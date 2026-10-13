@@ -8,6 +8,7 @@
   <title>F1 2027 Championship</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="next-race.css">
 </head>
 <body>
   <header class="hero">
@@ -29,12 +30,11 @@
 
   <main class="grid">
     <section class="card" aria-labelledby="next-race">
-      <p class="tag">Coming soon</p>
+      <p class="tag">Schedule</p>
       <h2 id="next-race">Next Race</h2>
-      <p class="placeholder">
-        Race weekend details and a countdown will appear here once the
-        schedule is added to the site.
-      </p>
+      <div id="next-race-content" aria-live="polite">
+        <p class="placeholder">Loading schedule...</p>
+      </div>
     </section>
 
     <section class="card" aria-labelledby="leaderboard">
@@ -58,5 +58,8 @@
   <footer class="footer">
     <p>Unofficial fan project for private use. Not affiliated with Formula 1, the FIA or any team.</p>
   </footer>
+
+  <script src="config.js"></script>
+  <script src="next-race.js"></script>
 </body>
 </html>

@@ -1,0 +1,52 @@
+.race-round {
+  margin: 0 0 4px;
+  color: var(--red);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.race-name {
+  margin: 0 0 6px;
+  font-size: 1.25rem;
+  line-height: 1.25;
+}
+
+.race-meta,
+.race-note {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.race-dates {
+  margin: 0 0 12px;
+  font-weight: 600;
+}
+
+.race-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.8rem;
+}
+
+.badge-sprint {
+  border-color: var(--red);
+  color: #ff6b66;
+}
+
+.race-note {
+  margin-bottom: 0;
+  font-size: 0.82rem;
+}
