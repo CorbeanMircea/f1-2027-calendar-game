@@ -40,6 +40,33 @@
     <section class="panel" id="signed-in-view" hidden>
       <h2>You are signed in</h2>
       <p class="signed-in-email" id="signed-in-email"></p>
+
+      <p class="placeholder" id="membership-status" role="status"></p>
+
+      <div id="join-section" hidden>
+        <h3>Join the friends group</h3>
+        <p class="placeholder">Enter a display name and the invite code you were given.</p>
+        <form id="join-form" novalidate>
+          <div class="field">
+            <label for="join-name">Display name (2 to 30 characters)</label>
+            <input id="join-name" name="join-name" type="text" maxlength="30" autocomplete="nickname" required>
+          </div>
+          <div class="field">
+            <label for="join-code">Invite code</label>
+            <input id="join-code" name="join-code" type="text" autocomplete="off" autocapitalize="characters" required>
+          </div>
+          <div class="actions">
+            <button type="submit" class="btn btn-primary" id="join-button">Join group</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="member-section" hidden>
+        <p>Group: <strong id="member-group"></strong></p>
+        <p>Display name: <strong id="member-name"></strong></p>
+        <p>Role: <strong id="member-role"></strong></p>
+      </div>
+
       <div class="actions">
         <button type="button" class="btn" id="sign-out-button">Sign out</button>
       </div>
