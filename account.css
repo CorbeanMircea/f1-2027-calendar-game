@@ -1,0 +1,94 @@
+.account-wrap {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 32px 20px 48px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--red);
+  border-radius: 10px;
+  padding: 24px;
+}
+
+.panel h2 {
+  margin: 0 0 16px;
+}
+
+.field {
+  margin: 0 0 16px;
+}
+
+.field label {
+  display: block;
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.field input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0d0d14;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.field input:focus {
+  outline: 2px solid var(--red);
+  outline-offset: 1px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.btn {
+  padding: 11px 20px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  border-color: var(--red);
+  background: var(--red);
+}
+
+.message {
+  min-height: 1.4em;
+  margin: 16px 0 0;
+  font-size: 0.92rem;
+}
+
+.message.error { color: #ff6b66; }
+.message.ok { color: #6fdc8c; }
+
+.signed-in-email {
+  margin: 0 0 16px;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 20px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+[hidden] { display: none !important; }

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0b10">
+  <title>Account | F1 2027 Championship</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="account.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="checker" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <p class="eyebrow">Private friends league</p>
+      <h1>Your <span>Account</span></h1>
+    </div>
+  </header>
+
+  <main class="account-wrap">
+    <section class="panel" id="signed-out-view">
+      <h2>Sign in or create an account</h2>
+      <form id="auth-form" novalidate>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label for="password">Password (at least 8 characters)</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" required>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn btn-primary" id="sign-in-button">Sign in</button>
+          <button type="button" class="btn" id="sign-up-button">Create account</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel" id="signed-in-view" hidden>
+      <h2>You are signed in</h2>
+      <p class="signed-in-email" id="signed-in-email"></p>
+      <div class="actions">
+        <button type="button" class="btn" id="sign-out-button">Sign out</button>
+      </div>
+    </section>
+
+    <p class="message" id="auth-message" role="status" aria-live="polite"></p>
+
+    <a class="back-link" href="index.html">&larr; Back to home</a>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1/dist/umd/supabase.js"></script>
+  <script src="config.js"></script>
+  <script src="account.js"></script>
+</body>
+</html>
