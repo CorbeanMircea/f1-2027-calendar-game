@@ -1,0 +1,49 @@
+-- 002: Seed the 2027 events from the canonical JSON (data/events-2027.json).
+-- Safe to re-run: existing rows are updated, not duplicated.
+
+insert into public.events
+  (id, season, round, name, circuit, locality, country, start_date, end_date, has_sprint, status)
+select
+  id, season, round, name, circuit, locality, country, start_date, end_date, has_sprint, status
+from jsonb_to_recordset($json$
+[
+  {"id":"bahrain-2027","season":2027,"round":1,"name":"Bahrain Grand Prix","circuit":"Bahrain International Circuit","locality":"Sakhir","country":"Bahrain","start_date":"2027-03-12","end_date":"2027-03-14","has_sprint":true,"status":"scheduled"},
+  {"id":"saudi-arabia-2027","season":2027,"round":2,"name":"Saudi Arabian Grand Prix","circuit":"Jeddah Corniche Circuit","locality":"Jeddah","country":"Saudi Arabia","start_date":"2027-03-19","end_date":"2027-03-21","has_sprint":false,"status":"scheduled"},
+  {"id":"australia-2027","season":2027,"round":3,"name":"Australian Grand Prix","circuit":"Albert Park Circuit","locality":"Melbourne","country":"Australia","start_date":"2027-04-02","end_date":"2027-04-04","has_sprint":true,"status":"scheduled"},
+  {"id":"japan-2027","season":2027,"round":4,"name":"Japanese Grand Prix","circuit":"Suzuka Circuit","locality":"Suzuka","country":"Japan","start_date":"2027-04-09","end_date":"2027-04-11","has_sprint":true,"status":"scheduled"},
+  {"id":"china-2027","season":2027,"round":5,"name":"Chinese Grand Prix","circuit":"Shanghai International Circuit","locality":"Shanghai","country":"China","start_date":"2027-04-16","end_date":"2027-04-18","has_sprint":false,"status":"scheduled"},
+  {"id":"miami-2027","season":2027,"round":6,"name":"Miami Grand Prix","circuit":"Miami International Autodrome","locality":"Miami Gardens","country":"United States","start_date":"2027-04-30","end_date":"2027-05-02","has_sprint":false,"status":"scheduled"},
+  {"id":"canada-2027","season":2027,"round":7,"name":"Canadian Grand Prix","circuit":"Circuit Gilles Villeneuve","locality":"Montreal","country":"Canada","start_date":"2027-05-21","end_date":"2027-05-23","has_sprint":true,"status":"scheduled"},
+  {"id":"monaco-2027","season":2027,"round":8,"name":"Monaco Grand Prix","circuit":"Circuit de Monaco","locality":"Monte Carlo","country":"Monaco","start_date":"2027-06-04","end_date":"2027-06-06","has_sprint":true,"status":"scheduled"},
+  {"id":"portugal-2027","season":2027,"round":9,"name":"Portuguese Grand Prix","circuit":"Algarve International Circuit","locality":"Portimao","country":"Portugal","start_date":"2027-06-18","end_date":"2027-06-20","has_sprint":false,"status":"scheduled"},
+  {"id":"great-britain-2027","season":2027,"round":10,"name":"British Grand Prix","circuit":"Silverstone Circuit","locality":"Silverstone","country":"United Kingdom","start_date":"2027-07-02","end_date":"2027-07-04","has_sprint":true,"status":"scheduled"},
+  {"id":"austria-2027","season":2027,"round":11,"name":"Austrian Grand Prix","circuit":"Red Bull Ring","locality":"Spielberg","country":"Austria","start_date":"2027-07-09","end_date":"2027-07-11","has_sprint":false,"status":"scheduled"},
+  {"id":"belgium-2027","season":2027,"round":12,"name":"Belgian Grand Prix","circuit":"Circuit de Spa-Francorchamps","locality":"Stavelot","country":"Belgium","start_date":"2027-07-23","end_date":"2027-07-25","has_sprint":false,"status":"scheduled"},
+  {"id":"hungary-2027","season":2027,"round":13,"name":"Hungarian Grand Prix","circuit":"Hungaroring","locality":"Budapest","country":"Hungary","start_date":"2027-07-30","end_date":"2027-08-01","has_sprint":false,"status":"scheduled"},
+  {"id":"italy-2027","season":2027,"round":14,"name":"Italian Grand Prix","circuit":"Autodromo Nazionale Monza","locality":"Monza","country":"Italy","start_date":"2027-09-03","end_date":"2027-09-05","has_sprint":true,"status":"scheduled"},
+  {"id":"spain-2027","season":2027,"round":15,"name":"Spanish Grand Prix","circuit":"Madring","locality":"Madrid","country":"Spain","start_date":"2027-09-10","end_date":"2027-09-12","has_sprint":false,"status":"scheduled"},
+  {"id":"azerbaijan-2027","season":2027,"round":16,"name":"Azerbaijan Grand Prix","circuit":"Baku City Circuit","locality":"Baku","country":"Azerbaijan","start_date":"2027-09-24","end_date":"2027-09-26","has_sprint":false,"status":"scheduled"},
+  {"id":"turkey-2027","season":2027,"round":17,"name":"Turkish Grand Prix","circuit":"Istanbul Park","locality":"Istanbul","country":"Turkey","start_date":"2027-10-01","end_date":"2027-10-03","has_sprint":false,"status":"scheduled"},
+  {"id":"singapore-2027","season":2027,"round":18,"name":"Singapore Grand Prix","circuit":"Marina Bay Street Circuit","locality":"Singapore","country":"Singapore","start_date":"2027-10-08","end_date":"2027-10-10","has_sprint":false,"status":"scheduled"},
+  {"id":"united-states-2027","season":2027,"round":19,"name":"United States Grand Prix","circuit":"Circuit of the Americas","locality":"Austin","country":"United States","start_date":"2027-10-22","end_date":"2027-10-24","has_sprint":false,"status":"scheduled"},
+  {"id":"mexico-2027","season":2027,"round":20,"name":"Mexico City Grand Prix","circuit":"Autodromo Hermanos Rodriguez","locality":"Mexico City","country":"Mexico","start_date":"2027-10-29","end_date":"2027-10-31","has_sprint":false,"status":"scheduled"},
+  {"id":"brazil-2027","season":2027,"round":21,"name":"Sao Paulo Grand Prix","circuit":"Autodromo Jose Carlos Pace","locality":"Sao Paulo","country":"Brazil","start_date":"2027-11-05","end_date":"2027-11-07","has_sprint":true,"status":"scheduled"},
+  {"id":"las-vegas-2027","season":2027,"round":22,"name":"Las Vegas Grand Prix","circuit":"Las Vegas Strip Circuit","locality":"Las Vegas","country":"United States","start_date":"2027-11-18","end_date":"2027-11-20","has_sprint":false,"status":"scheduled"},
+  {"id":"qatar-2027","season":2027,"round":23,"name":"Qatar Grand Prix","circuit":"Lusail International Circuit","locality":"Lusail","country":"Qatar","start_date":"2027-12-03","end_date":"2027-12-05","has_sprint":true,"status":"scheduled"},
+  {"id":"abu-dhabi-2027","season":2027,"round":24,"name":"Abu Dhabi Grand Prix","circuit":"Yas Marina Circuit","locality":"Abu Dhabi","country":"United Arab Emirates","start_date":"2027-12-10","end_date":"2027-12-12","has_sprint":true,"status":"scheduled"}
+]
+$json$::jsonb) as x(
+  id text, season integer, round integer, name text, circuit text, locality text,
+  country text, start_date date, end_date date, has_sprint boolean, status text
+)
+on conflict (id) do update set
+  season     = excluded.season,
+  round      = excluded.round,
+  name       = excluded.name,
+  circuit    = excluded.circuit,
+  locality   = excluded.locality,
+  country    = excluded.country,
+  start_date = excluded.start_date,
+  end_date   = excluded.end_date,
+  has_sprint = excluded.has_sprint,
+  status     = excluded.status;
