@@ -1,0 +1,28 @@
+.field select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0d0d14;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.field select:focus {
+  outline: 2px solid var(--red);
+  outline-offset: 1px;
+}
+
+a.btn {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.card-links {
+  margin: 14px 0 0;
+  font-size: 0.95rem;
+}
+
+.card-links a {
+  color: #ff6b66;
+}

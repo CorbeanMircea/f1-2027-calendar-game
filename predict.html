@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0b10">
+  <title>Predictions | F1 2027 Championship</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="account.css">
+  <link rel="stylesheet" href="predict.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="checker" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <p class="eyebrow">Private friends league</p>
+      <h1>Your <span>Predictions</span></h1>
+    </div>
+  </header>
+
+  <main class="account-wrap">
+    <section class="panel" id="gate" hidden>
+      <h2>Sign in required</h2>
+      <p class="placeholder" id="gate-text"></p>
+      <div class="actions">
+        <a class="btn btn-primary" href="account.html">Go to Account</a>
+      </div>
+    </section>
+
+    <section class="panel" id="predict-panel" hidden>
+      <h2>Make your prediction</h2>
+      <p class="placeholder" id="empty-text" hidden>
+        No predictions are open right now. They open once the session times are confirmed.
+      </p>
+      <div id="form-area" hidden>
+        <div class="field">
+          <label for="session-select">Session</label>
+          <select id="session-select"></select>
+        </div>
+        <p class="placeholder" id="lock-info"></p>
+        <form id="predict-form" novalidate>
+          <div id="pick-fields"></div>
+          <div class="actions">
+            <button type="submit" class="btn btn-primary" id="save-button">Save prediction</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <p class="message" id="pred-message" role="status" aria-live="polite"></p>
+
+    <a class="back-link" href="index.html">&larr; Back to home</a>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1/dist/umd/supabase.js"></script>
+  <script src="config.js"></script>
+  <script src="predict.js"></script>
+</body>
+</html>
