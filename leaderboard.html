@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0b10">
+  <title>Leaderboard | F1 2027 Championship</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="account.css">
+  <link rel="stylesheet" href="predict.css">
+  <link rel="stylesheet" href="leaderboard.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="checker" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <p class="eyebrow">Private friends league</p>
+      <h1>Season <span>Leaderboard</span></h1>
+    </div>
+  </header>
+
+  <main class="board-wrap">
+    <section class="panel" id="gate" hidden>
+      <h2>Sign in required</h2>
+      <p class="placeholder" id="gate-text"></p>
+      <div class="actions">
+        <a class="btn btn-primary" href="account.html">Go to Account</a>
+      </div>
+    </section>
+
+    <section class="panel" id="board-panel" hidden>
+      <div class="board-top">
+        <div class="field" id="season-field" hidden>
+          <label for="season-select">Season</label>
+          <select id="season-select"></select>
+        </div>
+        <span class="live-badge" id="live-badge">Connecting...</span>
+      </div>
+
+      <p class="placeholder" id="empty-text" hidden>
+        No points yet. Scores appear after the first race result is approved.
+      </p>
+
+      <div class="board-table-wrap" id="table-wrap" hidden>
+        <table class="board-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Player</th>
+              <th class="num">Points</th>
+              <th class="num">Sessions</th>
+            </tr>
+          </thead>
+          <tbody id="board-body"></tbody>
+        </table>
+      </div>
+
+      <p class="updated" id="updated"></p>
+    </section>
+
+    <p class="message" id="board-message" role="status" aria-live="polite"></p>
+
+    <a class="back-link" href="index.html">&larr; Back to home</a>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1/dist/umd/supabase.js"></script>
+  <script src="config.js"></script>
+  <script src="leaderboard.js"></script>
+</body>
+</html>
