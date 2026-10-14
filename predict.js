@@ -17,17 +17,31 @@
   var fieldsEl = byId("pick-fields");
   var saveButton = byId("save-button");
 
-  var RACE_SLOTS = [
-    ["p1", "P1 (winner)"], ["p2", "P2"], ["p3", "P3"], ["p4", "P4"], ["p5", "P5"],
-    ["pole", "Pole position"], ["fastest_lap", "Fastest lap"]
-  ];
-  var SPRINT_SLOTS = [["p1", "P1 (winner)"], ["p2", "P2"], ["p3", "P3"]];
+  var TYPE_LABEL = {
+    qualifying: "Qualifying",
+    sprint_qualifying: "Sprint Qualifying",
+    race: "Race",
+    sprint: "Sprint"
+  };
+  var TYPE_ORDER = { sprint_qualifying: 1, sprint: 2, qualifying: 3, race: 4 };
+
+  var NOTES = {
+    qualifying: "Pick who is knocked out in Q1 and Q2, then rank the 10 drivers who reach Q3. " +
+      "Points: 1 per driver in the right group, +3 per exact Q3 position, +10 for a perfect top 10 (max 62).",
+    sprint_qualifying: "Pick who is knocked out in SQ1 and SQ2, then rank the 10 drivers who reach SQ3. " +
+      "Points: 1 per driver in the right group, +3 per exact SQ3 position, +10 for a perfect top 10 (max 62).",
+    race: "Predict the top 8, the fastest lap and the DNFs. Points: 5 per exact position, 2 per driver " +
+      "in the top 8 but in the wrong place, +15 for a perfect top 8. Fastest lap 3. DNF questions: any DNF 2, " +
+      "exact count 5 (off by one 2), DNF driver 4 (8 if that driver started in the real top 8). Max 73.",
+    sprint: "Predict the top 8. Points: 3 per exact position, 1 per driver in the top 8 but in the wrong place, " +
+      "+8 for a perfect top 8 (max 32)."
+  };
 
   var user = null;
   var windowsById = {};
   var eventsById = {};
-  var currentSlots = [];
-  var currentTarget = "race";
+  var drivers = [];
+  var controller = null;
   var loadToken = 0;
 
   function setMessage(kind, text) {
@@ -35,7 +49,7 @@
     messageEl.textContent = text || "";
   }
 
-  function setShown(el, on) { el.hidden = !on; }
+  function setShown(node, on) { node.hidden = !on; }
 
   function showGate(text) {
     gateText.textContent = text;
@@ -51,6 +65,15 @@
 
   var client = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_PUBLISHABLE_KEY);
 
+  // ---------- small DOM helpers ----------
+
+  function el(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) { node.className = className; }
+    if (text !== undefined) { node.textContent = text; }
+    return node;
+  }
+
   function makeOption(value, text) {
     var opt = document.createElement("option");
     opt.value = value;
@@ -58,51 +81,363 @@
     return opt;
   }
 
-  function buildFields(drivers, existing) {
-    fieldsEl.textContent = "";
-    var slots = currentTarget === "race" ? RACE_SLOTS : SPRINT_SLOTS;
-    currentSlots = slots;
-
-    slots.forEach(function (slot) {
-      var wrap = document.createElement("div");
-      wrap.className = "field";
-
-      var label = document.createElement("label");
-      label.setAttribute("for", "pick-" + slot[0]);
-      label.textContent = slot[1];
-
-      var select = document.createElement("select");
-      select.id = "pick-" + slot[0];
-      select.appendChild(makeOption("", "Choose a driver..."));
-      drivers.forEach(function (d) {
-        select.appendChild(makeOption(d.id, d.code + " - " + d.full_name + " (" + d.team_name + ")"));
-      });
-      if (existing && existing[slot[0]]) { select.value = existing[slot[0]]; }
-
-      wrap.appendChild(label);
-      wrap.appendChild(select);
-      fieldsEl.appendChild(wrap);
-    });
-
-    saveButton.disabled = false;
+  function driverById(id) {
+    for (var i = 0; i < drivers.length; i++) {
+      if (drivers[i].id === id) { return drivers[i]; }
+    }
+    return null;
   }
+
+  function driverLabel(d) {
+    return d.code + " - " + d.full_name + " (" + d.team_name + ")";
+  }
+
+  function filterKnown(list) {
+    var out = [];
+    if (Array.isArray(list)) {
+      list.forEach(function (id) {
+        if (driverById(id) && out.indexOf(id) === -1) { out.push(id); }
+      });
+    }
+    return out;
+  }
+
+  function makeField(labelText, control) {
+    var wrap = el("div", "field");
+    var label = el("label", "", labelText);
+    label.setAttribute("for", control.id);
+    wrap.appendChild(label);
+    wrap.appendChild(control);
+    return wrap;
+  }
+
+  function makeDriverSelect(id, value, blankText) {
+    var select = document.createElement("select");
+    select.id = id;
+    select.appendChild(makeOption("", blankText));
+    drivers.forEach(function (d) { select.appendChild(makeOption(d.id, driverLabel(d))); });
+    if (value && driverById(value)) { select.value = value; }
+    return select;
+  }
+
+  function makeStep(title, hint) {
+    var step = el("div", "form-step");
+    step.appendChild(el("h3", "", title));
+    if (hint) { step.appendChild(el("p", "step-hint", hint)); }
+    return step;
+  }
+
+  // A group of selects for "P1..Pn" where one driver cannot be chosen twice.
+  function makeRankSelects(container, count, existing, prefix) {
+    var selects = [];
+
+    function sync() {
+      var used = {};
+      selects.forEach(function (s) { if (s.value) { used[s.value] = true; } });
+      selects.forEach(function (s) {
+        Array.prototype.forEach.call(s.options, function (opt) {
+          opt.disabled = opt.value !== "" && used[opt.value] === true && opt.value !== s.value;
+        });
+      });
+    }
+
+    for (var i = 0; i < count; i++) {
+      var select = makeDriverSelect(prefix + (i + 1), existing && existing[i], "Choose a driver...");
+      select.addEventListener("change", sync);
+      selects.push(select);
+      container.appendChild(makeField("P" + (i + 1), select));
+    }
+    sync();
+
+    return {
+      values: function () { return selects.map(function (s) { return s.value; }); }
+    };
+  }
+
+  // ---------- Qualifying and Sprint Qualifying ----------
+
+  function buildQualifying(container, existing, part) {
+    var n = drivers.length;
+    var q1Size = n - 16;
+    if (q1Size < 1) {
+      throw new Error("The driver list for this season is not complete yet.");
+    }
+
+    var q1 = filterKnown(existing && existing.q1_out);
+    var q2 = filterKnown(existing && existing.q2_out);
+    var order = filterKnown(existing && existing.q3_order);
+
+    var step1 = el("div", "form-step");
+    var step2 = el("div", "form-step");
+    var step3 = el("div", "form-step");
+    container.appendChild(step1);
+    container.appendChild(step2);
+    container.appendChild(step3);
+
+    function counter(count, size) {
+      return el("span", "counter" + (count === size ? " done" : ""), count + " / " + size);
+    }
+
+    function toggle(list, id, on) {
+      var index = list.indexOf(id);
+      if (on && index === -1) { list.push(id); }
+      if (!on && index !== -1) { list.splice(index, 1); }
+    }
+
+    function checkList(list, selected, size, onChange) {
+      var ul = el("ul", "driver-list");
+      list.forEach(function (d) {
+        var li = document.createElement("li");
+        var label = document.createElement("label");
+        var box = document.createElement("input");
+        box.type = "checkbox";
+        var isChecked = selected.indexOf(d.id) !== -1;
+        box.checked = isChecked;
+        if (isChecked) {
+          label.className = "checked";
+        } else if (selected.length >= size) {
+          box.disabled = true;
+          label.className = "disabled";
+        }
+        box.addEventListener("change", function () { onChange(d.id, box.checked); });
+        label.appendChild(box);
+        label.appendChild(document.createTextNode(driverLabel(d)));
+        li.appendChild(label);
+        ul.appendChild(li);
+      });
+      return ul;
+    }
+
+    function move(from, to) {
+      var tmp = order[from];
+      order[from] = order[to];
+      order[to] = tmp;
+      render();
+    }
+
+    function render() {
+      q2 = q2.filter(function (id) { return q1.indexOf(id) === -1; });
+
+      var step1Done = q1.length === q1Size;
+      var afterQ1 = drivers.filter(function (d) { return q1.indexOf(d.id) === -1; });
+      var step2Done = step1Done && q2.length === 6;
+
+      var q3ids = step2Done
+        ? afterQ1.filter(function (d) { return q2.indexOf(d.id) === -1; }).map(function (d) { return d.id; })
+        : [];
+      order = order.filter(function (id) { return q3ids.indexOf(id) !== -1; });
+      q3ids.forEach(function (id) { if (order.indexOf(id) === -1) { order.push(id); } });
+
+      // Step 1
+      step1.textContent = "";
+      var h1 = el("h3", "", "Step 1: knocked out in " + part + "1");
+      h1.appendChild(counter(q1.length, q1Size));
+      step1.appendChild(h1);
+      step1.appendChild(el("p", "step-hint",
+        "Choose the " + q1Size + " drivers you think will be eliminated in " + part + "1."));
+      step1.appendChild(checkList(drivers, q1, q1Size, function (id, on) {
+        toggle(q1, id, on);
+        render();
+      }));
+
+      // Step 2
+      step2.textContent = "";
+      var h2 = el("h3", "", "Step 2: knocked out in " + part + "2");
+      if (step1Done) { h2.appendChild(counter(q2.length, 6)); }
+      step2.appendChild(h2);
+      if (!step1Done) {
+        step2.appendChild(el("p", "step-hint", "Complete step 1 first."));
+      } else {
+        step2.appendChild(el("p", "step-hint",
+          "From the remaining " + afterQ1.length + " drivers, choose the 6 eliminated in " + part + "2."));
+        step2.appendChild(checkList(afterQ1, q2, 6, function (id, on) {
+          toggle(q2, id, on);
+          render();
+        }));
+      }
+
+      // Step 3
+      step3.textContent = "";
+      step3.appendChild(el("h3", "", "Step 3: " + part + "3 order (P1 to P10)"));
+      if (!step2Done) {
+        step3.appendChild(el("p", "step-hint", "Complete step 2 first."));
+      } else {
+        step3.appendChild(el("p", "step-hint",
+          "These 10 drivers reach " + part + "3. Use the arrows to put them in your predicted order."));
+        var ol = el("ol", "order-list");
+        order.forEach(function (id, index) {
+          var li = document.createElement("li");
+          li.appendChild(el("span", "pos", "P" + (index + 1)));
+          li.appendChild(el("span", "name", driverLabel(driverById(id))));
+
+          var up = el("button", "", "\u2191");
+          up.type = "button";
+          up.setAttribute("aria-label", "Move up");
+          up.disabled = index === 0;
+          up.addEventListener("click", function () { move(index, index - 1); });
+
+          var down = el("button", "", "\u2193");
+          down.type = "button";
+          down.setAttribute("aria-label", "Move down");
+          down.disabled = index === order.length - 1;
+          down.addEventListener("click", function () { move(index, index + 1); });
+
+          li.appendChild(up);
+          li.appendChild(down);
+          ol.appendChild(li);
+        });
+        step3.appendChild(ol);
+      }
+    }
+
+    render();
+
+    return {
+      getPicks: function () {
+        if (q1.length !== q1Size || q2.length !== 6 || order.length !== 10) {
+          throw new Error("Please complete all three steps.");
+        }
+        return { q1_out: q1.slice(), q2_out: q2.slice(), q3_order: order.slice() };
+      }
+    };
+  }
+
+  // ---------- Grand Prix ----------
+
+  function buildRace(container, existing) {
+    var topStep = makeStep("Top 8 finishing order", "Choose the driver you expect in each position.");
+    var top = makeRankSelects(topStep, 8, existing && existing.top8, "top-");
+    container.appendChild(topStep);
+
+    var flStep = makeStep("Fastest lap", null);
+    var flSelect = makeDriverSelect("fastest-lap", existing && existing.fastest_lap, "Choose a driver...");
+    flStep.appendChild(makeField("Driver with the fastest lap", flSelect));
+    container.appendChild(flStep);
+
+    var dnfStep = makeStep("DNF questions",
+      "A DNF is a driver who retires and is not classified as running at the finish. " +
+      "Lapped finishers do not count.");
+    var choice = el("div", "inline-choice");
+
+    function makeRadio(value, text) {
+      var label = document.createElement("label");
+      var input = document.createElement("input");
+      input.type = "radio";
+      input.name = "any-dnf";
+      input.value = value;
+      label.appendChild(input);
+      label.appendChild(document.createTextNode(text));
+      choice.appendChild(label);
+      return input;
+    }
+
+    dnfStep.appendChild(el("p", "", "Will there be at least one DNF?"));
+    var yes = makeRadio("yes", "Yes");
+    var no = makeRadio("no", "No");
+    dnfStep.appendChild(choice);
+
+    var details = document.createElement("div");
+    var countInput = document.createElement("input");
+    countInput.type = "number";
+    countInput.id = "dnf-count";
+    countInput.min = "1";
+    countInput.max = String(drivers.length);
+    countInput.step = "1";
+    if (existing && existing.dnf_count >= 1) { countInput.value = String(existing.dnf_count); }
+    details.appendChild(makeField("How many drivers will DNF?", countInput));
+
+    var dnfSelect = makeDriverSelect("dnf-driver", existing && existing.dnf_driver, "No pick (skip this question)");
+    details.appendChild(makeField("Which driver will DNF? (optional)", dnfSelect));
+    details.appendChild(el("p", "step-hint",
+      "Your DNF driver scores 4 points, or 8 if that driver started in the real top 8."));
+    dnfStep.appendChild(details);
+    container.appendChild(dnfStep);
+
+    if (existing && existing.any_dnf === true) { yes.checked = true; }
+    if (existing && existing.any_dnf === false) { no.checked = true; }
+
+    function sync() { details.hidden = !yes.checked; }
+    yes.addEventListener("change", sync);
+    no.addEventListener("change", sync);
+    sync();
+
+    return {
+      getPicks: function () {
+        var topValues = top.values();
+        for (var i = 0; i < topValues.length; i++) {
+          if (!topValues[i]) { throw new Error("Please choose a driver for every top-8 position."); }
+        }
+        if (!flSelect.value) { throw new Error("Please choose the fastest lap driver."); }
+        if (!yes.checked && !no.checked) { throw new Error("Please answer the DNF question."); }
+
+        var anyDnf = yes.checked;
+        var count = 0;
+        var dnfDriver = null;
+        if (anyDnf) {
+          count = parseInt(countInput.value, 10);
+          if (!(count >= 1) || count > drivers.length) {
+            throw new Error("Enter how many drivers will DNF (at least 1).");
+          }
+          dnfDriver = dnfSelect.value || null;
+        }
+
+        return {
+          top8: topValues,
+          fastest_lap: flSelect.value,
+          any_dnf: anyDnf,
+          dnf_count: count,
+          dnf_driver: dnfDriver
+        };
+      }
+    };
+  }
+
+  // ---------- Sprint ----------
+
+  function buildSprint(container, existing) {
+    var topStep = makeStep("Top 8 finishing order", "Choose the driver you expect in each position.");
+    var top = makeRankSelects(topStep, 8, existing && existing.top8, "top-");
+    container.appendChild(topStep);
+
+    return {
+      getPicks: function () {
+        var values = top.values();
+        for (var i = 0; i < values.length; i++) {
+          if (!values[i]) { throw new Error("Please choose a driver for every position."); }
+        }
+        return { top8: values };
+      }
+    };
+  }
+
+  function buildForm(type, existing) {
+    fieldsEl.textContent = "";
+    fieldsEl.appendChild(el("p", "points-note", NOTES[type]));
+    if (type === "qualifying" || type === "sprint_qualifying") {
+      return buildQualifying(fieldsEl, existing, type === "qualifying" ? "Q" : "SQ");
+    }
+    if (type === "race") { return buildRace(fieldsEl, existing); }
+    return buildSprint(fieldsEl, existing);
+  }
+
+  // ---------- loading ----------
 
   function loadSession(sessionId) {
     var token = ++loadToken;
     var w = windowsById[sessionId];
     var ev = eventsById[w.event_id];
-    currentTarget = w.target_type;
 
     lockInfo.textContent = "Locks " +
       new Date(w.lock_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) +
       " (your local time). You can change your picks until then.";
     fieldsEl.textContent = "";
     saveButton.disabled = true;
+    controller = null;
 
     return Promise.all([
       client.from("drivers").select("id, code, full_name, team_name")
         .eq("season", ev.season).eq("is_active", true).order("code"),
-      client.from("predictions").select("p1, p2, p3, p4, p5, pole, fastest_lap")
+      client.from("predictions").select("picks")
         .eq("user_id", user.id).eq("session_id", sessionId).limit(1)
     ]).then(function (results) {
       if (token !== loadToken) { return; }
@@ -111,20 +446,30 @@
       if (driversResult.error) { throw driversResult.error; }
       if (existingResult.error) { throw existingResult.error; }
 
-      var drivers = driversResult.data || [];
+      drivers = driversResult.data || [];
       if (drivers.length === 0) {
         setMessage("error", "The driver list for this season has not been loaded yet.");
         return;
       }
       setMessage("", "");
-      buildFields(drivers, existingResult.data && existingResult.data[0]);
+
+      var existing = existingResult.data && existingResult.data[0]
+        ? existingResult.data[0].picks
+        : null;
+      try {
+        controller = buildForm(w.target_type, existing);
+      } catch (err) {
+        setMessage("error", err.message);
+        return;
+      }
+      saveButton.disabled = false;
     });
   }
 
   function loadWindows(keepId) {
     return Promise.all([
       client.from("prediction_windows").select("session_id, event_id, target_type, lock_at")
-        .eq("is_open", true).order("lock_at", { ascending: true }),
+        .eq("is_open", true),
       client.from("events").select("id, season, round, name")
     ]).then(function (results) {
       var windowsResult = results[0];
@@ -137,12 +482,19 @@
       (eventsResult.data || []).forEach(function (e) { eventsById[e.id] = e; });
 
       var list = (windowsResult.data || []).filter(function (w) { return eventsById[w.event_id]; });
+      list.sort(function (a, b) {
+        var diff = new Date(a.lock_at) - new Date(b.lock_at);
+        if (diff !== 0) { return diff; }
+        return TYPE_ORDER[a.target_type] - TYPE_ORDER[b.target_type];
+      });
 
       sessionSelect.textContent = "";
       list.forEach(function (w) {
         windowsById[w.session_id] = w;
-        var kind = w.target_type === "race" ? "Race" : "Sprint";
-        sessionSelect.appendChild(makeOption(w.session_id, eventsById[w.event_id].name + " - " + kind));
+        sessionSelect.appendChild(makeOption(
+          w.session_id,
+          eventsById[w.event_id].name + " - " + TYPE_LABEL[w.target_type]
+        ));
       });
 
       if (list.length === 0) {
@@ -171,47 +523,19 @@
   formEl.addEventListener("submit", function (event) {
     event.preventDefault();
     var sessionId = sessionSelect.value;
-    if (!sessionId || !windowsById[sessionId]) { return; }
+    if (!sessionId || !windowsById[sessionId] || !controller) { return; }
 
-    var picks = {};
-    for (var i = 0; i < currentSlots.length; i++) {
-      var key = currentSlots[i][0];
-      var value = byId("pick-" + key).value;
-      if (!value) {
-        setMessage("error", "Please choose a driver for every position.");
-        return;
-      }
-      picks[key] = value;
-    }
-
-    var topKeys = ["p1", "p2", "p3", "p4", "p5"];
-    var seen = {};
-    for (var j = 0; j < topKeys.length; j++) {
-      var k = topKeys[j];
-      if (picks[k] === undefined) { continue; }
-      if (seen[picks[k]]) {
-        setMessage("error", "Each finishing position needs a different driver.");
-        return;
-      }
-      seen[picks[k]] = true;
-    }
-
-    var params = {
-      p_session_id: sessionId,
-      p_p1: picks.p1,
-      p_p2: picks.p2,
-      p_p3: picks.p3
-    };
-    if (currentTarget === "race") {
-      params.p_p4 = picks.p4;
-      params.p_p5 = picks.p5;
-      params.p_pole = picks.pole;
-      params.p_fastest_lap = picks.fastest_lap;
+    var picks;
+    try {
+      picks = controller.getPicks();
+    } catch (err) {
+      setMessage("error", err.message);
+      return;
     }
 
     saveButton.disabled = true;
     setMessage("", "Saving...");
-    client.rpc("submit_prediction", params).then(function (result) {
+    client.rpc("submit_prediction", { p_session_id: sessionId, p_picks: picks }).then(function (result) {
       saveButton.disabled = false;
       if (result.error) {
         setMessage("error", result.error.message);
