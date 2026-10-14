@@ -32,7 +32,8 @@
       "Points: 1 per driver in the right group, +3 per exact SQ3 position, +10 for a perfect top 10 (max 62).",
     race: "Predict the top 8, the fastest lap and the DNFs. Points: 5 per exact position, 2 per driver " +
       "in the top 8 but in the wrong place, +15 for a perfect top 8. Fastest lap 3. DNF questions: any DNF 2, " +
-      "exact count 5 (off by one 2), DNF driver 4 (8 if that driver started in the real top 8). Max 73.",
+      "exact count 5 (off by one 2), DNF driver 4 (8 if that driver started in the real top 8). Max 73. " +
+      "A driver cannot be both in your top 8 and your DNF pick.",
     sprint: "Predict the top 8. Points: 3 per exact position, 1 per driver in the top 8 but in the wrong place, " +
       "+8 for a perfect top 8 (max 32)."
   };
@@ -128,15 +129,19 @@
   }
 
   // A group of selects for "P1..Pn" where one driver cannot be chosen twice.
-  function makeRankSelects(container, count, existing, prefix) {
+  // getBlocked() may return extra driver ids that must not be offered.
+  function makeRankSelects(container, count, existing, prefix, getBlocked) {
     var selects = [];
 
     function sync() {
       var used = {};
       selects.forEach(function (s) { if (s.value) { used[s.value] = true; } });
+      var blocked = getBlocked ? getBlocked() : [];
       selects.forEach(function (s) {
         Array.prototype.forEach.call(s.options, function (opt) {
-          opt.disabled = opt.value !== "" && used[opt.value] === true && opt.value !== s.value;
+          if (opt.value === "") { opt.disabled = false; return; }
+          var takenElsewhere = used[opt.value] === true && opt.value !== s.value;
+          opt.disabled = takenElsewhere || blocked.indexOf(opt.value) !== -1;
         });
       });
     }
@@ -150,7 +155,8 @@
     sync();
 
     return {
-      values: function () { return selects.map(function (s) { return s.value; }); }
+      values: function () { return selects.map(function (s) { return s.value; }); },
+      sync: sync
     };
   }
 
@@ -305,8 +311,12 @@
   // ---------- Grand Prix ----------
 
   function buildRace(container, existing) {
+    var dnfSelect = null;
+
     var topStep = makeStep("Top 8 finishing order", "Choose the driver you expect in each position.");
-    var top = makeRankSelects(topStep, 8, existing && existing.top8, "top-");
+    var top = makeRankSelects(topStep, 8, existing && existing.top8, "top-", function () {
+      return dnfSelect && dnfSelect.value ? [dnfSelect.value] : [];
+    });
     container.appendChild(topStep);
 
     var flStep = makeStep("Fastest lap", null);
@@ -336,19 +346,21 @@
     var no = makeRadio("no", "No");
     dnfStep.appendChild(choice);
 
+    var maxDnf = Math.max(1, drivers.length - 8);
     var details = document.createElement("div");
     var countInput = document.createElement("input");
     countInput.type = "number";
     countInput.id = "dnf-count";
     countInput.min = "1";
-    countInput.max = String(drivers.length);
+    countInput.max = String(maxDnf);
     countInput.step = "1";
     if (existing && existing.dnf_count >= 1) { countInput.value = String(existing.dnf_count); }
     details.appendChild(makeField("How many drivers will DNF?", countInput));
 
-    var dnfSelect = makeDriverSelect("dnf-driver", existing && existing.dnf_driver, "No pick (skip this question)");
+    dnfSelect = makeDriverSelect("dnf-driver", existing && existing.dnf_driver, "No pick (skip this question)");
     details.appendChild(makeField("Which driver will DNF? (optional)", dnfSelect));
     details.appendChild(el("p", "step-hint",
+      "A driver who retires cannot also finish in your top 8, so your top-8 drivers are not offered here. " +
       "Your DNF driver scores 4 points, or 8 if that driver started in the real top 8."));
     dnfStep.appendChild(details);
     container.appendChild(dnfStep);
@@ -356,10 +368,23 @@
     if (existing && existing.any_dnf === true) { yes.checked = true; }
     if (existing && existing.any_dnf === false) { no.checked = true; }
 
-    function sync() { details.hidden = !yes.checked; }
-    yes.addEventListener("change", sync);
-    no.addEventListener("change", sync);
-    sync();
+    function syncDetails() { details.hidden = !yes.checked; }
+    yes.addEventListener("change", syncDetails);
+    no.addEventListener("change", syncDetails);
+    syncDetails();
+
+    // Keep the DNF menu and the top-8 menus consistent with each other.
+    function syncDnfOptions() {
+      var chosen = top.values();
+      if (dnfSelect.value && chosen.indexOf(dnfSelect.value) !== -1) { dnfSelect.value = ""; }
+      Array.prototype.forEach.call(dnfSelect.options, function (opt) {
+        opt.disabled = opt.value !== "" && chosen.indexOf(opt.value) !== -1;
+      });
+    }
+    topStep.addEventListener("change", syncDnfOptions);
+    dnfSelect.addEventListener("change", function () { top.sync(); });
+    syncDnfOptions();
+    top.sync();
 
     return {
       getPicks: function () {
@@ -375,10 +400,13 @@
         var dnfDriver = null;
         if (anyDnf) {
           count = parseInt(countInput.value, 10);
-          if (!(count >= 1) || count > drivers.length) {
-            throw new Error("Enter how many drivers will DNF (at least 1).");
+          if (!(count >= 1) || count > maxDnf) {
+            throw new Error("Enter how many drivers will DNF (1 to " + maxDnf + ").");
           }
           dnfDriver = dnfSelect.value || null;
+          if (dnfDriver && topValues.indexOf(dnfDriver) !== -1) {
+            throw new Error("A driver cannot be both in your top 8 and your DNF pick.");
+          }
         }
 
         return {
