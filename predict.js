@@ -368,7 +368,13 @@
     if (existing && existing.any_dnf === true) { yes.checked = true; }
     if (existing && existing.any_dnf === false) { no.checked = true; }
 
-    function syncDetails() { details.hidden = !yes.checked; }
+    function syncDetails() {
+      details.hidden = !yes.checked;
+      if (!yes.checked) {
+        dnfSelect.value = "";
+        top.sync();
+      }
+    }
     yes.addEventListener("change", syncDetails);
     no.addEventListener("change", syncDetails);
     syncDetails();
