@@ -1,6 +1,12 @@
-// import-results (Milestone 15b: DRY RUN ONLY).
-// Reads public results-API data and translates it into this project's result formats.
-// It never writes to the database.
+// import-results (Milestone 15c).
+// Reads public results-API data and, in import mode, saves PENDING results for our events.
+// It never approves anything. Every action is logged to import_log.
+//
+//   ?key=SECRET&event=australia-2026              dry run (nothing is saved)
+//   ?key=SECRET&event=australia-2026&mode=import  saves pending results
+//   ?key=SECRET&mode=import                       processes events of the current race weekend window
+
+import { createClient } from "npm:@supabase/supabase-js@2.100.1";
 
 const API = "https://api.jolpi.ca/ergast/f1";
 const USER_AGENT = "F1FriendsLeague/1.0 (private friends prediction game)";
@@ -31,12 +37,6 @@ async function apiGet(path: string): Promise<Row> {
   return body;
 }
 
-function toIso(block: Row): string | null {
-  if (!block || !block.date || !block.time) { return null; }
-  const iso = block.date + "T" + block.time;
-  return Number.isNaN(Date.parse(iso)) ? null : iso;
-}
-
 function driverId(row: Row): string {
   return String(row.Driver.driverId);
 }
@@ -58,7 +58,7 @@ function byGrid(a: Row, b: Row): number {
 }
 
 // Qualifying: top 10 = Q3 order, positions 11-16 = Q2 knock-outs,
-// everyone else on the full grid = Q1 knock-outs (drivers with no time are missing from the API list).
+// everyone else on our full grid = Q1 knock-outs (drivers with no time are missing from the API list).
 function buildQualifying(rows: Row[], allIds: string[]): Row {
   const sorted = [...rows].sort(byPosition);
   const q3 = sorted.filter((r) => num(r.position) >= 1 && num(r.position) <= 10).map(driverId);
@@ -105,45 +105,175 @@ function buildSprint(rows: Row[]): Row {
 }
 
 // Sprint qualifying has no results feed. Derive it from the sprint starting grid
-// (penalties can change the grid, so this must always be reviewed by a person).
-function deriveSprintQualifying(rows: Row[]): Row {
+// (penalties can change the grid, so a person must always review it before approving).
+function deriveSprintQualifying(rows: Row[], allIds: string[]): Row {
   const ordered = rows.filter((r) => num(r.grid) >= 1).sort(byGrid).map(driverId);
-  if (ordered.length < 17) { throw new Error("Not enough grid positions to derive sprint qualifying"); }
-  return {
-    q1_out: ordered.slice(16),
-    q2_out: ordered.slice(10, 16),
-    q3_order: ordered.slice(0, 10),
-  };
+  const q3 = ordered.slice(0, 10);
+  const q2out = ordered.slice(10, 16);
+  if (q3.length !== 10 || q2out.length !== 6) {
+    throw new Error("Not enough grid positions to derive sprint qualifying");
+  }
+  const placed = new Set([...q3, ...q2out]);
+  const q1out = allIds.filter((id) => !placed.has(id));
+  if (q1out.length !== allIds.length - 16) {
+    throw new Error("Unexpected number of derived SQ1 knock-outs: " + q1out.length);
+  }
+  return { q1_out: q1out, q2_out: q2out, q3_order: q3 };
 }
 
-function codeMap(...lists: Row[][]): Record<string, string> {
-  const map: Record<string, string> = {};
-  for (const list of lists) {
-    for (const row of list) {
-      if (row && row.Driver) { map[driverId(row)] = String(row.Driver.code ?? driverId(row)); }
+// Replace the API's driver ids with our own driver ids. Any unknown driver is an error.
+function mapData(data: Row, extToOurs: Map<string, string>): Row {
+  const convert = (external: string): string => {
+    const ours = extToOurs.get(external);
+    if (!ours) { throw new Error("Unmapped driver: " + external); }
+    return ours;
+  };
+  const out: Row = {};
+  for (const [key, value] of Object.entries(data)) {
+    out[key] = Array.isArray(value) ? value.map((v: string) => convert(v)) : convert(value as string);
+  }
+  return out;
+}
+
+// Same JSON, regardless of key order.
+function canonical(value: Row): string {
+  if (Array.isArray(value)) { return "[" + value.map(canonical).join(",") + "]"; }
+  if (value && typeof value === "object") {
+    return "{" + Object.keys(value).sort()
+      .map((k) => JSON.stringify(k) + ":" + canonical(value[k])).join(",") + "}";
+  }
+  return JSON.stringify(value);
+}
+
+async function processEvent(db: Row, ev: Row, apply: boolean, cache: Map<string, Row[]>): Promise<Row[]> {
+  const report: Row[] = [];
+
+  async function log(
+    sessionType: string,
+    action: string,
+    detail: string,
+    resultId: string | null = null,
+    round: number | null = null,
+  ): Promise<void> {
+    report.push({ event: ev.id, session: sessionType, action, detail });
+    if (apply) {
+      await db.from("import_log").insert({
+        season: ev.season,
+        round,
+        event_id: ev.id,
+        session_type: sessionType,
+        action,
+        detail,
+        result_id: resultId,
+      });
     }
   }
-  return map;
-}
 
-function readable(value: Row, codes: Record<string, string>): Row {
-  if (Array.isArray(value)) { return value.map((v) => codes[v] ?? v); }
-  if (value && typeof value === "object") {
-    const out: Row = {};
-    for (const key of Object.keys(value)) { out[key] = readable(value[key], codes); }
-    return out;
+  // Our drivers for this season, mapped by the API's driver id.
+  const driversResult = await db.from("drivers").select("id, external_id, is_active").eq("season", ev.season);
+  if (driversResult.error) {
+    await log("all", "error", "Could not read drivers: " + driversResult.error.message);
+    return report;
   }
-  return codes[value as string] ?? value;
-}
+  const extToOurs = new Map<string, string>();
+  const activeExternal: string[] = [];
+  for (const d of driversResult.data ?? []) {
+    if (d.external_id) {
+      extToOurs.set(d.external_id, d.id);
+      if (d.is_active) { activeExternal.push(d.external_id); }
+    }
+  }
+  if (extToOurs.size === 0) {
+    await log("all", "error", "No drivers with an external id are loaded for season " + ev.season);
+    return report;
+  }
 
-function attempt(rows: Row[], missingReason: string, build: () => Row, codes: Record<string, string>): Row {
-  if (rows.length === 0) { return { status: "not available", reason: missingReason }; }
-  try {
-    const data = build();
-    return { status: "ok", data, readable: readable(data, codes) };
-  } catch (err) {
-    return { status: "error", error: (err as Error).message };
+  // Find the API race that belongs to this event by DATE (not by round number).
+  let races = cache.get(String(ev.season));
+  if (!races) {
+    const body = await apiGet("/" + ev.season + "/races/?limit=100");
+    races = body?.MRData?.RaceTable?.Races ?? [];
+    cache.set(String(ev.season), races as Row[]);
   }
+  const matches = (races as Row[]).filter((r) => r.date >= ev.start_date && r.date <= ev.end_date);
+  if (matches.length !== 1) {
+    await log(
+      "all",
+      "error",
+      "Expected exactly one API race between " + ev.start_date + " and " + ev.end_date +
+        ", found " + matches.length + ". The calendar may have changed; check the event.",
+    );
+    return report;
+  }
+  const round = num(matches[0].round);
+
+  const raceRows: Row[] =
+    (await apiGet("/" + ev.season + "/" + round + "/results/?limit=100"))?.MRData?.RaceTable?.Races?.[0]?.Results ?? [];
+  const qualifyingRows: Row[] =
+    (await apiGet("/" + ev.season + "/" + round + "/qualifying/?limit=100"))?.MRData?.RaceTable?.Races?.[0]
+      ?.QualifyingResults ?? [];
+  const sprintRows: Row[] = ev.has_sprint
+    ? ((await apiGet("/" + ev.season + "/" + round + "/sprint/?limit=100"))?.MRData?.RaceTable?.Races?.[0]
+      ?.SprintResults ?? [])
+    : [];
+
+  const wanted: { type: string; source: string; has: boolean; build: () => Row }[] = [
+    {
+      type: "qualifying",
+      source: "jolpica",
+      has: qualifyingRows.length > 0,
+      build: () => buildQualifying(qualifyingRows, activeExternal),
+    },
+    { type: "race", source: "jolpica", has: raceRows.length > 0, build: () => buildRace(raceRows) },
+  ];
+  if (ev.has_sprint) {
+    wanted.push({
+      type: "sprint_qualifying",
+      source: "jolpica-derived-sprint-grid",
+      has: sprintRows.length > 0,
+      build: () => deriveSprintQualifying(sprintRows, activeExternal),
+    });
+    wanted.push({ type: "sprint", source: "jolpica", has: sprintRows.length > 0, build: () => buildSprint(sprintRows) });
+  }
+
+  for (const w of wanted) {
+    const sessionId = ev.id + "-" + w.type;
+    if (!w.has) {
+      await log(w.type, "skipped", "No results available yet", null, round);
+      continue;
+    }
+    try {
+      const data = mapData(w.build(), extToOurs);
+
+      const latest = await db.from("results").select("id, version, status, data")
+        .eq("session_id", sessionId).order("version", { ascending: false }).limit(1);
+      if (latest.error) { throw new Error(latest.error.message); }
+
+      if (latest.data && latest.data.length > 0 && canonical(latest.data[0].data) === canonical(data)) {
+        await log(
+          w.type,
+          "unchanged",
+          "Latest result (version " + latest.data[0].version + ", " + latest.data[0].status + ") already matches",
+          latest.data[0].id,
+          round,
+        );
+        continue;
+      }
+
+      if (!apply) {
+        await log(w.type, "would_create_pending", JSON.stringify(data), null, round);
+        continue;
+      }
+
+      const saved = await db.rpc("enter_result", { p_session_id: sessionId, p_data: data, p_source: w.source });
+      if (saved.error) { throw new Error(saved.error.message); }
+      await log(w.type, "created_pending", "New pending result saved (source " + w.source + ")", saved.data, round);
+    } catch (err) {
+      await log(w.type, "error", (err as Error).message, null, round);
+    }
+  }
+
+  return report;
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
@@ -154,69 +284,56 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return json({ error: "Not authorised" }, 401);
   }
 
-  const season = url.searchParams.get("season") ?? "";
-  const round = url.searchParams.get("round") ?? "";
-  if (!/^20[0-9]{2}$/.test(season) || !/^[0-9]{1,2}$/.test(round)) {
-    return json({ error: "Use ?season=2026&round=1&key=YOUR_SECRET" }, 400);
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!supabaseUrl || !serviceKey) {
+    return json({ error: "Server configuration is incomplete" }, 500);
+  }
+  const db = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
+
+  const apply = url.searchParams.get("mode") === "import";
+  const eventParam = url.searchParams.get("event");
+
+  const columns = "id, season, round, start_date, end_date, has_sprint, status";
+  let events: Row[] = [];
+  if (eventParam) {
+    const found = await db.from("events").select(columns).eq("id", eventParam);
+    if (found.error) { return json({ error: found.error.message }, 500); }
+    events = found.data ?? [];
+  } else {
+    // Current race-weekend window: weekend started, and ended no more than 3 days ago.
+    const today = new Date();
+    const todayIso = today.toISOString().slice(0, 10);
+    const threeDaysAgo = new Date(today.getTime() - 3 * 86400000).toISOString().slice(0, 10);
+    const found = await db.from("events").select(columns)
+      .eq("status", "scheduled").lte("start_date", todayIso).gte("end_date", threeDaysAgo);
+    if (found.error) { return json({ error: found.error.message }, 500); }
+    events = found.data ?? [];
   }
 
-  try {
-    const scheduleBody = await apiGet("/" + season + "/" + round + "/");
-    const raceInfo = scheduleBody?.MRData?.RaceTable?.Races?.[0] ?? null;
-
-    const resultsBody = await apiGet("/" + season + "/" + round + "/results/?limit=100");
-    const raceRows: Row[] = resultsBody?.MRData?.RaceTable?.Races?.[0]?.Results ?? [];
-
-    const qualifyingBody = await apiGet("/" + season + "/" + round + "/qualifying/?limit=100");
-    const qualifyingRows: Row[] = qualifyingBody?.MRData?.RaceTable?.Races?.[0]?.QualifyingResults ?? [];
-
-    const sprintBody = await apiGet("/" + season + "/" + round + "/sprint/?limit=100");
-    const sprintRows: Row[] = sprintBody?.MRData?.RaceTable?.Races?.[0]?.SprintResults ?? [];
-
-    const codes = codeMap(raceRows, qualifyingRows, sprintRows);
-    const allIds = raceRows.map(driverId);
-
-    const output: Row = {
-      mode: "DRY RUN: nothing is saved",
-      season: num(season),
-      round: num(round),
-      race_name: raceInfo?.raceName ?? null,
-      schedule: raceInfo
-        ? {
-          qualifying: toIso(raceInfo.Qualifying),
-          sprint_qualifying: toIso(raceInfo.SprintQualifying),
-          sprint: toIso(raceInfo.Sprint),
-          race: toIso(raceInfo),
-        }
-        : null,
-      row_counts: {
-        race: raceRows.length,
-        qualifying: qualifyingRows.length,
-        sprint: sprintRows.length,
-      },
-      qualifying: attempt(
-        qualifyingRows,
-        "No qualifying results yet",
-        () => {
-          if (allIds.length === 0) {
-            throw new Error("Race results are needed in this dry run to list the full grid");
-          }
-          return buildQualifying(qualifyingRows, allIds);
-        },
-        codes,
-      ),
-      race: attempt(raceRows, "No race results yet", () => buildRace(raceRows), codes),
-      sprint: attempt(sprintRows, "No sprint this weekend, or no results yet", () => buildSprint(sprintRows), codes),
-      sprint_qualifying_derived: attempt(
-        sprintRows,
-        "No sprint this weekend, or no results yet",
-        () => deriveSprintQualifying(sprintRows),
-        codes,
-      ),
-    };
-
-    return json(output);
-  } catch (err) {
-    return json({ error: (err as Error).message }, 502);
+  const cache = new Map<string, Row[]>();
+  const report: Row[] = [];
+  for (const ev of events) {
+    try {
+      report.push(...await processEvent(db, ev, apply, cache));
+    } catch (err) {
+      const message = (err as Error).message;
+      report.push({ event: ev.id, session: "all", action: "error", detail: message });
+      if (apply) {
+        await db.from("import_log").insert({
+          season: ev.season,
+          event_id: ev.id,
+          session_type: "all",
+          action: "error",
+          detail: message,
+        });
+      }
+    }
   }
+
+  return json({
+    mode: apply ? "IMPORT: pending results are saved" : "DRY RUN: nothing is saved",
+    events_checked: events.length,
+    report,
+  });
 });
