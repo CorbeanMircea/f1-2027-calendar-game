@@ -439,7 +439,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
   const url = new URL(req.url);
 
   const expected = Deno.env.get("IMPORT_SECRET");
-  if (!expected || url.searchParams.get("key") !== expected) {
+  const provided = req.headers.get("x-import-secret") ?? url.searchParams.get("key");
+  if (!expected || provided !== expected) {
     return json({ error: "Not authorised" }, 401);
   }
 
