@@ -1,0 +1,21 @@
+name: Keep Supabase active
+
+on:
+  schedule:
+    - cron: "17 5 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read one public row
+        env:
+          SUPABASE_URL: "https://qcofaxawphewcrfgiaej.supabase.co"
+          SUPABASE_PUBLISHABLE_KEY: "sb_publishable_TY9yvcXIhAPu_KPOMTJ3_g_lu1BrMcn"
+        run: |
+          curl --silent --show-error --fail \
+            --header "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
+            "${SUPABASE_URL}/rest/v1/events?select=id&limit=1"
