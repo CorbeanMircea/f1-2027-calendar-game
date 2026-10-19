@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0b10">
+  <meta name="robots" content="noindex">
+  <title>Admin | F1 2027 Championship</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="account.css">
+  <link rel="stylesheet" href="leaderboard.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="checker" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <p class="eyebrow">Private friends league</p>
+      <h1>Admin <span>Panel</span></h1>
+    </div>
+  </header>
+
+  <main class="admin-wrap">
+    <section class="panel" id="gate" hidden>
+      <h2>Access</h2>
+      <p class="placeholder" id="gate-text"></p>
+      <div class="actions">
+        <a class="btn btn-primary" href="account.html">Go to Account</a>
+      </div>
+    </section>
+
+    <div id="admin-panel" hidden>
+      <div class="admin-toolbar">
+        <p class="placeholder" id="updated"></p>
+        <button type="button" class="btn" id="refresh-button">Refresh</button>
+      </div>
+
+      <h2 class="admin-section-title">Pending results</h2>
+      <p class="placeholder" id="pending-empty" hidden>Nothing is waiting for approval.</p>
+      <div id="pending-list"></div>
+
+      <h2 class="admin-section-title">Recently approved</h2>
+      <ul class="plain-list" id="recent-list"></ul>
+
+      <h2 class="admin-section-title">Import log</h2>
+      <div class="board-table-wrap">
+        <table class="board-table log-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Event</th>
+              <th>Session</th>
+              <th>Action</th>
+              <th>Detail</th>
+            </tr>
+          </thead>
+          <tbody id="log-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <p class="message" id="admin-message" role="status" aria-live="polite"></p>
+
+    <a class="back-link" href="index.html">&larr; Back to home</a>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1/dist/umd/supabase.js"></script>
+  <script src="config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

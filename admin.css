@@ -1,0 +1,122 @@
+.admin-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 32px 20px 56px;
+}
+
+.admin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 8px;
+}
+
+.admin-toolbar .placeholder {
+  margin: 0;
+}
+
+.admin-section-title {
+  margin: 32px 0 12px;
+  font-size: 1.15rem;
+}
+
+.admin-card {
+  margin: 0 0 20px;
+}
+
+.admin-card h3 {
+  margin: 0 0 10px;
+  font-size: 1.15rem;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.78rem;
+}
+
+.badge.warn {
+  border-color: #ffb300;
+  color: #ffb300;
+}
+
+.badge.ok {
+  border-color: #2f8f4a;
+  color: #6fdc8c;
+}
+
+.badge.bad {
+  border-color: var(--red);
+  color: #ff6b66;
+}
+
+.result-data {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin: 12px 0;
+}
+
+.result-block h4 {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.result-block p {
+  margin: 0;
+}
+
+.result-list {
+  margin: 0;
+  padding-left: 22px;
+  font-size: 0.92rem;
+}
+
+ul.result-list {
+  list-style: disc;
+}
+
+.admin-card details {
+  margin: 12px 0;
+}
+
+.admin-card summary {
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.admin-card .actions {
+  margin-top: 16px;
+}
+
+.btn-danger {
+  border-color: var(--red);
+  color: #ff6b66;
+}
+
+.plain-list {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.log-table td {
+  font-size: 0.82rem;
+  vertical-align: top;
+}
