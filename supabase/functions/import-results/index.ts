@@ -262,11 +262,14 @@ async function processEvent(db: Row, ev: Row, apply: boolean, cache: Map<string,
     try {
       const data = mapData(w.build(), extToOurs);
 
-      const latest = await db.from("results").select("id, version, status, data")
+      const latest = await db.from("results").select("id, version, status, data, api_snapshot")
         .eq("session_id", sessionId).order("version", { ascending: false }).limit(1);
       if (latest.error) { throw new Error(latest.error.message); }
 
-      if (latest.data && latest.data.length > 0 && canonical(latest.data[0].data) === canonical(data)) {
+      if (
+        latest.data && latest.data.length > 0 &&
+        canonical(latest.data[0].api_snapshot ?? latest.data[0].data) === canonical(data)
+      ) {
         await log(
           w.type,
           "unchanged",
