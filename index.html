@@ -10,11 +10,18 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="next-race.css">
   <link rel="stylesheet" href="predict.css">
+  <link rel="stylesheet" href="site-nav.css">
 </head>
 <body>
   <header class="hero">
     <div class="checker" aria-hidden="true"></div>
     <div class="hero-inner">
+      <nav class="site-nav" aria-label="Main">
+        <a href="account.html">Account</a>
+        <a href="predict.html">Predictions</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="admin.html" id="admin-link" hidden>Admin</a>
+      </nav>
       <p class="eyebrow">Private friends league</p>
       <h1>F1 2027 <span>Championship</span></h1>
       <p class="lead">
@@ -65,7 +72,9 @@
     <p>Unofficial fan project for private use. Not affiliated with Formula 1, the FIA or any team.</p>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1/dist/umd/supabase.js"></script>
   <script src="config.js"></script>
   <script src="next-race.js"></script>
+  <script src="admin-link.js"></script>
 </body>
 </html>

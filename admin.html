@@ -9,6 +9,7 @@
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="account.css">
+  <link rel="stylesheet" href="predict.css">
   <link rel="stylesheet" href="leaderboard.css">
   <link rel="stylesheet" href="admin.css">
 </head>
@@ -40,8 +41,14 @@
       <p class="placeholder" id="pending-empty" hidden>Nothing is waiting for approval.</p>
       <div id="pending-list"></div>
 
+      <h2 class="admin-section-title">Missing results</h2>
+      <p class="placeholder">Sessions whose predictions are locked but that have no result yet. Use this if the data source is unavailable.</p>
+      <p class="placeholder" id="missing-empty" hidden>No sessions are waiting for a result.</p>
+      <div id="missing-list"></div>
+
       <h2 class="admin-section-title">Recently approved</h2>
-      <ul class="plain-list" id="recent-list"></ul>
+      <p class="placeholder">Use Correct if a result changes after approval (for example, a penalty). The correction is saved as a new pending version.</p>
+      <div id="recent-list"></div>
 
       <h2 class="admin-section-title">Import log</h2>
       <div class="board-table-wrap">
