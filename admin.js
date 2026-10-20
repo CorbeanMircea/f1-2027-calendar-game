@@ -264,6 +264,7 @@
     root.appendChild(gridBox);
 
     function syncDnf() {
+      if (!top) { return; }
       var chosenTop = top.values();
       var count = 0;
       dnfBoxes.forEach(function (b) {
