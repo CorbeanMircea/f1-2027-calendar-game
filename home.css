@@ -1,0 +1,284 @@
+.wrap {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Site header */
+.site-header {
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.site-header-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 28px;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 14px 20px;
+}
+
+.wordmark {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+}
+
+.site-nav a {
+  padding: 6px 0;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.site-nav a:hover {
+  border-bottom-color: var(--text);
+  color: var(--text);
+}
+
+.site-nav a[hidden] {
+  display: none;
+}
+
+/* Race hero */
+.race-hero {
+  padding: 44px 0 40px;
+  border-bottom: 1px solid var(--line);
+}
+
+.hero-content {
+  position: relative;
+}
+
+.hero-content > * {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-content > .round-mark {
+  position: absolute;
+  z-index: 0;
+  top: -18px;
+  right: 0;
+  margin: 0;
+  color: var(--panel);
+  font-family: var(--font-display);
+  font-size: clamp(6.5rem, 30vw, 14rem);
+  font-weight: 800;
+  line-height: 0.8;
+  pointer-events: none;
+  user-select: none;
+}
+
+.hero-place {
+  margin: 0 0 6px;
+  color: var(--muted);
+}
+
+.hero-title {
+  max-width: 14ch;
+  margin: 0;
+  font-size: clamp(2.8rem, 10vw, 5.2rem);
+  font-weight: 800;
+  line-height: 0.95;
+}
+
+.hero-dates {
+  margin: 12px 0 0;
+  color: var(--muted);
+}
+
+/* The lock countdown: the edge colour is the flag state */
+.lock {
+  margin: 30px 0 26px;
+  padding: 2px 0 2px 20px;
+  border-left: 8px solid var(--flag, var(--line));
+}
+
+.lock[data-state="open"],
+.session[data-state="open"] {
+  --flag: var(--green);
+}
+
+.lock[data-state="soon"],
+.session[data-state="soon"] {
+  --flag: var(--yellow);
+}
+
+.lock[data-state="locked"],
+.session[data-state="locked"] {
+  --flag: var(--red);
+}
+
+.lock-label {
+  margin: 0;
+  color: var(--muted);
+}
+
+.clock {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 30px;
+  margin: 2px 0 8px;
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.clock .num {
+  font-size: clamp(3.4rem, 16vw, 6.6rem);
+  line-height: 0.95;
+}
+
+.clock .num.word {
+  font-size: clamp(2.4rem, 10vw, 4.2rem);
+}
+
+.clock .unit-label {
+  margin-left: 8px;
+  color: var(--muted);
+  font-family: var(--font-text);
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.lock-detail {
+  max-width: 48ch;
+  margin: 0;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.rehearsal-note {
+  max-width: 56ch;
+  margin: 22px 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* Schedule and standings */
+.two-col {
+  display: grid;
+  gap: 40px;
+  grid-template-columns: 1fr;
+  padding-top: 36px;
+  padding-bottom: 56px;
+}
+
+@media (min-width: 820px) {
+  .two-col {
+    grid-template-columns: 1.3fr 1fr;
+  }
+}
+
+.two-col h2 {
+  margin: 0 0 14px;
+  font-size: 1.9rem;
+}
+
+.season-note {
+  margin: -8px 0 14px;
+  color: var(--muted);
+}
+
+.empty {
+  margin: 0;
+  color: var(--muted);
+}
+
+.session {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 16px;
+  margin: 0 0 8px;
+  padding: 14px 16px 14px 18px;
+  border-left: 6px solid var(--flag, var(--line));
+  background: var(--panel);
+}
+
+.session-name {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.session-time {
+  font-weight: 600;
+  text-align: right;
+}
+
+.session-note,
+.session-mine {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.session-mine {
+  text-align: right;
+}
+
+.tower-row {
+  display: grid;
+  grid-template-columns: 2.6rem 10px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 8px;
+  padding: 10px 16px 10px 8px;
+  background: var(--panel);
+}
+
+.tower-pos {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.tower-chip {
+  align-self: stretch;
+  background: var(--chip, var(--line));
+}
+
+.tower-name {
+  font-weight: 600;
+}
+
+.tower-points {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.full-link {
+  display: inline-block;
+  margin-top: 6px;
+}
+
+.site-footer {
+  padding: 0 0 40px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.site-footer p {
+  margin: 0;
+}

@@ -3,78 +3,58 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b0b10">
-  <meta name="description" content="A private F1 2027 calendar and race prediction game for friends.">
-  <title>F1 2027 Championship</title>
+  <meta name="theme-color" content="#0f1b26">
+  <meta name="description" content="A private F1 prediction league for friends.">
+  <title>F1 2027 | Friends league</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="next-race.css">
-  <link rel="stylesheet" href="predict.css">
-  <link rel="stylesheet" href="site-nav.css">
+  <link rel="stylesheet" href="home.css">
 </head>
 <body>
-  <header class="hero">
-    <div class="checker" aria-hidden="true"></div>
-    <div class="hero-inner">
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a class="wordmark" href="index.html">F1 2027</a>
       <nav class="site-nav" aria-label="Main">
-        <a href="account.html">Account</a>
         <a href="predict.html">Predictions</a>
         <a href="leaderboard.html">Leaderboard</a>
+        <a href="account.html">Account</a>
         <a href="admin.html" id="admin-link" hidden>Admin</a>
       </nav>
-      <p class="eyebrow">Private friends league</p>
-      <h1>F1 2027 <span>Championship</span></h1>
-      <p class="lead">
-        A printed wall calendar and an online prediction game, built together.
-        Scan a QR code from the calendar to open a race weekend, predict the
-        podium before the deadline, and climb the leaderboard against your friends.
-      </p>
-      <p class="status">
-        <span class="dot" aria-hidden="true"></span>
-        Under construction. The game is not open yet.
-      </p>
     </div>
   </header>
 
-  <main class="grid">
-    <section class="card" aria-labelledby="next-race">
-      <p class="tag">Schedule</p>
-      <h2 id="next-race">Next Race</h2>
-      <div id="next-race-content" aria-live="polite">
-        <p class="placeholder">Loading schedule...</p>
+  <main>
+    <section class="race-hero" aria-label="Next race">
+      <div class="wrap">
+        <div class="hero-content" id="hero-content">
+          <p class="placeholder">Loading the next race...</p>
+        </div>
       </div>
     </section>
 
-    <section class="card" aria-labelledby="leaderboard">
-      <p class="tag">Invited players</p>
-      <h2 id="leaderboard">Season Leaderboard</h2>
-      <p class="placeholder">
-        Player standings and season points, updated live when results are approved.
-      </p>
-      <p class="card-links">
-        <a href="leaderboard.html">Open leaderboard</a>
-      </p>
-    </section>
+    <div class="wrap two-col">
+      <section aria-labelledby="schedule-title">
+        <h2 id="schedule-title">Schedule</h2>
+        <div id="schedule-rows"><p class="empty">Loading...</p></div>
+      </section>
 
-    <section class="card" aria-labelledby="predictions">
-      <p class="tag">Invited players</p>
-      <h2 id="predictions">Predictions</h2>
-      <p class="placeholder">
-        Sign in and enter your predictions once race weekends open.
-      </p>
-      <p class="card-links">
-        <a href="account.html">Account</a> &middot; <a href="predict.html">Predictions</a>
-      </p>
-    </section>
+      <section aria-labelledby="standings-title">
+        <h2 id="standings-title">Standings</h2>
+        <p class="season-note" id="standings-season"></p>
+        <div id="standings-rows"><p class="empty">Loading...</p></div>
+      </section>
+    </div>
   </main>
 
-  <footer class="footer">
-    <p>Unofficial fan project for private use. Not affiliated with Formula 1, the FIA or any team.</p>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>Unofficial fan project for private use. Not affiliated with Formula 1, the FIA or any team.</p>
+    </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1/dist/umd/supabase.js"></script>
   <script src="config.js"></script>
-  <script src="next-race.js"></script>
+  <script src="home.js"></script>
   <script src="admin-link.js"></script>
 </body>
 </html>
