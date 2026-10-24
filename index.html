@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0f1b26">
-  <meta name="description" content="A private F1 prediction league for friends.">
-  <title>F1 2027 | Friends league</title>
+  <meta name="theme-color" content="#0d0e10">
+  <meta name="description" content="Lights Out: a private F1 2027 prediction league for friends.">
+  <title>Lights Out | F1 2027 friends league</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="home.css">
@@ -13,7 +13,7 @@
 <body>
   <header class="site-header">
     <div class="site-header-inner">
-      <a class="wordmark" href="index.html">F1 2027</a>
+      <a class="wordmark" href="index.html">Lights Out</a>
       <nav class="site-nav" aria-label="Main">
         <a href="predict.html">Predictions</a>
         <a href="leaderboard.html">Leaderboard</a>
@@ -25,10 +25,73 @@
 
   <main>
     <section class="race-hero" aria-label="Next race">
-      <div class="wrap">
+      <div class="hero-scene" aria-hidden="true">
+        <svg viewBox="0 0 1440 420" preserveAspectRatio="xMidYMax slice" focusable="false">
+          <defs>
+            <pattern id="chequer" width="16" height="16" patternUnits="userSpaceOnUse">
+              <rect width="16" height="16" fill="#ecece8"/>
+              <rect width="8" height="8" fill="#0d0e10"/>
+              <rect x="8" y="8" width="8" height="8" fill="#0d0e10"/>
+            </pattern>
+          </defs>
+
+          <polygon points="0,360 0,316 100,316 100,298 210,298 210,280 300,280 300,360" fill="#12151a"/>
+          <polygon points="1440,360 1440,316 1340,316 1340,298 1230,298 1230,280 1140,280 1140,360" fill="#12151a"/>
+
+          <g fill="#262a30">
+            <rect x="147" y="170" width="6" height="190"/>
+            <rect x="127" y="152" width="46" height="18"/>
+            <rect x="327" y="210" width="6" height="150"/>
+            <rect x="307" y="192" width="46" height="18"/>
+            <rect x="1107" y="210" width="6" height="150"/>
+            <rect x="1087" y="192" width="46" height="18"/>
+            <rect x="1287" y="170" width="6" height="190"/>
+            <rect x="1267" y="152" width="46" height="18"/>
+          </g>
+          <g stroke="#c4c8ce" stroke-width="6" stroke-dasharray="7 4" opacity=".55" fill="none">
+            <path d="M131 161h38"/>
+            <path d="M311 201h38"/>
+            <path d="M1091 201h38"/>
+            <path d="M1271 161h38"/>
+          </g>
+
+          <rect y="359" width="1440" height="2" fill="#343840"/>
+          <g fill="none" stroke="#3a3f46" stroke-width="2">
+            <rect x="400" y="376" width="90" height="28"/>
+            <rect x="520" y="376" width="90" height="28"/>
+            <rect x="830" y="376" width="90" height="28"/>
+            <rect x="950" y="376" width="90" height="28"/>
+          </g>
+          <rect x="700" y="362" width="40" height="58" fill="url(#chequer)" opacity=".6"/>
+
+          <g class="gantry">
+            <rect x="300" y="36" width="16" height="324" fill="#2a2e34"/>
+            <rect x="1124" y="36" width="16" height="324" fill="#2a2e34"/>
+            <path d="M302 150L314 250M314 150L302 250M1126 150L1138 250M1138 150L1126 250" stroke="#3a3f46" stroke-width="2" fill="none"/>
+            <rect x="290" y="30" width="860" height="26" fill="#30343a"/>
+            <rect x="290" y="30" width="860" height="3" fill="#4d535b"/>
+            <rect x="290" y="52" width="860" height="4" fill="#1a1c20"/>
+
+            <rect x="490" y="56" width="60" height="92" fill="#20232a" stroke="#4a4f57" stroke-width="2"/>
+            <rect x="590" y="56" width="60" height="92" fill="#20232a" stroke="#4a4f57" stroke-width="2"/>
+            <rect x="690" y="56" width="60" height="92" fill="#20232a" stroke="#4a4f57" stroke-width="2"/>
+            <rect x="790" y="56" width="60" height="92" fill="#20232a" stroke="#4a4f57" stroke-width="2"/>
+            <rect x="890" y="56" width="60" height="92" fill="#20232a" stroke="#4a4f57" stroke-width="2"/>
+
+            <g class="light"><circle class="lens" cx="520" cy="102" r="22"/><circle class="core" cx="520" cy="102" r="9"/></g>
+            <g class="light"><circle class="lens" cx="620" cy="102" r="22"/><circle class="core" cx="620" cy="102" r="9"/></g>
+            <g class="light"><circle class="lens" cx="720" cy="102" r="22"/><circle class="core" cx="720" cy="102" r="9"/></g>
+            <g class="light"><circle class="lens" cx="820" cy="102" r="22"/><circle class="core" cx="820" cy="102" r="9"/></g>
+            <g class="light"><circle class="lens" cx="920" cy="102" r="22"/><circle class="core" cx="920" cy="102" r="9"/></g>
+          </g>
+        </svg>
+      </div>
+
+      <div class="wrap hero-grid">
         <div class="hero-content" id="hero-content">
           <p class="placeholder">Loading the next race...</p>
         </div>
+        <aside class="status-panel" id="status-panel"></aside>
       </div>
     </section>
 

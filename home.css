@@ -7,7 +7,7 @@
 /* Site header */
 .site-header {
   border-bottom: 1px solid var(--line);
-  background: var(--panel);
+  background: var(--bg);
 }
 
 .site-header-inner {
@@ -18,16 +18,17 @@
   gap: 6px 28px;
   max-width: 1040px;
   margin: 0 auto;
-  padding: 14px 20px;
+  padding: 12px 20px;
 }
 
 .wordmark {
   color: var(--text);
   font-family: var(--font-display);
-  font-size: 1.7rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
+  font-size: 1.9rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
   text-decoration: none;
+  text-transform: uppercase;
 }
 
 .site-nav {
@@ -45,7 +46,7 @@
 }
 
 .site-nav a:hover {
-  border-bottom-color: var(--text);
+  border-bottom-color: var(--yellow);
   color: var(--text);
 }
 
@@ -55,32 +56,112 @@
 
 /* Race hero */
 .race-hero {
-  padding: 44px 0 40px;
+  --scene-h: clamp(240px, 29.2vw, 420px);
+  position: relative;
+  overflow: hidden;
   border-bottom: 1px solid var(--line);
+  background: var(--ground);
+}
+
+/* Sky above the horizon, ground below it. Both run edge to edge. */
+.hero-scene {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--scene-h);
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    #0a0b0d 0,
+    #0a0b0d calc(var(--scene-h) * 0.857),
+    var(--ground) calc(var(--scene-h) * 0.857),
+    var(--ground) 100%
+  );
+}
+
+/* Kerb along the edge of the track, edge to edge */
+.hero-scene::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--scene-h) * 0.8333);
+  height: calc(var(--scene-h) * 0.0238);
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(224, 38, 44, 0.6) 0 36px,
+    rgba(236, 236, 232, 0.45) 36px 72px
+  );
+}
+
+/* Fine grain, very low contrast */
+.hero-scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
+}
+
+.hero-scene svg {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  max-width: 1440px;
+  height: 100%;
+  margin: 0 auto;
+}
+
+/* The start lights */
+.gantry .lens {
+  fill: #3a1a1d;
+  stroke: #565b63;
+  stroke-width: 3;
+  transition: fill 0.16s linear var(--d, 0ms), stroke 0.16s linear var(--d, 0ms);
+}
+
+.gantry .core {
+  fill: #4a2428;
+  transition: fill 0.16s linear var(--d, 0ms);
+}
+
+.gantry .light.is-lit .lens {
+  fill: var(--red);
+  stroke: #ff7a70;
+}
+
+.gantry .light.is-lit .core {
+  fill: #ff9a90;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gantry .lens,
+  .gantry .core {
+    transition: none;
+  }
+}
+
+.hero-grid {
+  position: relative;
+  display: grid;
+  gap: 28px;
+  grid-template-columns: 1fr;
+  padding-top: calc(var(--scene-h) + 8px);
+  padding-bottom: 44px;
+}
+
+@media (min-width: 900px) {
+  .hero-grid {
+    grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr);
+    align-items: end;
+    gap: 40px;
+  }
 }
 
 .hero-content {
-  position: relative;
-}
-
-.hero-content > * {
-  position: relative;
-  z-index: 1;
-}
-
-.hero-content > .round-mark {
-  position: absolute;
-  z-index: 0;
-  top: -18px;
-  right: 0;
-  margin: 0;
-  color: var(--panel);
-  font-family: var(--font-display);
-  font-size: clamp(6.5rem, 30vw, 14rem);
-  font-weight: 800;
-  line-height: 0.8;
-  pointer-events: none;
-  user-select: none;
+  min-width: 0;
 }
 
 .hero-place {
@@ -89,82 +170,27 @@
 }
 
 .hero-title {
-  max-width: 14ch;
   margin: 0;
-  font-size: clamp(2.8rem, 10vw, 5.2rem);
-  font-weight: 800;
-  line-height: 0.95;
+  font-size: clamp(3rem, 8vw, 5.8rem);
+  font-weight: 900;
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
+.hero-meta {
+  margin: 14px 0 0;
+  color: var(--muted);
 }
 
 .hero-dates {
-  margin: 12px 0 0;
-  color: var(--muted);
-}
-
-/* The lock countdown: the edge colour is the flag state */
-.lock {
-  margin: 30px 0 26px;
-  padding: 2px 0 2px 20px;
-  border-left: 8px solid var(--flag, var(--line));
-}
-
-.lock[data-state="open"],
-.session[data-state="open"] {
-  --flag: var(--green);
-}
-
-.lock[data-state="soon"],
-.session[data-state="soon"] {
-  --flag: var(--yellow);
-}
-
-.lock[data-state="locked"],
-.session[data-state="locked"] {
-  --flag: var(--red);
-}
-
-.lock-label {
-  margin: 0;
-  color: var(--muted);
-}
-
-.clock {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 30px;
-  margin: 2px 0 8px;
-  font-family: var(--font-display);
-  font-variant-numeric: tabular-nums;
-  font-weight: 800;
-}
-
-.clock .num {
-  font-size: clamp(3.4rem, 16vw, 6.6rem);
-  line-height: 0.95;
-}
-
-.clock .num.word {
-  font-size: clamp(2.4rem, 10vw, 4.2rem);
-}
-
-.clock .unit-label {
-  margin-left: 8px;
-  color: var(--muted);
-  font-family: var(--font-text);
-  font-size: 1.05rem;
-  font-weight: 500;
-}
-
-.lock-detail {
-  max-width: 48ch;
-  margin: 0;
+  margin: 2px 0 0;
 }
 
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+  margin-top: 26px;
 }
 
 .rehearsal-note {
@@ -172,6 +198,136 @@
   margin: 22px 0 0;
   color: var(--muted);
   font-size: 0.95rem;
+}
+
+/* The lock board. Yellow while predictions are live, dark when they are not. */
+.status-panel {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+}
+
+.status-panel:empty {
+  display: none;
+}
+
+.status-panel[data-state="open"],
+.status-panel[data-state="soon"] {
+  border: 3px solid #101114;
+  background: var(--yellow);
+  color: #101114;
+}
+
+.status-panel[data-state="open"] { --flag-bg: #1f9d55; --flag-ink: #ffffff; }
+.status-panel[data-state="soon"] { --flag-bg: #101114; --flag-ink: var(--yellow); }
+.status-panel[data-state="locked"] { --flag-bg: var(--red); --flag-ink: #ffffff; }
+.status-panel[data-state="tbc"] { --flag-bg: #4a4f56; --flag-ink: #ffffff; }
+
+.panel-label { order: 1; }
+.clock { order: 2; }
+.panel-detail { order: 3; }
+.panel-state { order: 4; }
+.panel-lights { order: 5; }
+
+.panel-label {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.status-panel[data-state="locked"] .panel-label,
+.status-panel[data-state="tbc"] .panel-label {
+  color: var(--muted);
+}
+
+.clock {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px 10px;
+  margin: 0 0 14px;
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  font-weight: 900;
+}
+
+.clock .unit {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.clock .num {
+  min-width: 1.5em;
+  padding: 2px 12px 0;
+  border: 1px solid var(--line);
+  background: #0d0e10;
+  color: var(--text);
+  font-size: clamp(2.8rem, 6vw, 3.8rem);
+  line-height: 1.05;
+  text-align: center;
+}
+
+.clock .num.word {
+  min-width: 0;
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+}
+
+.clock .unit-label {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--font-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-panel[data-state="open"] .clock .num,
+.status-panel[data-state="soon"] .clock .num {
+  border-color: #101114;
+}
+
+.status-panel[data-state="open"] .clock .unit-label,
+.status-panel[data-state="soon"] .clock .unit-label {
+  color: #101114;
+}
+
+.panel-detail {
+  margin: 0 0 14px;
+}
+
+.panel-state {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  background: var(--flag-bg, var(--panel-2));
+  color: var(--flag-ink, var(--text));
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.panel-lights {
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.status-panel[data-state="open"] .panel-lights,
+.status-panel[data-state="soon"] .panel-lights {
+  border-top-color: rgba(16, 17, 20, 0.35);
+  color: rgba(16, 17, 20, 0.78);
 }
 
 /* Schedule and standings */
@@ -191,7 +347,6 @@
 
 .two-col h2 {
   margin: 0 0 14px;
-  font-size: 1.9rem;
 }
 
 .season-note {
@@ -214,10 +369,15 @@
   background: var(--panel);
 }
 
+.session[data-state="open"] { --flag: var(--green); }
+.session[data-state="soon"] { --flag: var(--yellow); }
+.session[data-state="locked"] { --flag: var(--red); }
+
 .session-name {
   font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.7rem;
+  font-weight: 800;
+  line-height: 1.1;
 }
 
 .session-time {
@@ -237,7 +397,7 @@
 
 .tower-row {
   display: grid;
-  grid-template-columns: 2.6rem 10px 1fr auto;
+  grid-template-columns: 2.6rem 8px 1fr auto;
   align-items: center;
   gap: 12px;
   margin: 0 0 8px;
@@ -247,8 +407,9 @@
 
 .tower-pos {
   font-family: var(--font-display);
-  font-size: 2rem;
-  font-weight: 800;
+  font-size: 2.2rem;
+  font-weight: 900;
+  line-height: 1;
   text-align: center;
 }
 
@@ -263,9 +424,9 @@
 
 .tower-points {
   font-family: var(--font-display);
-  font-size: 1.7rem;
+  font-size: 1.9rem;
   font-variant-numeric: tabular-nums;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .full-link {

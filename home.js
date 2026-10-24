@@ -3,10 +3,12 @@
 
   var cfg = window.APP_CONFIG || {};
   var heroBox = document.getElementById("hero-content");
+  var panelBox = document.getElementById("status-panel");
   var scheduleBox = document.getElementById("schedule-rows");
   var standingsBox = document.getElementById("standings-rows");
   var seasonNote = document.getElementById("standings-season");
-  if (!heroBox || !scheduleBox || !standingsBox) { return; }
+  var lightEls = document.querySelectorAll(".gantry .light");
+  if (!heroBox || !panelBox || !scheduleBox || !standingsBox) { return; }
 
   var TYPE_LABEL = {
     sprint_qualifying: "Sprint Qualifying",
@@ -39,6 +41,7 @@
 
   function showHeroMessage(text) {
     heroBox.textContent = "";
+    panelBox.textContent = "";
     heroBox.appendChild(el("p", "placeholder", text));
   }
 
@@ -49,6 +52,18 @@
   }
 
   var client = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_PUBLISHABLE_KEY);
+
+  function reducedMotion() {
+    return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }
+
+  function playedBefore() {
+    try { return window.sessionStorage.getItem("lo-lights") === "1"; } catch (e) { return false; }
+  }
+
+  function markPlayed() {
+    try { window.sessionStorage.setItem("lo-lights", "1"); } catch (e) { /* ignore */ }
+  }
 
   var monthFormat = new Intl.DateTimeFormat("en-GB", { month: "long", timeZone: "UTC" });
 
@@ -88,7 +103,11 @@
 
   var current = { ev: null, sessions: [], mine: {}, signedIn: false, userId: null };
   var clockNode = null;
+  var captionNode = null;
   var lastSignature = "";
+  var lastLit = -1;
+  var firstRenderDone = false;
+  var entering = false;
 
   function msOf(session) {
     return Date.parse(session.start_utc);
@@ -135,6 +154,90 @@
     return { kind: "locked", session: null, remaining: 0, signature: "finished" };
   }
 
+  // The start lights show how close the deadline is. The text always states the real status.
+  function litCount(state) {
+    if (state.kind !== "open" && state.kind !== "soon") { return 0; }
+    var hours = state.remaining / 3600000;
+    if (hours <= 1) { return 5; }
+    if (hours <= 6) { return 4; }
+    if (hours <= 24) { return 3; }
+    if (hours <= 72) { return 2; }
+    return 1;
+  }
+
+  function lightsCaption(state, target) {
+    if (state.kind === "open" || state.kind === "soon") {
+      return target + " of 5 start lights lit. More come on as the deadline gets closer, " +
+        "and all go out when predictions lock.";
+    }
+    if (state.kind === "tbc") { return "Start lights are out until the schedule is confirmed."; }
+    return "Start lights are out.";
+  }
+
+  function setLights(count, sequence) {
+    for (var i = 0; i < lightEls.length; i++) {
+      lightEls[i].style.setProperty("--d", (sequence ? i * 130 : 0) + "ms");
+      if (i < count) {
+        lightEls[i].classList.add("is-lit");
+      } else {
+        lightEls[i].classList.remove("is-lit");
+      }
+    }
+    lastLit = count;
+  }
+
+  function applyLights(target) {
+    if (!firstRenderDone) {
+      firstRenderDone = true;
+      if (target > 0 && !reducedMotion() && !playedBefore()) {
+        setLights(0, false);
+        window.requestAnimationFrame(function () {
+          window.requestAnimationFrame(function () {
+            setLights(target, true);
+            markPlayed();
+          });
+        });
+        return;
+      }
+    }
+    setLights(target, false);
+  }
+
+  // Pressing "Make your predictions": lights come on one by one, go out, then the page opens.
+  function enterRace(href) {
+    if (entering || reducedMotion() || lightEls.length === 0) {
+      window.location.href = href;
+      return;
+    }
+    entering = true;
+    var step = 70;
+    var i;
+    for (i = 0; i < lightEls.length; i++) {
+      lightEls[i].style.setProperty("--d", "0ms");
+      lightEls[i].classList.remove("is-lit");
+    }
+    for (i = 0; i < lightEls.length; i++) {
+      (function (index) {
+        window.setTimeout(function () { lightEls[index].classList.add("is-lit"); }, 50 + index * step);
+      })(i);
+    }
+    var outAt = 50 + lightEls.length * step + 100;
+    window.setTimeout(function () {
+      for (var j = 0; j < lightEls.length; j++) { lightEls[j].classList.remove("is-lit"); }
+    }, outAt);
+    window.setTimeout(function () { window.location.href = href; }, outAt + 110);
+  }
+
+  heroBox.addEventListener("click", function (event) {
+    var link = event.target.closest ? event.target.closest("a[data-enter]") : null;
+    if (!link || event.defaultPrevented || event.button !== 0 ||
+        event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+      return;
+    }
+    event.preventDefault();
+    enterRace(link.href);
+  });
+
   function fillClock(node, ms) {
     node.textContent = "";
     var minutes = Math.max(0, Math.floor(ms / 60000));
@@ -160,55 +263,23 @@
     var state = computeState(Date.now());
     lastSignature = state.signature;
     clockNode = null;
+    captionNode = null;
     heroBox.textContent = "";
-
-    var mark = el("p", "round-mark", String(ev.round));
-    mark.setAttribute("aria-hidden", "true");
-    heroBox.appendChild(mark);
+    panelBox.textContent = "";
 
     heroBox.appendChild(el("p", "hero-place", ev.locality + ", " + ev.country));
     heroBox.appendChild(el("h1", "hero-title", ev.name));
+    heroBox.appendChild(el("p", "hero-meta", "Round " + ev.round + " of the " + ev.season + " season"));
     heroBox.appendChild(el("p", "hero-dates",
-      formatRange(ev.start_date, ev.end_date) + ", " + ev.circuit + (ev.has_sprint ? " (sprint weekend)" : "")));
-
-    var lock = el("div", "lock");
-    lock.setAttribute("data-state", state.kind);
-
-    if (state.kind === "tbc") {
-      lock.appendChild(el("p", "lock-label", "Session times"));
-      var tbc = el("p", "clock");
-      tbc.appendChild(el("span", "num word", "To be confirmed"));
-      lock.appendChild(tbc);
-      lock.appendChild(el("p", "lock-detail", "Predictions open once the official schedule is published."));
-    } else if (!state.session) {
-      lock.appendChild(el("p", "lock-label", "This weekend"));
-      var fin = el("p", "clock");
-      fin.appendChild(el("span", "num word", "Finished"));
-      lock.appendChild(fin);
-      lock.appendChild(el("p", "lock-detail",
-        "Predictions are locked. Points appear on the leaderboard after an admin approves each result."));
-    } else {
-      var label = state.kind === "locked"
-        ? TYPE_LABEL[state.session.session_type] + " starts in"
-        : "Predictions lock in";
-      lock.appendChild(el("p", "lock-label", label));
-      var clock = el("p", "clock");
-      clock.setAttribute("role", "timer");
-      fillClock(clock, state.remaining);
-      clockNode = clock;
-      lock.appendChild(clock);
-      lock.appendChild(el("p", "lock-detail", state.kind === "locked"
-        ? "Predictions are locked. Points appear on the leaderboard after an admin approves each result."
-        : "Locks when " + TYPE_LABEL[state.session.session_type] + " starts, " +
-          whenText(state.session.start_utc) + " (your time)."));
-    }
-    heroBox.appendChild(lock);
+      formatRange(ev.start_date, ev.end_date) + " at " + ev.circuit + (ev.has_sprint ? ", sprint weekend" : "")));
 
     var actions = el("div", "hero-actions");
     if (!current.signedIn) {
       actions.appendChild(makeLink("btn btn-primary", "account.html", "Sign in or create an account"));
     } else if (state.kind === "open" || state.kind === "soon") {
-      actions.appendChild(makeLink("btn btn-primary", "predict.html", "Make your predictions"));
+      var go = makeLink("btn btn-primary", "predict.html", "Make your predictions");
+      go.setAttribute("data-enter", "1");
+      actions.appendChild(go);
       actions.appendChild(makeLink("btn", "leaderboard.html", "View the leaderboard"));
     } else {
       actions.appendChild(makeLink("btn btn-primary", "leaderboard.html", "View the leaderboard"));
@@ -220,6 +291,46 @@
         "Rehearsal weekend: this is a real 2026 race used as a dry run for the 2027 game. " +
         "Points count for this test only."));
     }
+
+    // Status panel: the real status in text, the countdown, and the deadline.
+    panelBox.setAttribute("data-state", state.kind);
+    var stateText = {
+      tbc: "Session times to be confirmed",
+      open: "Predictions open",
+      soon: "Predictions lock soon",
+      locked: "Predictions locked"
+    }[state.kind];
+    panelBox.appendChild(el("p", "panel-state", stateText));
+
+    if (state.kind === "tbc") {
+      panelBox.appendChild(el("p", "panel-detail", "Predictions open once the official schedule is published."));
+    } else if (!state.session) {
+      panelBox.appendChild(el("p", "panel-label", "This weekend"));
+      var fin = el("p", "clock");
+      fin.appendChild(el("span", "num word", "Finished"));
+      panelBox.appendChild(fin);
+      panelBox.appendChild(el("p", "panel-detail",
+        "Points appear on the leaderboard after an admin approves each result."));
+    } else {
+      var label = state.kind === "locked"
+        ? TYPE_LABEL[state.session.session_type] + " starts in"
+        : "Predictions lock in";
+      panelBox.appendChild(el("p", "panel-label", label));
+      var clock = el("p", "clock");
+      clock.setAttribute("role", "timer");
+      fillClock(clock, state.remaining);
+      clockNode = clock;
+      panelBox.appendChild(clock);
+      panelBox.appendChild(el("p", "panel-detail", state.kind === "locked"
+        ? "Your picks are locked. Points appear on the leaderboard after an admin approves each result."
+        : "Locks when " + TYPE_LABEL[state.session.session_type] + " starts, " +
+          whenText(state.session.start_utc) + " (your time)."));
+    }
+
+    var target = litCount(state);
+    captionNode = el("p", "panel-lights", lightsCaption(state, target));
+    panelBox.appendChild(captionNode);
+    applyLights(target);
   }
 
   function renderSchedule() {
@@ -299,6 +410,11 @@
       return;
     }
     if (clockNode) { fillClock(clockNode, state.remaining); }
+    var target = litCount(state);
+    if (target !== lastLit && !entering) {
+      setLights(target, false);
+      if (captionNode) { captionNode.textContent = lightsCaption(state, target); }
+    }
   }
 
   function loadAccountData(ev) {
@@ -355,7 +471,7 @@
         current.sessions = sessions.data || [];
         renderHero();
         renderSchedule();
-        setInterval(tick, 30000);
+        window.setInterval(tick, 30000);
 
         if (!current.signedIn) {
           renderStandings(null, "Sign in to see the standings.");
