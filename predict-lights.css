@@ -1,0 +1,73 @@
+.deadline-lights {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.deadline-lights[data-state="open"] { --flag-bg: #1f9d55; --flag-ink: #ffffff; }
+.deadline-lights[data-state="soon"] { --flag-bg: var(--yellow); --flag-ink: #101114; }
+.deadline-lights[data-state="locked"] { --flag-bg: var(--red); --flag-ink: #ffffff; }
+.deadline-lights[data-state="tbc"] { --flag-bg: #4a4f56; --flag-ink: #ffffff; }
+
+.dl-lights {
+  display: flex;
+  gap: 6px;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  background: #101114;
+}
+
+.dl-light {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #565b63;
+  border-radius: 50%;
+  background: #3a1a1d;
+  transition: background-color 0.16s linear var(--d, 0ms), border-color 0.16s linear var(--d, 0ms);
+}
+
+.dl-light.is-lit {
+  border-color: #ff7a70;
+  background: var(--red);
+}
+
+.dl-text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  min-width: 0;
+}
+
+.dl-state {
+  margin: 0;
+  padding: 4px 10px;
+  background: var(--flag-bg, #4a4f56);
+  color: var(--flag-ink, #ffffff);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.dl-time {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dl-light {
+    transition: none;
+  }
+}

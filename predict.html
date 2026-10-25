@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b0b10">
-  <title>Predictions | F1 2027 Championship</title>
+  <meta name="theme-color" content="#0d0e10">
+  <title>Predictions | Lights Out</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="account.css">
   <link rel="stylesheet" href="predict.css">
+  <link rel="stylesheet" href="predict-lights.css">
 </head>
 <body>
   <header class="hero">
@@ -38,6 +39,21 @@
           <label for="session-select">Session</label>
           <select id="session-select"></select>
         </div>
+
+        <div class="deadline-lights" id="deadline-lights" hidden>
+          <div class="dl-lights" aria-hidden="true">
+            <span class="dl-light"></span>
+            <span class="dl-light"></span>
+            <span class="dl-light"></span>
+            <span class="dl-light"></span>
+            <span class="dl-light"></span>
+          </div>
+          <div class="dl-text">
+            <p class="dl-state" id="dl-state"></p>
+            <p class="dl-time" id="dl-time"></p>
+          </div>
+        </div>
+
         <p class="placeholder" id="lock-info"></p>
         <form id="predict-form" novalidate>
           <div id="pick-fields"></div>
@@ -56,5 +72,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1/dist/umd/supabase.js"></script>
   <script src="config.js"></script>
   <script src="predict.js"></script>
+  <script src="predict-lights.js"></script>
 </body>
 </html>
