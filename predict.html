@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="account.css">
   <link rel="stylesheet" href="predict.css">
   <link rel="stylesheet" href="predict-lights.css">
+  <link rel="stylesheet" href="tiles.css">
 </head>
 <body>
   <header class="hero">
@@ -57,7 +58,8 @@
         <p class="placeholder" id="lock-info"></p>
         <form id="predict-form" novalidate>
           <div id="pick-fields"></div>
-          <div class="actions">
+          <div class="action-bar">
+            <p class="pick-status" id="pick-status" role="status"></p>
             <button type="submit" class="btn btn-primary" id="save-button">Save prediction</button>
           </div>
         </form>
@@ -71,7 +73,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1/dist/umd/supabase.js"></script>
   <script src="config.js"></script>
-  <script src="predict.js"></script>
+  <script src="predict-tiles.js"></script>
   <script src="predict-lights.js"></script>
 </body>
 </html>
