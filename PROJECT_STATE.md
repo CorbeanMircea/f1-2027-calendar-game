@@ -5,28 +5,27 @@ Live site: https://corbeanmircea.github.io/f1-2027-calendar-game/
 
 ## Working (confirmed by the owner)
 - Accounts, friends group with invite code, display names.
-- Predictions for qualifying, sprint qualifying, race and sprint, with server-side deadlines and scoring v2.
-- Results import (edge function + scheduled jobs), admin panel (approve, reject, edit, correct, manual entry).
-- Live leaderboard. Daily session-time sync. Keep-alive workflow.
-- Lights Out theme and home page: charcoal/white, yellow actions, start-light gantry, lock board.
+- Predictions for all four session types, server-side deadlines, scoring v2.
+- Importer (edge function and scheduled jobs), admin panel (approve, reject, edit, correct, manual entry).
+- Live leaderboard, daily session-time sync, keep-alive workflow.
+- Lights Out theme, home page with start-light gantry and lock board.
+- Predictions page: compact deadline lights and driver tiles (placeholder portraits).
+- Rehearsal 1 (US GP 2026) completed: results imported and approved.
 
-## Rehearsal
-Real United States GP 2026 (event `united-states-2026`) is the dry run. Remove afterwards with
+## Rehearsal 2
+Mexico City GP 2026 (`mexico-city-2026`, 30 Oct to 1 Nov). Remove both rehearsals afterwards with
 `supabase/maintenance/remove_rehearsal_weekend.sql`.
 
 ## Delivered, awaiting confirmation
-- Compact deadline lights on the predictions page: `predict.html`, `predict-lights.css`, `predict-lights.js`.
-  (`predict.js` is unchanged.)
+- New leaderboard: `leaderboard.html`, `standings.css`, `standings.js` (`leaderboard.js` is the old fallback).
 
 ## Not done yet
-- Driver tiles with placeholder portraits on the predictions page.
-- Overview strip on the home page; leaderboard, race page and calendar in the new design; A3 calendar.
-- Team colours in the database; real 2027 drivers and session times (not published yet).
-- Unused old files: `next-race.js`, `next-race.css`, `site-nav.css`.
+- Home overview strip; race page; calendar overview; A3 printed calendar.
+- Team colours in the database; verified portraits; real 2027 drivers and session times (not published yet).
+- Unused old files: `next-race.js`, `next-race.css`, `site-nav.css`, `predict.js`, `leaderboard.js` (kept as fallbacks).
 
 ## Rules
 - Do not change scoring, deadlines, lock logic, authentication or prediction saving without a plan.
-- Temporary test data (event `ui-test-2026`) must be deleted after testing.
 
 ## Next task
-Confirm the deadline lights, then replace the pick controls with driver tiles.
+Confirm the leaderboard, then run Mexico City as the second rehearsal to see movement.
