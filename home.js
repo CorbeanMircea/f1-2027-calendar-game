@@ -11,6 +11,9 @@
   var lightEls = document.querySelectorAll(".gantry .light");
   var lightsCount = document.getElementById("lights-count");
   var photoEl = document.getElementById("hero-photo");
+  var plateEl = document.getElementById("hero-plate");
+  var plateWhere = document.getElementById("plate-where");
+  var plateRound = document.getElementById("plate-round");
   var motifEl = document.getElementById("hero-motif");
   var circuitSvg = document.getElementById("hero-circuit");
   var cUnder = document.getElementById("c-under");
@@ -321,7 +324,8 @@
     var token = ev.id;
 
     hero.classList.remove("is-themed");
-    photoEl.classList.remove("on");
+    plateEl.classList.remove("on");
+    hero.classList.remove("has-photo");
     hero.setAttribute("data-race", theme.stem);
     hero.style.setProperty("--atmos", theme.atmos);
     motifEl.innerHTML = theme.motif;
@@ -339,7 +343,13 @@
     T.loadPhoto(theme.assetStem).then(function (url) {
       if (url && current.ev && current.ev.id === token) {
         photoEl.style.backgroundImage = "url(\"" + url + "\")";
-        photoEl.classList.add("on");
+        plateWhere.textContent = ev.locality + ", " + ev.country;
+        plateRound.textContent = "Round " + ev.round;
+        hero.classList.add("has-photo");
+        // Two frames so the reveal animation starts from the hidden state.
+        window.requestAnimationFrame(function () {
+          window.requestAnimationFrame(function () { plateEl.classList.add("on"); });
+        });
       }
     });
   }
