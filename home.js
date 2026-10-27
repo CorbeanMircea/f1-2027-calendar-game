@@ -333,10 +333,10 @@
     });
 
     // Optional local artwork replaces the generated pieces when the files exist.
-    T.loadCircuit(theme.stem).then(function (real) {
+    T.loadCircuit(theme.assetStem).then(function (real) {
       if (real && current.ev && current.ev.id === token) { setCircuit(real); }
     });
-    T.loadPhoto(theme.stem).then(function (url) {
+    T.loadPhoto(theme.assetStem).then(function (url) {
       if (url && current.ev && current.ev.id === token) {
         photoEl.style.backgroundImage = "url(\"" + url + "\")";
         photoEl.classList.add("on");

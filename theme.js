@@ -37,6 +37,9 @@
   };
   var FALLBACK = ["grandstand", "#8a8f98"];
 
+  // Event stems that share artwork with another stem (2027 "mexico" uses the Mexico City files).
+  var ASSET_ALIAS = { "mexico": "mexico-city" };
+
   function stemOf(ev) {
     return String(ev.id || ev.name || "race").toLowerCase().replace(/-\d{4}$/, "");
   }
@@ -238,7 +241,7 @@
     var info = RACES[stem] || FALLBACK;
     var seed = hash(stem);
     var draw = MOTIFS[info[0]] || MOTIFS.grandstand;
-    return { stem: stem, motifName: info[0], atmos: info[1], motif: draw(rng(seed ^ 0x9e3779b9)), line: racingLine(seed) };
+    return { stem: stem, assetStem: ASSET_ALIAS[stem] || stem, motifName: info[0], atmos: info[1], motif: draw(rng(seed ^ 0x9e3779b9)), line: racingLine(seed) };
   }
 
   function loadPhoto(stem) {
