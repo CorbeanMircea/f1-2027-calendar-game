@@ -1,0 +1,289 @@
+/* Lights Out design foundation.
+   Load AFTER styles.css. Provides tokens, header, mobile bottom navigation, buttons,
+   section heads, reveal utilities and page transitions. Other pages can adopt it later. */
+
+:root {
+  --hair: rgba(243, 243, 240, 0.14);
+  --hair-strong: rgba(243, 243, 240, 0.3);
+  --surface: #111317;
+  --surface-2: #181b20;
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
+  --header-h: 56px;
+  --bottom-h: 62px;
+  --gutter: 20px;
+  --maxw: 1160px;
+}
+
+body.lo { padding-bottom: calc(var(--bottom-h) + env(safe-area-inset-bottom, 0px)); }
+
+@media (min-width: 820px) {
+  body.lo { padding-bottom: 0; }
+}
+
+/* Page transitions (Chromium cross-document view transitions; other browsers ignore this) */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: lo-fade-out 0.14s linear both; }
+::view-transition-new(root) { animation: lo-fade-in 0.28s var(--ease-out) both; }
+@keyframes lo-fade-out { to { opacity: 0; } }
+@keyframes lo-fade-in { from { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation: none; }
+}
+
+/* Header */
+.lo-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid var(--hair);
+  background: var(--bg);
+}
+
+.lo-header-in {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  max-width: var(--maxw);
+  height: var(--header-h);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.lo-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.lo-mark-lights {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.lo-mark-lights i {
+  display: block;
+  width: 5px;
+  height: 14px;
+  background: var(--red);
+}
+
+.lo-nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.lo-nav a {
+  position: relative;
+  padding: 8px 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+.lo-nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--yellow);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s var(--ease-out);
+}
+
+.lo-nav a:hover,
+.lo-nav a[aria-current="page"] { color: var(--text); }
+
+.lo-nav a:hover::after,
+.lo-nav a[aria-current="page"]::after { transform: scaleX(1); }
+
+.lo-nav a[hidden] { display: none; }
+
+@media (max-width: 819px) {
+  .lo-nav a:not(#admin-link) { display: none; }
+}
+
+/* Mobile bottom navigation */
+.lo-bottom {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  height: calc(var(--bottom-h) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  border-top: 1px solid var(--hair-strong);
+  background: var(--bg);
+}
+
+@media (min-width: 820px) {
+  .lo-bottom { display: none; }
+}
+
+.lo-bottom a {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-decoration: none;
+  text-transform: uppercase;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lo-bottom a svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: square;
+}
+
+.lo-bottom a[aria-current="page"] { color: var(--text); }
+
+.lo-bottom a[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 24%;
+  right: 24%;
+  height: 3px;
+  background: var(--yellow);
+}
+
+.lo-bottom a:active { background: var(--surface-2); }
+
+/* Buttons */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 24px;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid var(--hair-strong);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.2s, border-color 0.2s, transform 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--text);
+  transform: translateY(101%);
+  transition: transform 0.3s var(--ease-out);
+}
+
+.btn:hover { border-color: var(--text); color: #101114; }
+.btn:hover::before { transform: none; }
+.btn:active { transform: translateY(1px); }
+
+.btn-primary { border-color: var(--yellow); background: var(--yellow); color: #101114; }
+.btn-primary::before { background: #ffffff; }
+.btn-primary:hover { border-color: #ffffff; background: var(--yellow); }
+
+.btn-block { display: flex; width: 100%; }
+
+.btn-arrow::after {
+  content: "\2192";
+  display: inline-block;
+  transition: transform 0.3s var(--ease-out);
+}
+
+.btn-arrow:hover::after { transform: translateX(5px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .btn::before,
+  .btn-arrow::after { transition: none; }
+  .btn:active { transform: none; }
+}
+
+/* Section heads */
+.sec-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--hair);
+}
+
+.sec-head h2 {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 2.8rem);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.lo-eyebrow {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.sec-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: right;
+}
+
+/* Reveal on scroll. Content stays visible if JavaScript does not run. */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+
+.js [data-reveal].in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal] { opacity: 1; transform: none; transition: none; }
+}

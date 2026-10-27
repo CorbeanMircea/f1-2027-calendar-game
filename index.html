@@ -2,19 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0d0e10">
   <meta name="description" content="Lights Out: a private F1 2027 prediction league for friends.">
   <title>Lights Out | F1 2027 friends league</title>
   <link rel="icon" href="data:,">
+  <script>document.documentElement.className += " js";</script>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="lights-out.css">
   <link rel="stylesheet" href="home.css">
 </head>
-<body>
-  <header class="site-header">
-    <div class="site-header-inner">
-      <a class="wordmark" href="index.html">Lights Out</a>
-      <nav class="site-nav" aria-label="Main">
+<body class="lo">
+  <header class="lo-header">
+    <div class="lo-header-in">
+      <a class="lo-mark" href="index.html" aria-label="Lights Out, home">
+        <span class="lo-mark-lights" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+        <span>Lights Out</span>
+      </a>
+      <nav class="lo-nav" aria-label="Main">
+        <a href="index.html" aria-current="page">Home</a>
         <a href="predict.html">Predictions</a>
         <a href="leaderboard.html">Leaderboard</a>
         <a href="account.html">Account</a>
@@ -24,86 +30,71 @@
   </header>
 
   <main>
-    <section class="race-hero" aria-label="Next race">
-      <div class="hero-scene" aria-hidden="true">
-        <svg viewBox="0 0 1440 420" preserveAspectRatio="xMidYMax slice" focusable="false">
-          <defs>
-            <pattern id="chequer" width="16" height="16" patternUnits="userSpaceOnUse">
-              <rect width="16" height="16" fill="#ecece8"/>
-              <rect width="8" height="8" fill="#0d0e10"/>
-              <rect x="8" y="8" width="8" height="8" fill="#0d0e10"/>
-            </pattern>
-          </defs>
-
-          <polygon points="0,360 0,316 100,316 100,298 210,298 210,280 300,280 300,360" fill="#12151a"/>
-          <polygon points="1440,360 1440,316 1340,316 1340,298 1230,298 1230,280 1140,280 1140,360" fill="#12151a"/>
-
-          <g fill="#262a30">
-            <rect x="147" y="170" width="6" height="190"/>
-            <rect x="127" y="152" width="46" height="18"/>
-            <rect x="327" y="210" width="6" height="150"/>
-            <rect x="307" y="192" width="46" height="18"/>
-            <rect x="1107" y="210" width="6" height="150"/>
-            <rect x="1087" y="192" width="46" height="18"/>
-            <rect x="1287" y="170" width="6" height="190"/>
-            <rect x="1267" y="152" width="46" height="18"/>
-          </g>
-          <g stroke="#c4c8ce" stroke-width="6" stroke-dasharray="7 4" opacity=".55" fill="none">
-            <path d="M131 161h38"/>
-            <path d="M311 201h38"/>
-            <path d="M1091 201h38"/>
-            <path d="M1271 161h38"/>
-          </g>
-
-          <rect y="359" width="1440" height="2" fill="#343840"/>
-          <g fill="none" stroke="#3a3f46" stroke-width="2">
-            <rect x="400" y="376" width="90" height="28"/>
-            <rect x="520" y="376" width="90" height="28"/>
-            <rect x="830" y="376" width="90" height="28"/>
-            <rect x="950" y="376" width="90" height="28"/>
-          </g>
-          <rect x="700" y="362" width="40" height="58" fill="url(#chequer)" opacity=".6"/>
-
-          <g class="gantry">
-            <rect x="300" y="36" width="16" height="324" fill="#2a2e34"/>
-            <rect x="1124" y="36" width="16" height="324" fill="#2a2e34"/>
-            <path d="M302 150L314 250M314 150L302 250M1126 150L1138 250M1138 150L1126 250" stroke="#3a3f46" stroke-width="2" fill="none"/>
-            <rect x="290" y="30" width="860" height="26" fill="#30343a"/>
-            <rect x="290" y="30" width="860" height="3" fill="#4d535b"/>
-            <rect x="290" y="52" width="860" height="4" fill="#1a1c20"/>
-
-            <rect x="490" y="56" width="60" height="92" fill="#20232a" stroke="#4a4f57" stroke-width="2"/>
-            <rect x="590" y="56" width="60" height="92" fill="#20232a" stroke="#4a4f57" stroke-width="2"/>
-            <rect x="690" y="56" width="60" height="92" fill="#20232a" stroke="#4a4f57" stroke-width="2"/>
-            <rect x="790" y="56" width="60" height="92" fill="#20232a" stroke="#4a4f57" stroke-width="2"/>
-            <rect x="890" y="56" width="60" height="92" fill="#20232a" stroke="#4a4f57" stroke-width="2"/>
-
-            <g class="light"><circle class="lens" cx="520" cy="102" r="22"/><circle class="core" cx="520" cy="102" r="9"/></g>
-            <g class="light"><circle class="lens" cx="620" cy="102" r="22"/><circle class="core" cx="620" cy="102" r="9"/></g>
-            <g class="light"><circle class="lens" cx="720" cy="102" r="22"/><circle class="core" cx="720" cy="102" r="9"/></g>
-            <g class="light"><circle class="lens" cx="820" cy="102" r="22"/><circle class="core" cx="820" cy="102" r="9"/></g>
-            <g class="light"><circle class="lens" cx="920" cy="102" r="22"/><circle class="core" cx="920" cy="102" r="9"/></g>
-          </g>
+    <section class="hero-lo" id="hero" aria-label="Next Grand Prix">
+      <div class="scene" aria-hidden="true">
+        <div class="sky"></div>
+        <div class="photo" id="hero-photo"></div>
+        <div class="photo-veil"></div>
+        <svg class="circuit" id="hero-circuit" viewBox="0 0 600 380" preserveAspectRatio="xMidYMid meet" focusable="false">
+          <path class="c-under" id="c-under" pathLength="1" d=""/>
+          <path class="c-line" id="c-line" pathLength="1" d=""/>
+          <line class="c-start" id="c-start" x1="0" y1="0" x2="0" y2="0"/>
         </svg>
+        <svg class="motif" id="hero-motif" viewBox="0 0 1440 320" preserveAspectRatio="xMidYMax slice" focusable="false"></svg>
+        <div class="ground"></div>
+        <div class="kerb"></div>
+        <div class="grain"></div>
       </div>
 
-      <div class="wrap hero-grid">
-        <div class="hero-content" id="hero-content">
+      <div class="hero-in">
+        <div class="hero-text" id="hero-content">
           <p class="placeholder">Loading the next race...</p>
         </div>
-        <aside class="status-panel" id="status-panel"></aside>
+
+        <div class="hero-side">
+          <div class="gantry-wrap">
+            <svg viewBox="0 0 420 118" focusable="false" aria-hidden="true">
+              <g class="gantry">
+                <rect x="0" y="6" width="420" height="16" fill="#2a2e34"/>
+                <rect x="0" y="6" width="420" height="2" fill="#4d535b"/>
+                <rect x="44" y="22" width="8" height="12" fill="#3a3f46"/>
+                <rect x="368" y="22" width="8" height="12" fill="#3a3f46"/>
+                <rect x="14" y="32" width="392" height="82" fill="#15171b" stroke="#3a3f46" stroke-width="1.5"/>
+                <path d="M104.5 32v82M178.5 32v82M252.5 32v82M326.5 32v82" stroke="#2b2f35" stroke-width="1"/>
+                <g class="light"><circle class="lens" cx="60" cy="73" r="24"/><circle class="core" cx="60" cy="73" r="10"/></g>
+                <g class="light"><circle class="lens" cx="141" cy="73" r="24"/><circle class="core" cx="141" cy="73" r="10"/></g>
+                <g class="light"><circle class="lens" cx="210" cy="73" r="24"/><circle class="core" cx="210" cy="73" r="10"/></g>
+                <g class="light"><circle class="lens" cx="279" cy="73" r="24"/><circle class="core" cx="279" cy="73" r="10"/></g>
+                <g class="light"><circle class="lens" cx="360" cy="73" r="24"/><circle class="core" cx="360" cy="73" r="10"/></g>
+              </g>
+            </svg>
+            <p class="gantry-label"><span>Start lights</span><span id="lights-count">0 / 5</span></p>
+          </div>
+          <aside class="rc" id="status-panel" aria-label="Prediction status"></aside>
+        </div>
       </div>
     </section>
 
-    <div class="wrap two-col">
-      <section aria-labelledby="schedule-title">
-        <h2 id="schedule-title">Schedule</h2>
+    <div class="home-grid">
+      <section aria-labelledby="schedule-title" data-reveal>
+        <div class="sec-head">
+          <div>
+            <p class="lo-eyebrow">Race weekend</p>
+            <h2 id="schedule-title">Schedule</h2>
+          </div>
+          <p class="sec-note">Your local time</p>
+        </div>
         <div id="schedule-rows"><p class="empty">Loading...</p></div>
       </section>
 
-      <section aria-labelledby="standings-title">
-        <h2 id="standings-title">Standings</h2>
-        <p class="season-note" id="standings-season"></p>
+      <section aria-labelledby="standings-title" data-reveal style="--i:1">
+        <div class="sec-head">
+          <div>
+            <p class="lo-eyebrow">The league</p>
+            <h2 id="standings-title">Standings</h2>
+          </div>
+          <p class="sec-note" id="standings-season"></p>
+        </div>
         <div id="standings-rows"><p class="empty">Loading...</p></div>
       </section>
     </div>
@@ -115,8 +106,28 @@
     </div>
   </footer>
 
+  <nav class="lo-bottom" aria-label="Main">
+    <a href="index.html" aria-current="page">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7M5 10v10h5v-6h4v6h5V10"/></svg>
+      <span>Home</span>
+    </a>
+    <a href="predict.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V4h13v6H8M4 14h9"/></svg>
+      <span>Predict</span>
+    </a>
+    <a href="leaderboard.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21v-8h4v8M10 21V5h4v16M15 21v-5h4v5"/></svg>
+      <span>Board</span>
+    </a>
+    <a href="account.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21v-3a4 4 0 014-4h6a4 4 0 014 4v3M9 8a3 3 0 106 0 3 3 0 00-6 0"/></svg>
+      <span>Account</span>
+    </a>
+  </nav>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1/dist/umd/supabase.js"></script>
   <script src="config.js"></script>
+  <script src="theme.js"></script>
   <script src="home.js"></script>
   <script src="admin-link.js"></script>
 </body>
