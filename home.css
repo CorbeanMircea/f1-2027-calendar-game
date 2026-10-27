@@ -183,7 +183,6 @@
   .has-photo .hero-title { grid-column: 1; grid-row: 2; }
   .has-photo .plate { grid-column: 1; grid-row: 3; margin: 28px 0 0; border: 1px solid var(--hair-strong); }
   .has-photo .hero-facts { grid-column: 1; grid-row: 4; }
-  .has-photo .hero-actions { grid-column: 1; grid-row: 5; }
   .has-photo .rehearsal-note { grid-column: 1; grid-row: 6; }
   .has-photo .hero-side { grid-column: 2; grid-row: 1 / span 6; }
   .has-photo .plate-cap { padding-inline: 14px; }
@@ -607,14 +606,7 @@
   font-weight: 900;
 }
 
-.full-link {
-  display: inline-block;
-  margin-top: 16px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
+.full-link { margin-top: 18px; }
 
 .site-footer { padding: 8px 0 40px; color: var(--muted); font-size: 0.85rem; }
 .site-footer p { margin: 0; }

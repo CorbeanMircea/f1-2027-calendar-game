@@ -388,12 +388,6 @@
     });
     textBox.appendChild(reveal(facts, i++, animate));
 
-    if (current.signedIn) {
-      var actions = el("div", "hero-actions");
-      actions.appendChild(makeLink("btn", "leaderboard.html", "Leaderboard"));
-      textBox.appendChild(reveal(actions, i++, animate));
-    }
-
     if (ev.season < 2027) {
       textBox.appendChild(reveal(el("p", "rehearsal-note",
         "Rehearsal weekend: this is a real 2026 race used as a dry run for the 2027 game. " +
@@ -624,7 +618,7 @@
       standingsBox.textContent = "";
       list = el("ol", "st-list");
       standingsBox.appendChild(list);
-      standingsBox.appendChild(makeLink("full-link", "leaderboard.html", "Full leaderboard \u2192"));
+      standingsBox.appendChild(makeLink("btn full-link", "leaderboard.html", "Leaderboard"));
     }
 
     // FLIP: remember where each row is, reorder, then animate from the old position.

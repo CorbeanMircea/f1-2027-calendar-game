@@ -9,26 +9,12 @@
   <link rel="icon" href="data:,">
   <script>document.documentElement.className += " js";</script>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="site-chrome.css">
   <link rel="stylesheet" href="lights-out.css">
   <link rel="stylesheet" href="home.css">
 </head>
 <body class="lo">
-  <header class="lo-header">
-    <div class="lo-header-in">
-      <a class="lo-mark" href="index.html" aria-label="Lights Out, home">
-        <span class="lo-mark-lights" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
-        <span>Lights Out</span>
-      </a>
-      <nav class="lo-nav" aria-label="Main">
-        <a href="index.html" aria-current="page">Home</a>
-        <a href="predict.html">Predictions</a>
-        <a href="leaderboard.html">Leaderboard</a>
-        <a href="account.html">Account</a>
-        <a href="admin.html" id="admin-link" hidden>Admin</a>
-      </nav>
-    </div>
-  </header>
-
+  <script src="site-nav.js"></script>
   <main>
     <section class="hero-lo" id="hero" aria-label="Next Grand Prix">
       <div class="scene" aria-hidden="true">
@@ -107,25 +93,6 @@
       <p>Unofficial fan project for private use. Not affiliated with Formula 1, the FIA or any team.</p>
     </div>
   </footer>
-
-  <nav class="lo-bottom" aria-label="Main">
-    <a href="index.html" aria-current="page">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7M5 10v10h5v-6h4v6h5V10"/></svg>
-      <span>Home</span>
-    </a>
-    <a href="predict.html">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V4h13v6H8M4 14h9"/></svg>
-      <span>Predict</span>
-    </a>
-    <a href="leaderboard.html">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21v-8h4v8M10 21V5h4v16M15 21v-5h4v5"/></svg>
-      <span>Board</span>
-    </a>
-    <a href="account.html">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21v-3a4 4 0 014-4h6a4 4 0 014 4v3M9 8a3 3 0 106 0 3 3 0 00-6 0"/></svg>
-      <span>Account</span>
-    </a>
-  </nav>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1/dist/umd/supabase.js"></script>
   <script src="config.js"></script>

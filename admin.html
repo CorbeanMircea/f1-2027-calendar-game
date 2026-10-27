@@ -2,18 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b0b10">
   <meta name="robots" content="noindex">
   <title>Admin | F1 2027 Championship</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="site-chrome.css">
   <link rel="stylesheet" href="account.css">
   <link rel="stylesheet" href="predict.css">
   <link rel="stylesheet" href="leaderboard.css">
   <link rel="stylesheet" href="admin.css">
 </head>
 <body>
+  <script src="site-nav.js"></script>
   <header class="hero">
     <div class="checker" aria-hidden="true"></div>
     <div class="hero-inner">
@@ -68,12 +70,11 @@
     </div>
 
     <p class="message" id="admin-message" role="status" aria-live="polite"></p>
-
-    <a class="back-link" href="index.html">&larr; Back to home</a>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1/dist/umd/supabase.js"></script>
   <script src="config.js"></script>
   <script src="admin.js"></script>
+  <script src="admin-link.js"></script>
 </body>
 </html>
