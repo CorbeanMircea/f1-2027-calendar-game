@@ -12,3 +12,5 @@ local-assets/
 node_modules/
 .DS_Store
 Thumbs.db
+
+assets/hero-originals/
