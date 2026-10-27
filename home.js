@@ -342,7 +342,8 @@
     });
     T.loadPhoto(theme.assetStem).then(function (url) {
       if (url && current.ev && current.ev.id === token) {
-        photoEl.style.backgroundImage = "url(\"" + url + "\")";
+        photoEl.src = url;
+        photoEl.alt = "Photograph of " + ev.locality + ", " + ev.country;
         plateWhere.textContent = ev.locality + ", " + ev.country;
         plateRound.textContent = "Round " + ev.round;
         hero.classList.add("has-photo");
