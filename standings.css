@@ -3,12 +3,12 @@
   display: grid;
   grid-template-columns: var(--cols);
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .standings-head,
 .standings {
-  --cols: 2.6rem minmax(0, 1fr) 3rem 64px 3.6rem;
+  --cols: 2.2rem minmax(0, 1fr) 2.6rem 44px 3.4rem;
 }
 
 @media (min-width: 560px) {
@@ -22,6 +22,12 @@
   padding: 0 12px 8px;
   color: var(--muted);
   font-size: 0.8rem;
+}
+
+.standings-head span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .standings-head .right {
@@ -59,13 +65,21 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.3rem;
-  height: 2.3rem;
+  width: 2.2rem;
+  height: 2.2rem;
   border: 1px solid var(--line);
   font-family: var(--font-display);
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 900;
   line-height: 1;
+}
+
+@media (min-width: 560px) {
+  .pos {
+    width: 2.6rem;
+    height: 2.6rem;
+    font-size: 1.6rem;
+  }
 }
 
 .standing.rank-1 .pos {
@@ -119,12 +133,15 @@
 .last5 {
   display: flex;
   align-items: flex-end;
+  justify-content: flex-start;
   gap: 3px;
   height: 26px;
 }
 
 .bar {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 3px;
+  max-width: 12px;
   min-height: 3px;
   background: #6a6f77;
 }
@@ -173,4 +190,23 @@
   margin: 14px 0 0;
   color: var(--muted);
   font-size: 0.85rem;
+}
+
+/* Phones: more room for the name */
+@media (max-width: 559px) {
+  .board-wrap .panel {
+    padding: 16px 10px;
+  }
+
+  .standings-head {
+    padding: 0 8px 8px;
+  }
+
+  .standing-row {
+    padding: 10px 8px;
+  }
+
+  .you {
+    display: none;
+  }
 }
