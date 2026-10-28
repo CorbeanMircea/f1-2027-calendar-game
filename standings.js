@@ -84,7 +84,7 @@
   // ---------- data ----------
 
   function loadModel(season) {
-    var model = { events: [], sessionInfo: {}, scores: [], names: {} };
+    var model = { events: [], sessionInfo: {}, scores: [], names: {}, extras: {} };
 
     return client.from("events").select("id, name, round, start_date")
       .eq("season", season).order("start_date", { ascending: true })
@@ -113,7 +113,11 @@
       .then(function (r) {
         if (r.error) { throw r.error; }
         (r.data || []).forEach(function (p) { model.names[p.id] = p.display_name; });
-        return model;
+        // Avatars and levels (database update 019). Missing view: the board still works.
+        return client.from("player_xp").select("user_id, avatar, xp").then(function (x) {
+          if (!x.error) { (x.data || []).forEach(function (p) { model.extras[p.user_id] = p; }); }
+          return model;
+        }, function () { return model; });
       });
   }
 
@@ -185,12 +189,27 @@
       });
     });
 
-    return { rows: current, hasScores: weekends.length > 0 };
+    return { rows: current, hasScores: weekends.length > 0, extras: model.extras };
   }
 
   // ---------- rendering ----------
 
-  function renderRow(row) {
+  var firstPaint = true;
+
+  function countUp(node, from, to) {
+    node.textContent = String(to);
+    if (reducedMotion() || from === to) { return; }
+    var start = null;
+    function frame(t) {
+      if (start === null) { start = t; }
+      var p = Math.min(1, (t - start) / 800);
+      node.textContent = String(Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) { window.requestAnimationFrame(frame); }
+    }
+    window.requestAnimationFrame(frame);
+  }
+
+  function renderRow(row, extras, leaderPoints) {
     var rankClass = row.rank <= 3 ? "rank-" + row.rank : "rank-n";
     var li = el("li", "standing " + rankClass + (row.id === user.id ? " is-me" : ""));
     li.setAttribute("data-id", row.id);
@@ -202,10 +221,31 @@
 
     btn.appendChild(el("span", "pos", String(row.rank)));
 
-    var name = el("span", "name", row.name);
-    if (row.id === user.id) { name.appendChild(el("span", "you", "(you)")); }
+    var P = window.LO_PROFILE;
+    var extra = extras[row.id];
+    var av = el("span", "av");
+    if (P) { av.innerHTML = P.avatarSvg(extra && extra.avatar ? extra.avatar : null, 52, row.id); }
+    btn.appendChild(av);
+
+    var name = el("span", "name");
+    var top = el("span", "name-top");
+    if (P && extra && typeof extra.xp === "number") {
+      var lvl = P.levelFor(extra.xp).level;
+      var badge = el("span", "nb");
+      badge.innerHTML = P.badgeSvg(P.tierFor(lvl), 16);
+      top.appendChild(badge);
+    }
+    top.appendChild(el("span", "n", row.name));
+    if (row.id === user.id) { top.appendChild(el("span", "you", "(you)")); }
+    if (P && extra && typeof extra.xp === "number") {
+      top.appendChild(el("span", "lv", "LV " + P.levelFor(extra.xp).level));
+    }
+    name.appendChild(top);
+    var gap = leaderPoints - row.points;
+    name.appendChild(el("span", "sub", row.rank === 1 ? "Leader" : (gap === 0 ? "Level on points" : gap + " behind the leader")));
     btn.appendChild(name);
 
+    var meta = el("span", "meta");
     var move;
     if (row.move === null || row.move === 0) {
       move = el("span", "move same", "\u2013");
@@ -214,7 +254,7 @@
     } else {
       move = el("span", "move down", String(-row.move));
     }
-    btn.appendChild(move);
+    meta.appendChild(move);
 
     var bars = el("span", "last5");
     var summary = [];
@@ -226,9 +266,12 @@
     });
     bars.setAttribute("role", "img");
     bars.setAttribute("aria-label", summary.length ? "Last weekends: " + summary.join(", ") + " points" : "No weekends yet");
-    btn.appendChild(bars);
+    meta.appendChild(bars);
+    btn.appendChild(meta);
 
-    btn.appendChild(el("span", "points", String(row.points)));
+    var pts = el("span", "points", String(row.points));
+    pts.setAttribute("data-points", String(row.points));
+    btn.appendChild(pts);
     li.appendChild(btn);
 
     var detail = el("div", "detail");
@@ -263,8 +306,13 @@
     }
 
     listEl.textContent = "";
+    var leaderPoints = built.rows.length ? built.rows[0].points : 0;
     built.rows.forEach(function (row) {
-      var li = renderRow(row);
+      var li = renderRow(row, built.extras || {}, leaderPoints);
+      var from = lastPoints[row.id] !== undefined ? lastPoints[row.id] : 0;
+      if (firstPaint || lastPoints[row.id] !== undefined) {
+        countUp(li.querySelector(".points"), firstPaint ? 0 : from, row.points);
+      }
       if (animate && lastPoints[row.id] !== undefined && lastPoints[row.id] !== row.points) {
         li.classList.add("is-updated");
         window.setTimeout(function () { li.classList.remove("is-updated"); }, 2500);
@@ -289,6 +337,7 @@
 
     lastPoints = {};
     built.rows.forEach(function (row) { lastPoints[row.id] = row.points; });
+    firstPaint = false;
   }
 
   function refresh(animate) {
@@ -371,6 +420,7 @@
     currentSeason = Number(seasonSelect.value);
     expanded = {};
     lastPoints = {};
+    firstPaint = true;
     refresh(false).catch(handleError);
   });
 

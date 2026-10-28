@@ -8,18 +8,21 @@
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="site-chrome.css">
+  <link rel="stylesheet" href="lights-out.css">
   <link rel="stylesheet" href="account.css">
   <link rel="stylesheet" href="predict.css">
   <link rel="stylesheet" href="predict-lights.css">
   <link rel="stylesheet" href="tiles.css">
+  <link rel="stylesheet" href="pages.css">
+  <link rel="stylesheet" href="predict-ui.css">
 </head>
 <body>
   <script src="site-nav.js"></script>
-  <header class="hero">
-    <div class="checker" aria-hidden="true"></div>
-    <div class="hero-inner">
-      <p class="eyebrow">Private friends league</p>
-      <h1>Your <span>Predictions</span></h1>
+  <header class="pg-head">
+    <div class="pg-head-in">
+      <p class="lo-eyebrow">Private friends league</p>
+      <h1 class="pg-title">Your <span>Predictions</span></h1>
+      <p class="pg-sub" id="pg-context"></p>
     </div>
   </header>
 
@@ -75,6 +78,7 @@
   <script src="config.js"></script>
   <script src="predict-tiles.js"></script>
   <script src="predict-lights.js"></script>
+  <script src="predict-ui.js"></script>
   <script src="admin-link.js"></script>
 </body>
 </html>

@@ -1,0 +1,170 @@
+/* Lights Out predictions page. Restyles the existing tiles, lineup and action bar.
+   Load after tiles.css and predict-lights.css. */
+
+#predict-panel > h2 { display: none; }
+#predict-panel { padding: 0; border: 0; background: transparent; }
+#form-area { padding: 0; }
+
+/* Session tabs (built by predict-ui.js from the session list) */
+#form-area.has-tabs > .field { display: none; }
+
+.sess-ctx {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.sess-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 0 18px;
+  border: 1px solid var(--hair-strong);
+  background: var(--panel);
+}
+
+.sess-tab {
+  flex: 1 1 130px;
+  padding: 12px 16px 10px;
+  border: 0;
+  border-right: 1px solid var(--hair);
+  background: transparent;
+  box-shadow: inset 0 3px 0 transparent;
+  color: var(--muted);
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.2s, background-color 0.2s, box-shadow 0.25s var(--ease-out);
+}
+
+.sess-tab:last-child { border-right: 0; }
+.sess-tab .tab-ev { display: block; font-size: 0.66rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
+.sess-tab .tab-ty { display: block; font-family: var(--font-display); font-size: 1.45rem; font-weight: 800; line-height: 1.1; text-transform: uppercase; }
+.sess-tab:hover { color: var(--text); }
+.sess-tab[aria-selected="true"] { background: #181b20; box-shadow: inset 0 3px 0 var(--yellow); color: var(--text); }
+.sess-tab:focus-visible { outline: 2px solid var(--yellow); outline-offset: -2px; }
+
+/* Deadline strip */
+.deadline-lights {
+  --flag: var(--muted);
+  gap: 10px 18px;
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--hair-strong);
+  background: var(--panel);
+}
+
+.deadline-lights[data-state="open"],
+.deadline-lights[data-state="soon"] { --flag: var(--yellow); }
+.deadline-lights[data-state="locked"] { --flag: var(--red); }
+
+.dl-lights { padding: 6px 8px; border-radius: 0; border-color: var(--hair); background: #0a0b0d; }
+
+.dl-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 1.1rem;
+}
+
+.dl-state::before { content: ""; flex: none; width: 9px; height: 9px; background: var(--flag); }
+.dl-time { font-size: 1.3rem; }
+
+#lock-info { margin: 0 0 18px; font-size: 0.9rem; }
+
+/* Notes and step headings */
+.points-note {
+  margin: 0 0 14px;
+  padding: 0 0 0 14px;
+  border-left: 2px solid var(--hair-strong);
+  font-size: 0.85rem;
+}
+
+.portrait-note { margin: 0 0 20px; padding-left: 14px; }
+
+.form-step { margin: 0 0 30px; }
+
+.form-step h3 {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 0 0 4px;
+  padding: 0 0 10px;
+  border-bottom: 1px solid var(--hair);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.step-hint { margin: 10px 0 14px; }
+
+.counter {
+  margin-left: 0;
+  border-radius: 0;
+  border-color: var(--hair-strong);
+  font-family: var(--font-text);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.counter.done { border-color: var(--yellow); background: var(--yellow); color: #101114; }
+
+/* Tiles and lineup */
+.tile { border-color: var(--hair); background: var(--panel); transition: border-color 0.15s, transform 0.15s; }
+
+@media (hover: hover) {
+  .tile:not(:disabled):hover { border-color: var(--hair-strong); transform: translateY(-2px); }
+}
+
+.tile:focus-visible,
+.slot:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+
+.tile.is-selected { border-color: var(--yellow); outline: 2px solid var(--yellow); outline-offset: -2px; }
+.tile.is-submitted { border-color: var(--hair-strong); }
+.tile-info { padding: 9px 10px 11px; }
+.tile-code { font-size: 1.7rem; }
+
+.slot { border-color: var(--hair); background: var(--panel); transition: border-color 0.15s; }
+.slot-pos { font-size: 1.3rem; }
+.slot.is-filled .slot-pos { color: var(--text); }
+.slot-code { font-size: 1.65rem; }
+
+/* Inline choices and selects inside the form */
+.inline-choice label { border: 1px solid var(--hair-strong); padding: 10px 14px; cursor: pointer; }
+.inline-choice input { accent-color: var(--yellow); }
+
+/* Action bar: stays visible while picking, above the bottom navigation on phones */
+.action-bar {
+  bottom: 0;
+  margin: 28px 0 0;
+  padding: 12px var(--gutter);
+  border: 1px solid var(--hair-strong);
+  background: #0a0b0d;
+}
+
+@media (max-width: 819px) {
+  .action-bar {
+    bottom: calc(var(--bottom-h) + env(safe-area-inset-bottom, 0px));
+    margin-inline: calc(-1 * var(--gutter));
+    border-inline: 0;
+  }
+}
+
+.pick-status { font-size: 1.35rem; letter-spacing: 0.02em; text-transform: uppercase; }
+.pick-status[data-kind="ready"] { color: var(--yellow); }
+.pick-status[data-kind="saved"] { color: var(--text); }
+.pick-status[data-kind="saved"]::before { content: "\2713\00a0"; color: var(--yellow); }
+.pick-status[data-kind="locked"] { color: #ff6b61; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tile, .slot, .sess-tab { transition: none; }
+  .tile:not(:disabled):hover { transform: none; }
+}

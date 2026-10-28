@@ -8,18 +8,20 @@
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="site-chrome.css">
+  <link rel="stylesheet" href="lights-out.css">
   <link rel="stylesheet" href="account.css">
   <link rel="stylesheet" href="predict.css">
   <link rel="stylesheet" href="leaderboard.css">
   <link rel="stylesheet" href="standings.css">
+  <link rel="stylesheet" href="pages.css">
+  <link rel="stylesheet" href="profile.css">
 </head>
 <body>
   <script src="site-nav.js"></script>
-  <header class="hero">
-    <div class="checker" aria-hidden="true"></div>
-    <div class="hero-inner">
-      <p class="eyebrow">Private friends league</p>
-      <h1>Season <span>Leaderboard</span></h1>
+  <header class="pg-head">
+    <div class="pg-head-in">
+      <p class="lo-eyebrow">Private friends league</p>
+      <h1 class="pg-title">Season <span>Leaderboard</span></h1>
     </div>
   </header>
 
@@ -48,13 +50,14 @@
       <div id="standings-wrap" hidden>
         <div class="standings-head" aria-hidden="true">
           <span>Pos</span>
+          <span></span>
           <span>Player</span>
           <span>Move</span>
           <span>Last 5</span>
           <span class="right">Points</span>
         </div>
         <ol class="standings" id="standings"></ol>
-        <p class="legend">Move compares with the previous weekend. The bars show your last five weekends, and a purple bar is that weekend's top score. Tap a row for the breakdown.</p>
+        <p class="legend">Move compares with the previous weekend. The bars show the last five weekends, and a yellow bar is that weekend's top score. Tap a row for the breakdown.</p>
       </div>
 
       <p class="updated" id="updated"></p>
@@ -65,6 +68,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1/dist/umd/supabase.js"></script>
   <script src="config.js"></script>
+  <script src="lo-profile.js"></script>
   <script src="standings.js"></script>
   <script src="admin-link.js"></script>
 </body>
