@@ -2,7 +2,6 @@
    Used by account.html and index.html. Needs site-chrome.css for the tokens. */
 
 .avatar-svg, .rank-badge { display: block; }
-.avatar-svg .av-num { font-family: var(--font-display); font-size: 11px; font-weight: 800; letter-spacing: 0.02em; }
 
 .av-tile {
   display: block;

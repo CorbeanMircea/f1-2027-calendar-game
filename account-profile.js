@@ -222,7 +222,11 @@
       els.pkSave.disabled = false;
       if (res.error) {
         console.error(res.error);
-        els.pkMsg.textContent = "Could not save the avatar yet. The database update (019) may not have been run.";
+        var why = res.error.message || "unknown error";
+        var missing = /schema cache|could not find|does not exist|PGRST202|42883/i.test(why + " " + (res.error.code || ""));
+        els.pkMsg.textContent = missing
+          ? "Saving is not available yet: the database update (019_avatars_xp.sql) has not been run in Supabase. (" + why + ")"
+          : "Could not save the avatar: " + why;
         return;
       }
       state.avatar = P.parseAvatar(code);
