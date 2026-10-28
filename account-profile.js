@@ -20,7 +20,8 @@
     sXp: $("stat-xp"), sSessions: $("stat-sessions"), sBest: $("stat-best"), sAvg: $("stat-avg"),
     ladder: $("ladder"), recent: $("recent-list"),
     picker: $("avatar-picker"), pkPreview: $("picker-preview"), pkPatterns: $("pk-patterns"),
-    pkColours: $("pk-colours"), pkNumber: $("pk-number"), pkSave: $("picker-save"),
+    pkColours: $("pk-colours"), pkBases: $("pk-bases"), pkVisors: $("pk-visors"), pkStyles: $("pk-styles"),
+    pkRandom: $("picker-random"), pkNumber: $("pk-number"), pkSave: $("picker-save"),
     pkCancel: $("picker-cancel"), pkMsg: $("picker-msg")
   };
 
@@ -149,30 +150,45 @@
 
   // ---------- Avatar picker ----------
 
+  function swatches(list, key, selected, label) {
+    var html = "";
+    list.forEach(function (c, i) {
+      html += '<button type="button" data-' + key + '="' + i + '" aria-pressed="' + (i === selected) + '" aria-label="' +
+        label + ": " + c.name + '" title="' + c.name + '" style="background:' + c.hex + '"></button>';
+    });
+    return html;
+  }
+
+  function options(list, key, selected, label) {
+    var html = "";
+    list.forEach(function (name, i) {
+      html += '<button type="button" data-' + key + '="' + i + '" aria-pressed="' + (i === selected) + '" aria-label="' +
+        label + ": " + name + '">' + name + "</button>";
+    });
+    return html;
+  }
+
   function drawPicker() {
     var d = state.draft;
     els.pkPreview.innerHTML = P.avatarSvg(d, 132);
 
     var html = "";
     P.PATTERNS.forEach(function (name, i) {
-      var a = { pattern: i, colour: d.colour, number: d.number };
+      var a = { pattern: i, colour: d.colour, base: d.base, visor: d.visor, style: d.style, number: d.number };
       html += '<button type="button" data-pattern="' + i + '" aria-pressed="' + (i === d.pattern) + '" aria-label="' + name +
         ' pattern"><span class="av-tile">' + P.avatarSvg(a, 64) + "</span></button>";
     });
     els.pkPatterns.innerHTML = html;
-
-    var chtml = "";
-    P.COLOURS.forEach(function (c, i) {
-      chtml += '<button type="button" data-colour="' + i + '" aria-pressed="' + (i === d.colour) + '" aria-label="' + c.name +
-        '" style="background:' + c.hex + '"></button>';
-    });
-    els.pkColours.innerHTML = chtml;
+    els.pkBases.innerHTML = swatches(P.BASES, "base", d.base, "Shell");
+    els.pkColours.innerHTML = swatches(P.COLOURS, "colour", d.colour, "Pattern");
+    els.pkVisors.innerHTML = options(P.VISORS.map(function (v) { return v.name; }), "visor", d.visor, "Visor");
+    els.pkStyles.innerHTML = options(P.STYLES, "style", d.style, "Number plate");
     els.pkNumber.value = String(d.number);
   }
 
   function openPicker() {
     var a = state.avatar || P.defaultAvatar(state.user.id);
-    state.draft = { pattern: a.pattern, colour: a.colour, number: a.number };
+    state.draft = { pattern: a.pattern, colour: a.colour, base: a.base || 0, visor: a.visor || 0, style: a.style || 0, number: a.number };
     els.pkMsg.textContent = "";
     drawPicker();
     els.picker.hidden = false;
@@ -199,6 +215,24 @@
     var b = e.target.closest("button[data-colour]");
     if (!b) { return; }
     state.draft.colour = parseInt(b.getAttribute("data-colour"), 10);
+    drawPicker();
+  });
+
+  function pick(box, attr, field) {
+    box.addEventListener("click", function (e) {
+      var b = e.target.closest("button[data-" + attr + "]");
+      if (!b) { return; }
+      state.draft[field] = parseInt(b.getAttribute("data-" + attr), 10);
+      drawPicker();
+    });
+  }
+
+  pick(els.pkBases, "base", "base");
+  pick(els.pkVisors, "visor", "visor");
+  pick(els.pkStyles, "style", "style");
+
+  els.pkRandom.addEventListener("click", function () {
+    state.draft = P.randomAvatar();
     drawPicker();
   });
 

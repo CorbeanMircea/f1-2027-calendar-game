@@ -7,12 +7,15 @@
 --   drop function if exists public.set_avatar(text);
 --   alter table public.profiles drop column if exists avatar;
 
--- Avatar code, for example p3-c5-n27 = pattern 3, colour 5, number 27 ---------------------
+-- Avatar code, for example p3-c5-b0-v1-s0-n27 = pattern 3, pattern colour 5, shell colour 0,
+-- visor 1, number plate style 0, racing number 27. The short form p3-c5-n27 is also accepted.
+-- This file can be run again safely: if you already ran an earlier version, run it once more.
+-----------------------
 alter table public.profiles add column if not exists avatar text;
 
 alter table public.profiles drop constraint if exists profiles_avatar_format;
 alter table public.profiles add constraint profiles_avatar_format
-  check (avatar is null or avatar ~ '^p([0-9]|1[01])-c[0-7]-n([1-9]|[1-9][0-9])$');
+  check (avatar is null or avatar ~ '^p([0-9]|1[01])-c[0-9](-b[0-9]-v[0-3]-s[0-2])?-n([1-9]|[1-9][0-9])$');
 
 -- Players choose their own avatar through this function. The website cannot write to
 -- profiles directly (no UPDATE privilege), exactly like display names.
@@ -28,7 +31,7 @@ begin
   if v_user is null then
     raise exception 'Not signed in' using errcode = '28000';
   end if;
-  if p_avatar is null or p_avatar !~ '^p([0-9]|1[01])-c[0-7]-n([1-9]|[1-9][0-9])$' then
+  if p_avatar is null or p_avatar !~ '^p([0-9]|1[01])-c[0-9](-b[0-9]-v[0-3]-s[0-2])?-n([1-9]|[1-9][0-9])$' then
     raise exception 'Invalid avatar' using errcode = '22023';
   end if;
   update public.profiles set avatar = p_avatar where id = v_user;

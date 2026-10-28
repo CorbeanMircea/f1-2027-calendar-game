@@ -113,13 +113,30 @@
   }
 
   // ---------- Avatar (helmet on a tile, viewBox 64 x 64) ----------
-  var PATTERNS = ["Solid", "Stripe", "Twin stripe", "Chevron", "Split", "Diagonal", "Dots", "Checker", "Block", "Cap", "Ring", "Zigzag"];
+  // Code format: p<pattern>-c<accent>-b<base>-v<visor>-s<number style>-n<number>
+  // Older codes without the b/v/s part (p3-c5-n27) still work and use the defaults.
+  var PATTERNS = ["Trim", "Stripe", "Twin stripe", "Chevron", "Split", "Diagonal", "Dots", "Checker", "Front", "Cap", "Ring", "Zigzag"];
+
+  // Accent colours (the pattern) and base colours (the shell).
   var COLOURS = [
     { name: "Yellow", hex: "#ffd400" }, { name: "White", hex: "#f3f3f0" },
     { name: "Steel", hex: "#8f98a3" }, { name: "Sand", hex: "#c9a26b" },
     { name: "Sage", hex: "#7fa383" }, { name: "Sky", hex: "#7e95b5" },
-    { name: "Plum", hex: "#a07fb0" }, { name: "Rose", hex: "#c28d8d" }
+    { name: "Plum", hex: "#a07fb0" }, { name: "Rose", hex: "#c28d8d" },
+    { name: "Ink", hex: "#0d0e10" }, { name: "Teal", hex: "#5fa8a0" }
   ];
+  var BASES = [
+    { name: "Charcoal", hex: "#262a31" }, { name: "White", hex: "#e9e9e4" },
+    { name: "Yellow", hex: "#ffd400" }, { name: "Steel", hex: "#6e7782" },
+    { name: "Sand", hex: "#a98a5a" }, { name: "Sage", hex: "#5f7f66" },
+    { name: "Sky", hex: "#5f7894" }, { name: "Plum", hex: "#7b5f8a" },
+    { name: "Rose", hex: "#a46f6f" }, { name: "Black", hex: "#0f1114" }
+  ];
+  var VISORS = [
+    { name: "Smoke", hex: "#0a0b0d" }, { name: "Gold", hex: "#b8892f" },
+    { name: "Mirror", hex: "#aeb8c2" }, { name: "Blue", hex: "#3f6a94" }
+  ];
+  var STYLES = ["White", "Accent", "Dark"];
 
   var BODY = "M9 40 C9 22 21 11 35 11 C49 11 57 22 57 35 L57 45 C57 49 54 52 50 52 L18 52 C12 52 9 47 9 40 Z";
   var VISOR = "M33 27 L57 29 L57 41 L29 41 C27 35 29 30 33 27 Z";
@@ -130,7 +147,7 @@
 
   function patternShapes(p, c) {
     switch (p) {
-      case 0: return '<rect width="64" height="64" fill="' + c + '"/>';
+      case 0: return '<path d="' + VISOR + '" fill="none" stroke="' + c + '" stroke-width="7" stroke-linejoin="round"/>';
       case 1: return '<path d="M10 25 Q30 -3 58 15 L58 25 Q32 7 10 32 Z" fill="' + c + '"/>';
       case 2: return '<path d="M10 17 Q30 -11 58 6 L58 10.5 Q32 -4 10 21.5 Z" fill="' + c + '"/><path d="M10 29 Q30 1 58 18 L58 23.5 Q32 9 10 34 Z" fill="' + c + '"/>';
       case 3: return '<path d="M16 15 L27 21 L16 27 L21 27 L32 21 L21 15 Z" fill="' + c + '"/><path d="M29 12 L40 18 L29 24 L34 24 L45 18 L34 12 Z" fill="' + c + '"/>';
@@ -149,14 +166,23 @@
   var uid = 0;
 
   function parseAvatar(code) {
-    var m = /^p(\d{1,2})-c(\d)-n(\d{1,2})$/.exec(String(code || ""));
+    var m = /^p(\d{1,2})-c(\d)(?:-b(\d)-v(\d)-s(\d))?-n(\d{1,2})$/.exec(String(code || ""));
     if (!m) { return null; }
-    var p = parseInt(m[1], 10), c = parseInt(m[2], 10), n = parseInt(m[3], 10);
-    if (p > 11 || c > 7 || n < 1 || n > 99) { return null; }
-    return { pattern: p, colour: c, number: n };
+    var a = {
+      pattern: parseInt(m[1], 10), colour: parseInt(m[2], 10),
+      base: m[3] === undefined ? 0 : parseInt(m[3], 10),
+      visor: m[4] === undefined ? 0 : parseInt(m[4], 10),
+      style: m[5] === undefined ? 0 : parseInt(m[5], 10),
+      number: parseInt(m[6], 10)
+    };
+    if (a.pattern > 11 || a.colour > 9 || a.base > 9 || a.visor > 3 || a.style > 2 || a.number < 1 || a.number > 99) { return null; }
+    return a;
   }
 
-  function buildCode(a) { return "p" + a.pattern + "-c" + a.colour + "-n" + a.number; }
+  function buildCode(a) {
+    return "p" + a.pattern + "-c" + a.colour + "-b" + (a.base || 0) + "-v" + (a.visor || 0) +
+      "-s" + (a.style || 0) + "-n" + a.number;
+  }
 
   function hash(str) {
     var h = 2166136261;
@@ -167,7 +193,21 @@
   // A stable avatar for players who have not picked one yet.
   function defaultAvatar(userId) {
     var h = hash(String(userId || "player"));
-    return { pattern: h % 12, colour: (h >> 4) % 8, number: ((h >> 8) % 99) + 1 };
+    return { pattern: h % 12, colour: (h >> 4) % 8, base: 0, visor: 0, style: 0, number: ((h >> 8) % 99) + 1 };
+  }
+
+  function randomAvatar() {
+    function r(n) { return Math.floor(Math.random() * n); }
+    var a = { pattern: r(12), colour: r(10), base: r(10), visor: r(4), style: r(3), number: 1 + r(99) };
+    if (a.colour < 8 && COLOURS[a.colour].hex === BASES[a.base].hex) { a.base = 0; }
+    return a;
+  }
+
+  // Dark or light text for a given background.
+  function inkOn(hex) {
+    var n = parseInt(hex.slice(1), 16);
+    var lum = (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
+    return lum > 0.55 ? "#0d0e10" : "#f3f3f0";
   }
 
   function avatarSvg(source, size, userId) {
@@ -175,6 +215,10 @@
     if (!a) { a = defaultAvatar(userId); }
     var id = "av" + (++uid);
     var accent = COLOURS[a.colour].hex;
+    var base = BASES[a.base || 0].hex;
+    var visor = VISORS[a.visor || 0];
+    var style = a.style || 0;
+    var disc = style === 1 ? accent : (style === 2 ? "#0d0e10" : "#f3f3f0");
     var w = size || 64;
     var fs = a.number < 10 ? 13 : 11;
     return '<svg class="avatar-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="' + w + '" height="' + w +
@@ -182,17 +226,18 @@
       '<defs><clipPath id="' + id + '"><path d="' + BODY + '"/></clipPath></defs>' +
       '<rect width="64" height="64" fill="#15181d"/>' +
       '<g transform="translate(-7.6 -6)  scale(1.2)">' +
-      '<path d="' + BODY + '" fill="#262a31"/>' +
+      '<path d="' + BODY + '" fill="' + base + '"/>' +
       '<g clip-path="url(#' + id + ')">' + patternShapes(a.pattern, accent) + "</g>" +
-      '<path d="' + VISOR + '" fill="#0a0b0d" stroke="#3a3f46" stroke-width="1"/>' +
-      '<path d="M36 30 L52 31.5" stroke="#4d535b" stroke-width="1.5" fill="none"/>' +
-      '<circle cx="' + ROUNDEL.x + '" cy="' + ROUNDEL.y + '" r="' + ROUNDEL.r + '" fill="#f3f3f0" stroke="#262a31" stroke-width="1.5"/>' +
+      '<path d="' + VISOR + '" fill="' + visor.hex + '" stroke="#15181d" stroke-width="1"/>' +
+      '<path d="M36 30 L52 31.5" stroke="#ffffff" stroke-opacity="0.28" stroke-width="1.5" fill="none"/>' +
+      '<circle cx="' + ROUNDEL.x + '" cy="' + ROUNDEL.y + '" r="' + ROUNDEL.r + '" fill="' + disc + '" stroke="' + base + '" stroke-width="1.5"/>' +
       '<text x="' + ROUNDEL.x + '" y="' + (ROUNDEL.y + fs * 0.36) + '" text-anchor="middle" font-size="' + fs +
-      '" font-weight="800" fill="#0d0e10" style="font-family:var(--font-display,Arial,sans-serif)">' + a.number + "</text></g></svg>";
+      '" font-weight="800" fill="' + inkOn(disc) + '" style="font-family:var(--font-display,Arial,sans-serif)">' + a.number + "</text></g></svg>";
   }
 
   window.LO_PROFILE = {
     LEVEL_CAP: LEVEL_CAP, RANKS: RANKS, PATTERNS: PATTERNS, COLOURS: COLOURS,
+    BASES: BASES, VISORS: VISORS, STYLES: STYLES, randomAvatar: randomAvatar,
     xpForLevel: xpForLevel, levelFor: levelFor, tierFor: tierFor, rankFor: rankFor,
     badgeSvg: badgeSvg, avatarSvg: avatarSvg, parseAvatar: parseAvatar,
     buildCode: buildCode, defaultAvatar: defaultAvatar

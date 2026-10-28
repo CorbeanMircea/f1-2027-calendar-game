@@ -73,14 +73,21 @@
           <div>
             <h3>Helmet pattern</h3>
             <div class="pk-patterns" id="pk-patterns"></div>
-            <h3>Colour</h3>
+            <h3>Shell colour</h3>
+            <div class="pk-colours" id="pk-bases"></div>
+            <h3>Pattern colour</h3>
             <div class="pk-colours" id="pk-colours"></div>
+            <h3>Visor</h3>
+            <div class="pk-opts" id="pk-visors"></div>
+            <h3>Number plate</h3>
+            <div class="pk-opts" id="pk-styles"></div>
             <div class="pk-number">
               <label for="pk-number">Racing number (1 to 99)</label>
               <input id="pk-number" type="number" min="1" max="99" inputmode="numeric">
             </div>
             <div class="actions">
               <button type="button" class="btn btn-primary" id="picker-save">Save avatar</button>
+              <button type="button" class="btn" id="picker-random">Randomise</button>
               <button type="button" class="btn" id="picker-cancel">Cancel</button>
             </div>
             <p class="message" id="picker-msg" role="status" aria-live="polite"></p>

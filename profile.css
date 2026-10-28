@@ -165,3 +165,9 @@ main.profile-page .panel { max-width: 480px; }
 .st-top .rank-badge { flex: none; width: 15px; height: auto; }
 .st-top .st-n { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .st-lv { flex: none; color: var(--muted); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
+
+/* Option buttons (visor, number plate) */
+.pk-opts { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+.pk-opts button { padding: 8px 14px; border: 1px solid var(--hair-strong); background: transparent; color: var(--text); font-size: 0.9rem; cursor: pointer; }
+.pk-opts button[aria-pressed="true"] { border-color: var(--yellow); background: #181b20; color: var(--yellow); }
+.pk-colours { max-width: 230px; }
