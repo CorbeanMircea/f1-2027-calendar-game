@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="site-chrome.css">
   <link rel="stylesheet" href="account.css">
+  <link rel="stylesheet" href="profile.css">
 </head>
 <body>
   <script src="site-nav.js"></script>
@@ -20,7 +21,7 @@
     </div>
   </header>
 
-  <main class="account-wrap">
+  <main class="account-wrap profile-page">
     <section class="panel" id="signed-out-view">
       <h2>Sign in or create an account</h2>
       <form id="auth-form" novalidate>
@@ -37,6 +38,72 @@
           <button type="button" class="btn" id="sign-up-button">Create account</button>
         </div>
       </form>
+    </section>
+
+    <section class="driver" id="driver-card" aria-label="Driver profile" hidden>
+      <div class="levelup" id="levelup" role="status" hidden>
+        <strong>Level up</strong>
+        <span id="levelup-text"></span>
+        <button type="button" id="levelup-close" aria-label="Dismiss">Close</button>
+      </div>
+
+      <div class="driver-top">
+        <div class="driver-av">
+          <div class="av-tile" id="driver-avatar"></div>
+          <div id="driver-badge"></div>
+        </div>
+        <div>
+          <h2 class="driver-name" id="driver-name"></h2>
+          <p class="driver-rank" id="driver-rank"></p>
+          <div class="xp">
+            <div class="xp-bar" id="xp-bar" role="progressbar" aria-label="Progress to the next level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span class="xp-fill" id="xp-fill"></span>
+            </div>
+            <p class="xp-meta"><span id="xp-left"></span><span id="xp-right"></span></p>
+          </div>
+          <div class="driver-actions">
+            <button type="button" class="btn" id="edit-avatar" aria-expanded="false" aria-controls="avatar-picker">Edit avatar</button>
+          </div>
+        </div>
+      </div>
+
+      <section class="picker" id="avatar-picker" aria-label="Choose your avatar" hidden>
+        <div class="picker-grid">
+          <div class="picker-preview"><div class="av-tile" id="picker-preview"></div></div>
+          <div>
+            <h3>Helmet pattern</h3>
+            <div class="pk-patterns" id="pk-patterns"></div>
+            <h3>Colour</h3>
+            <div class="pk-colours" id="pk-colours"></div>
+            <div class="pk-number">
+              <label for="pk-number">Racing number (1 to 99)</label>
+              <input id="pk-number" type="number" min="1" max="99" inputmode="numeric">
+            </div>
+            <div class="actions">
+              <button type="button" class="btn btn-primary" id="picker-save">Save avatar</button>
+              <button type="button" class="btn" id="picker-cancel">Cancel</button>
+            </div>
+            <p class="message" id="picker-msg" role="status" aria-live="polite"></p>
+          </div>
+        </div>
+      </section>
+
+      <dl class="driver-stats">
+        <div><dt>Total XP</dt><dd id="stat-xp">0</dd></div>
+        <div><dt>Sessions scored</dt><dd id="stat-sessions">0</dd></div>
+        <div><dt>Best session</dt><dd id="stat-best">0</dd></div>
+        <div><dt>Average</dt><dd id="stat-avg">0</dd></div>
+      </dl>
+
+      <section class="ladder" aria-label="Rank ladder">
+        <h3>Rank ladder</h3>
+        <ol id="ladder"></ol>
+      </section>
+
+      <section class="recent" aria-label="Recent XP">
+        <h3>Recent XP</h3>
+        <ul id="recent-list"></ul>
+      </section>
     </section>
 
     <section class="panel" id="signed-in-view" hidden>
@@ -79,6 +146,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1/dist/umd/supabase.js"></script>
   <script src="config.js"></script>
+  <script src="lo-profile.js"></script>
+  <script src="account-profile.js"></script>
   <script src="account.js"></script>
   <script src="admin-link.js"></script>
 </body>

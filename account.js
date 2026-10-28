@@ -47,6 +47,7 @@
     memberGroup.textContent = "";
     memberName.textContent = "";
     memberRole.textContent = "";
+    if (window.AccountProfile) { window.AccountProfile.clear(); }
   }
 
   if (!window.supabase || !cfg.SUPABASE_URL || !cfg.SUPABASE_PUBLISHABLE_KEY ||
@@ -97,6 +98,9 @@
 
       membershipStatus.hidden = true;
       memberSection.hidden = false;
+      if (window.AccountProfile) {
+        window.AccountProfile.render(client, currentUser, profile ? profile.display_name : "");
+      }
     }).catch(function (err) {
       console.error(err);
       membershipStatus.textContent = "Could not check group membership. Please reload the page.";

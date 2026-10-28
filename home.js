@@ -605,7 +605,8 @@
     window.requestAnimationFrame(frame);
   }
 
-  function renderStandings(rows, message, animate) {
+  function renderStandings(rows, message, animate, extras) {
+    extras = extras || {};
     if (message) {
       standingsBox.textContent = "";
       standingsBox.appendChild(el("p", "empty", message));
@@ -647,14 +648,45 @@
         li.appendChild(el("span", "st-pos"));
         li.appendChild(el("span", "st-av"));
         var name = el("span", "st-name");
-        name.appendChild(el("span", "st-n"));
+        var topLine = el("span", "st-top");
+        topLine.appendChild(el("span", "st-badge"));
+        topLine.appendChild(el("span", "st-n"));
+        topLine.appendChild(el("span", "st-lv"));
+        name.appendChild(topLine);
         name.appendChild(el("span", "st-sub"));
         li.appendChild(name);
         li.appendChild(el("span", "st-pts"));
       }
       li.querySelector(".st-pos").textContent = String(rank);
-      li.querySelector(".st-av").textContent = initials(row.display_name);
       li.querySelector(".st-n").textContent = row.display_name;
+
+      var avatarBox = li.querySelector(".st-av");
+      var extra = extras[row.user_id];
+      var P = window.LO_PROFILE;
+      if (P) {
+        var code = extra && extra.avatar ? extra.avatar : "default";
+        if (avatarBox.getAttribute("data-code") !== code) {
+          avatarBox.innerHTML = P.avatarSvg(extra && extra.avatar ? extra.avatar : null, 42, row.user_id);
+          avatarBox.setAttribute("data-code", code);
+        }
+        var badgeBox = li.querySelector(".st-badge");
+        var lvBox = li.querySelector(".st-lv");
+        if (extra && typeof extra.xp === "number") {
+          var lvl = P.levelFor(extra.xp).level;
+          var tier = P.tierFor(lvl);
+          if (badgeBox.getAttribute("data-tier") !== String(tier)) {
+            badgeBox.innerHTML = P.badgeSvg(tier, 15);
+            badgeBox.setAttribute("data-tier", String(tier));
+          }
+          lvBox.textContent = "LV " + lvl;
+        } else {
+          badgeBox.textContent = "";
+          badgeBox.removeAttribute("data-tier");
+          lvBox.textContent = "";
+        }
+      } else {
+        avatarBox.textContent = initials(row.display_name);
+      }
 
       var scored = row.sessions_scored + (row.sessions_scored === 1 ? " session" : " sessions");
       var gap = leaderPoints - row.total_points;
@@ -707,7 +739,15 @@
       renderStandings(null, "No points yet. The first points arrive after qualifying and an admin's approval.", false);
       return;
     }
-    renderStandings(rows, null, animate);
+    // Avatars and levels come from the player_xp view. If it is missing, show defaults.
+    var ids = rows.map(function (r) { return r.user_id; });
+    client.from("player_xp").select("user_id, avatar, xp").in("user_id", ids).then(function (extra) {
+      var map = {};
+      if (!extra.error) { (extra.data || []).forEach(function (r) { map[r.user_id] = r; }); }
+      renderStandings(rows, null, animate, map);
+    }, function () {
+      renderStandings(rows, null, animate, {});
+    });
   }
 
   function loadAccountData() {
