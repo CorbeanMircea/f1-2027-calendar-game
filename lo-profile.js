@@ -193,7 +193,7 @@
   // A stable avatar for players who have not picked one yet.
   function defaultAvatar(userId) {
     var h = hash(String(userId || "player"));
-    return { pattern: h % 12, colour: (h >> 4) % 8, base: 0, visor: 0, style: 0, number: ((h >> 8) % 99) + 1 };
+    return { pattern: h % 12, colour: (h >>> 4) % 8, base: 0, visor: 0, style: 0, number: ((h >>> 8) % 99) + 1 };
   }
 
   function randomAvatar() {
