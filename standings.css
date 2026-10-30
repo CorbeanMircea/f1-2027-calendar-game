@@ -152,6 +152,8 @@
 .detail .w-name { font-weight: 600; }
 .detail .w-points { color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
 
+.sc-link { display: inline-block; margin-top: 12px; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+
 .legend, .updated { margin: 16px 0 0; color: var(--muted); font-size: 0.82rem; }
 .updated { margin-top: 6px; font-variant-numeric: tabular-nums; }
 

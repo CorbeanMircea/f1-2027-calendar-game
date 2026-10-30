@@ -12,6 +12,8 @@
       icon: "M4 21V4h13v6H8M4 14h9" },
     { file: "leaderboard.html", label: "Leaderboard", short: "Board",
       icon: "M3 21h18M5 21v-8h4v8M10 21V5h4v16M15 21v-5h4v5" },
+    { file: "scorecard.html", label: "Score check", short: "Scores",
+      icon: "M5 3h14v18H5zM9 8h6M9 12h6M9 16h4" },
     { file: "account.html", label: "Account", short: "Account",
       icon: "M5 21v-3a4 4 0 014-4h6a4 4 0 014 4v3M9 8a3 3 0 106 0 3 3 0 00-6 0" }
   ];

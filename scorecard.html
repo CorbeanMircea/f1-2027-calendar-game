@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0e10">
+  <title>Scorecard | Lights Out</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="site-chrome.css">
+  <link rel="stylesheet" href="lights-out.css">
+  <link rel="stylesheet" href="pages.css">
+  <link rel="stylesheet" href="scorecard.css">
+</head>
+<body>
+  <script src="site-nav.js"></script>
+
+  <header class="pg-head">
+    <div class="pg-head-in">
+      <p class="lo-eyebrow">Check the maths</p>
+      <h1 class="pg-title">Score <span>Check</span></h1>
+      <p class="pg-sub">Every point explained: what each player picked, what happened, and how the points add up.</p>
+    </div>
+  </header>
+
+  <main class="board-wrap">
+    <p class="message" id="sc-msg" role="status" aria-live="polite"></p>
+
+    <section class="panel" id="sc-controls" hidden>
+      <div class="sc-selects">
+        <div class="field">
+          <label for="sc-event">Weekend</label>
+          <select id="sc-event"></select>
+        </div>
+        <div class="field">
+          <label for="sc-player">Player</label>
+          <select id="sc-player"></select>
+        </div>
+      </div>
+      <div class="sc-tabs" id="sc-tabs" role="tablist" aria-label="Session"></div>
+    </section>
+
+    <section id="sc-result" hidden></section>
+    <section id="sc-everyone" hidden></section>
+
+    <details class="sc-rules" id="sc-rules" hidden>
+      <summary>How points work</summary>
+      <div id="sc-rules-body"></div>
+    </details>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1/dist/umd/supabase.js"></script>
+  <script src="config.js"></script>
+  <script src="scorecard-engine.js"></script>
+  <script src="scorecard.js"></script>
+  <script src="admin-link.js"></script>
+</body>
+</html>

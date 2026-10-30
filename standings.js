@@ -285,6 +285,9 @@
       list.appendChild(item);
     });
     detail.appendChild(list);
+    var scoreLink = el("a", "sc-link", "See how these points were scored");
+    scoreLink.href = "scorecard.html?player=" + encodeURIComponent(row.id);
+    detail.appendChild(scoreLink);
     li.appendChild(detail);
 
     btn.addEventListener("click", function () {
@@ -308,7 +311,22 @@
     listEl.textContent = "";
     var leaderPoints = built.rows.length ? built.rows[0].points : 0;
     built.rows.forEach(function (row) {
-      var li = renderRow(row, built.extras || {}, leaderPoints);
+      var li;
+      try {
+        li = renderRow(row, built.extras || {}, leaderPoints);
+      } catch (rowErr) {
+        // One bad row must never take the whole board down.
+        console.error("Leaderboard row failed", row && row.id, rowErr);
+        li = el("li", "standing rank-n");
+        li.setAttribute("data-id", row.id);
+        var fallback = el("div", "standing-row");
+        fallback.appendChild(el("span", "pos", String(row.rank)));
+        fallback.appendChild(el("span", "av"));
+        fallback.appendChild(el("span", "name", row.name));
+        fallback.appendChild(el("span", "meta"));
+        fallback.appendChild(el("span", "points", String(row.points)));
+        li.appendChild(fallback);
+      }
       var from = lastPoints[row.id] !== undefined ? lastPoints[row.id] : 0;
       if (firstPaint || lastPoints[row.id] !== undefined) {
         countUp(li.querySelector(".points"), firstPaint ? 0 : from, row.points);
@@ -398,7 +416,8 @@
 
   function handleError(err) {
     console.error(err);
-    setMessage("error", "Could not load the leaderboard. Please reload the page.");
+    var detail = err && err.message ? " (" + err.message + ")" : "";
+    setMessage("error", "Could not load the leaderboard. Please reload the page." + detail);
   }
 
   function refreshAll(animate) {
