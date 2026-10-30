@@ -33,8 +33,9 @@
       "Points: 1 per driver in the right group, +3 per exact SQ3 position, +10 for a perfect top 10 (max 62).",
     race: "Predict the top 8, the fastest lap and the DNFs. Points: 5 per exact position, 2 per driver " +
       "in the top 8 but in the wrong place, +15 for a perfect top 8. Fastest lap 3. DNF questions: any DNF 2, " +
-      "exact count 5 (off by one 2), DNF driver 4 (8 if that driver started in the real top 8). Max 73. " +
-      "A driver cannot be both in your top 8 and your DNF pick.",
+      "exact count 5 (off by one 2), and 4 for every DNF driver you pick who really retires (8 if that driver " +
+      "started in the real top 8). If you predict 3 DNFs you pick 3 drivers. Max 65, plus 8 for each DNF driver. " +
+      "A driver cannot be both in your top 8 and your DNF picks.",
     sprint: "Predict the top 8. Points: 3 per exact position, 1 per driver in the top 8 but in the wrong place, " +
       "+8 for a perfect top 8 (max 32)."
   };
@@ -432,31 +433,75 @@
     };
   }
 
+  // ---------- Driver chips: a compact picker used for fastest lap and DNF drivers ----------
+
+  // chipCfg: { onToggle(id), stateOf(id) -> { selected, disabled, why } }
+  function createChips(list, chipCfg) {
+    var wrap = el("div", "chip-grid");
+    var chips = {};
+    list.forEach(function (d) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "dchip";
+      b.style.setProperty("--team", teamColor(d.team_name));
+      if (d.car_number) { b.appendChild(el("span", "dc-num", String(d.car_number))); }
+      b.appendChild(el("span", "dc-code", d.code));
+      b.appendChild(el("span", "dc-name", lastName(d.full_name)));
+      b.addEventListener("click", function () { chipCfg.onToggle(d.id); });
+      chips[d.id] = b;
+      wrap.appendChild(b);
+    });
+
+    function update() {
+      var locked = isLocked();
+      list.forEach(function (d) {
+        var b = chips[d.id];
+        var s = chipCfg.stateOf(d.id);
+        b.classList.toggle("is-selected", !!s.selected);
+        b.classList.toggle("is-disabled", !!s.disabled && !s.selected);
+        b.disabled = locked || (!!s.disabled && !s.selected);
+        b.setAttribute("aria-pressed", s.selected ? "true" : "false");
+        b.setAttribute("aria-label", d.full_name + ", " + d.team_name +
+          (s.selected ? ", selected" : "") + (s.why ? ", " + s.why : ""));
+        b.title = s.why || "";
+      });
+    }
+
+    update();
+    return { el: wrap, update: update };
+  }
+
   // ---------- Grand Prix ----------
+
+  var MAX_DNF = 5;
 
   function buildRace(container, existing) {
     var list = sortedDrivers();
-    var dnfSelect = null;
     var picker = null;
     var extrasJson = null;
-    var yes = null;
-    var no = null;
-    var countInput = null;
-    var flSelect = null;
+
+    // What the player has chosen besides the top 8.
+    var fl = existing && existing.fastest_lap && driverById(existing.fastest_lap) ? existing.fastest_lap : "";
+    var anyDnf = existing && typeof existing.any_dnf === "boolean" ? existing.any_dnf : null;
+    var dnfCount = existing && existing.dnf_count >= 1 ? Math.min(MAX_DNF, Math.floor(existing.dnf_count)) : 1;
+    var dnfList = [];
+    if (existing && Array.isArray(existing.dnf_drivers)) {
+      dnfList = filterKnown(existing.dnf_drivers);
+    } else if (existing && existing.dnf_driver) {
+      dnfList = filterKnown([existing.dnf_driver]); // older predictions had one DNF driver
+    }
+    if (anyDnf !== true) { dnfList = []; }
+    dnfList = dnfList.slice(0, dnfCount);
 
     function extrasSnap() {
-      return JSON.stringify([
-        flSelect ? flSelect.value : "",
-        yes && yes.checked ? "y" : (no && no.checked ? "n" : ""),
-        countInput ? countInput.value : "",
-        dnfSelect ? dnfSelect.value : ""
-      ]);
+      return JSON.stringify([fl, anyDnf, anyDnf ? dnfCount : 0, dnfList.slice().sort()]);
     }
 
     function extrasDirty() {
       return extrasJson !== null && extrasSnap() !== extrasJson;
     }
 
+    // ----- Top 8 -----
     var topStep = makeStep("Top 8 finishing order", null);
     container.appendChild(topStep);
     picker = createPicker(topStep, {
@@ -464,66 +509,152 @@
       list: list,
       initial: existing && existing.top8,
       hint: PICK_HINT,
-      blocked: function (id) { return !!(dnfSelect && dnfSelect.value === id); },
+      blocked: function (id) { return dnfList.indexOf(id) !== -1; },
       isDirty: extrasDirty,
-      onChange: function () { syncDnfOptions(); updateStatus(); }
+      onChange: function () { dropBlockedDnf(); renderDnf(); updateStatus(); }
     });
 
-    var flStep = makeStep("Fastest lap", null);
-    flSelect = makeDriverSelect("fastest-lap", existing && existing.fastest_lap, "Choose a driver...");
-    flStep.appendChild(makeField("Driver with the fastest lap", flSelect));
+    // ----- Fastest lap -----
+    var flStep = makeStep("Fastest lap",
+      "Which driver sets the fastest lap of the race? Worth 3 points. Tap the driver again to clear.");
+    var flChips = createChips(list, {
+      onToggle: function (id) { fl = fl === id ? "" : id; afterChange(); },
+      stateOf: function (id) { return { selected: fl === id }; }
+    });
+    flStep.appendChild(flChips.el);
     container.appendChild(flStep);
 
-    var dnfStep = makeStep("DNF questions",
-      "A DNF is a driver who retires and is not classified as running at the finish. " +
-      "Lapped finishers do not count.");
-    var choice = el("div", "inline-choice");
+    // ----- DNF -----
+    var dnfStep = makeStep("Retirements (DNF)",
+      "A DNF is a driver who retires and is not classified as running at the finish. Lapped finishers do not count.");
+    var counter = el("span", "counter", "");
+    dnfStep.querySelector("h3").appendChild(counter);
 
-    function makeRadio(value, text) {
-      var label = document.createElement("label");
-      var input = document.createElement("input");
-      input.type = "radio";
-      input.name = "any-dnf";
-      input.value = value;
-      label.appendChild(input);
-      label.appendChild(document.createTextNode(text));
-      choice.appendChild(label);
-      return input;
+    function segButton(text, onClick) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "seg-btn";
+      b.textContent = text;
+      b.addEventListener("click", onClick);
+      return b;
     }
 
-    dnfStep.appendChild(el("p", "", "Will there be at least one DNF?"));
-    yes = makeRadio("yes", "Yes");
-    no = makeRadio("no", "No");
-    dnfStep.appendChild(choice);
+    dnfStep.appendChild(el("p", "dnf-label", "Will anyone retire?"));
+    var seg = el("div", "seg");
+    seg.setAttribute("role", "group");
+    seg.setAttribute("aria-label", "Will anyone retire?");
+    var noBtn = segButton("No", function () { anyDnf = false; dnfList = []; afterChange(); });
+    var yesBtn = segButton("Yes", function () { anyDnf = true; afterChange(); });
+    seg.appendChild(noBtn);
+    seg.appendChild(yesBtn);
+    dnfStep.appendChild(seg);
 
-    var maxDnf = Math.max(1, drivers.length - 8);
-    var details = document.createElement("div");
-    countInput = document.createElement("input");
-    countInput.type = "number";
-    countInput.id = "dnf-count";
-    countInput.min = "1";
-    countInput.max = String(maxDnf);
-    countInput.step = "1";
-    if (existing && existing.dnf_count >= 1) { countInput.value = String(existing.dnf_count); }
-    details.appendChild(makeField("How many drivers will DNF?", countInput));
+    var details = el("div", "dnf-details");
 
-    dnfSelect = makeDriverSelect("dnf-driver", existing && existing.dnf_driver, "No pick (skip this question)");
-    details.appendChild(makeField("Which driver will DNF? (optional)", dnfSelect));
+    details.appendChild(el("p", "dnf-label", "How many drivers will retire?"));
+    var stepper = el("div", "stepper");
+    var minus = segButton("\u2212", function () { setCount(dnfCount - 1); });
+    minus.setAttribute("aria-label", "One fewer DNF");
+    var countOut = el("output", "stepper-value", "");
+    countOut.setAttribute("aria-live", "polite");
+    var plus = segButton("+", function () { setCount(dnfCount + 1); });
+    plus.setAttribute("aria-label", "One more DNF");
+    stepper.appendChild(minus);
+    stepper.appendChild(countOut);
+    stepper.appendChild(plus);
+    details.appendChild(stepper);
+
+    var need = el("p", "dnf-need", "");
+    details.appendChild(need);
+    var slotsEl = el("div", "dnf-slots");
+    details.appendChild(slotsEl);
+
+    var dnfChips = createChips(list, {
+      onToggle: function (id) {
+        var i = dnfList.indexOf(id);
+        if (i !== -1) { dnfList.splice(i, 1); } else if (dnfList.length < dnfCount) { dnfList.push(id); }
+        afterChange();
+      },
+      stateOf: function (id) {
+        var inTop = picker.values().indexOf(id) !== -1;
+        var chosen = dnfList.indexOf(id) !== -1;
+        return {
+          selected: chosen,
+          disabled: inTop || dnfList.length >= dnfCount,
+          why: inTop ? "in your top 8" : ""
+        };
+      }
+    });
+    details.appendChild(dnfChips.el);
     details.appendChild(el("p", "step-hint",
-      "A driver who retires cannot also finish in your top 8, so your top-8 drivers are not offered here. " +
-      "Your DNF driver scores 4 points, or 8 if that driver started in the real top 8."));
+      "A driver who retires cannot also finish in your top 8, so your top 8 drivers are greyed out. " +
+      "Each driver you pick who really retires scores 4 points, or 8 if he started in the real top 8."));
     dnfStep.appendChild(details);
     container.appendChild(dnfStep);
 
-    if (existing && existing.any_dnf === true) { yes.checked = true; }
-    if (existing && existing.any_dnf === false) { no.checked = true; }
+    function setCount(n) {
+      dnfCount = Math.max(1, Math.min(MAX_DNF, n));
+      if (dnfList.length > dnfCount) { dnfList = dnfList.slice(0, dnfCount); }
+      afterChange();
+    }
 
-    function syncDnfOptions() {
-      var chosen = picker.values();
-      if (dnfSelect.value && chosen.indexOf(dnfSelect.value) !== -1) { dnfSelect.value = ""; }
-      Array.prototype.forEach.call(dnfSelect.options, function (opt) {
-        opt.disabled = opt.value !== "" && chosen.indexOf(opt.value) !== -1;
-      });
+    function dropBlockedDnf() {
+      var top = picker.values();
+      dnfList = dnfList.filter(function (id) { return top.indexOf(id) === -1; });
+    }
+
+    function renderDnf() {
+      var locked = isLocked();
+      yesBtn.setAttribute("aria-pressed", anyDnf === true ? "true" : "false");
+      noBtn.setAttribute("aria-pressed", anyDnf === false ? "true" : "false");
+      yesBtn.disabled = locked;
+      noBtn.disabled = locked;
+      details.hidden = anyDnf !== true;
+
+      if (anyDnf !== true) {
+        counter.textContent = "";
+        counter.className = "counter";
+        flChips.update();
+        return;
+      }
+
+      countOut.textContent = String(dnfCount);
+      minus.disabled = locked || dnfCount <= 1;
+      plus.disabled = locked || dnfCount >= MAX_DNF;
+
+      var left = dnfCount - dnfList.length;
+      need.textContent = left > 0
+        ? "Pick " + dnfCount + " driver" + (dnfCount === 1 ? "" : "s") + ": " + left + " more to choose."
+        : "All " + dnfCount + " DNF driver" + (dnfCount === 1 ? "" : "s") + " chosen.";
+      counter.textContent = dnfList.length + " / " + dnfCount;
+      counter.className = "counter" + (left === 0 ? " done" : "");
+
+      slotsEl.textContent = "";
+      for (var i = 0; i < dnfCount; i++) {
+        var d = dnfList[i] ? driverById(dnfList[i]) : null;
+        var slot = document.createElement("button");
+        slot.type = "button";
+        slot.className = "dnf-slot" + (d ? " is-filled" : "");
+        slot.disabled = locked || !d;
+        slot.appendChild(el("span", "ds-pos", "DNF " + (i + 1)));
+        slot.appendChild(el("span", "ds-code", d ? d.code : "\u2014"));
+        if (d) {
+          slot.style.setProperty("--team", teamColor(d.team_name));
+          slot.setAttribute("aria-label", "DNF " + (i + 1) + ": " + d.full_name + ". Press to remove.");
+          (function (id) {
+            slot.addEventListener("click", function () {
+              dnfList = dnfList.filter(function (x) { return x !== id; });
+              afterChange();
+            });
+          })(d.id);
+        } else {
+          slot.setAttribute("aria-label", "DNF " + (i + 1) + ": not chosen yet");
+        }
+        slotsEl.appendChild(slot);
+      }
+
+      dnfChips.update();
+      flChips.update();
     }
 
     function savedAll() {
@@ -534,6 +665,13 @@
       var n = picker.values().length;
       if (n < 8) {
         setStatus(n + " of 8 selected", "progress");
+      } else if (!fl) {
+        setStatus("Choose the fastest lap driver", "progress");
+      } else if (anyDnf === null) {
+        setStatus("Answer the DNF question", "progress");
+      } else if (anyDnf && dnfList.length < dnfCount) {
+        var k = dnfCount - dnfList.length;
+        setStatus("Pick " + k + " more DNF driver" + (k === 1 ? "" : "s"), "progress");
       } else if (savedAll()) {
         setStatus("Prediction saved", "saved");
       } else {
@@ -541,23 +679,14 @@
       }
     }
 
-    function syncDetails() {
-      details.hidden = !yes.checked;
-      if (!yes.checked) { dnfSelect.value = ""; }
-    }
-
     function updateAll() {
-      syncDetails();
-      syncDnfOptions();
+      dropBlockedDnf();
+      renderDnf();
       picker.refresh();
       updateStatus();
     }
 
-    yes.addEventListener("change", updateAll);
-    no.addEventListener("change", updateAll);
-    flSelect.addEventListener("change", updateAll);
-    countInput.addEventListener("input", updateAll);
-    dnfSelect.addEventListener("change", updateAll);
+    function afterChange() { updateAll(); }
 
     updateAll();
 
@@ -565,30 +694,24 @@
       getPicks: function () {
         var topValues = picker.values();
         if (topValues.length !== 8) { throw new Error("Please choose a driver for every top-8 position."); }
-        if (!flSelect.value) { throw new Error("Please choose the fastest lap driver."); }
-        if (!yes.checked && !no.checked) { throw new Error("Please answer the DNF question."); }
+        if (!fl) { throw new Error("Please choose the fastest lap driver."); }
+        if (anyDnf === null) { throw new Error("Please answer the DNF question."); }
 
-        var anyDnf = yes.checked;
-        var count = 0;
-        var dnfDriver = null;
+        var picks = { top8: topValues, fastest_lap: fl, any_dnf: anyDnf, dnf_count: 0, dnf_drivers: [] };
         if (anyDnf) {
-          count = parseInt(countInput.value, 10);
-          if (!(count >= 1) || count > maxDnf) {
-            throw new Error("Enter how many drivers will DNF (1 to " + maxDnf + ").");
+          if (dnfList.length !== dnfCount) {
+            throw new Error("Pick " + dnfCount + " driver" + (dnfCount === 1 ? "" : "s") +
+              " who will DNF, or lower the number of DNFs.");
           }
-          dnfDriver = dnfSelect.value || null;
-          if (dnfDriver && topValues.indexOf(dnfDriver) !== -1) {
-            throw new Error("A driver cannot be both in your top 8 and your DNF pick.");
+          for (var i = 0; i < dnfList.length; i++) {
+            if (topValues.indexOf(dnfList[i]) !== -1) {
+              throw new Error("A driver cannot be both in your top 8 and your DNF picks.");
+            }
           }
+          picks.dnf_count = dnfCount;
+          picks.dnf_drivers = dnfList.slice();
         }
-
-        return {
-          top8: topValues,
-          fastest_lap: flSelect.value,
-          any_dnf: anyDnf,
-          dnf_count: count,
-          dnf_driver: dnfDriver
-        };
+        return picks;
       },
       markSaved: function () {
         picker.markSaved();
@@ -938,7 +1061,11 @@
     client.rpc("submit_prediction", { p_session_id: sessionId, p_picks: picks }).then(function (result) {
       saveButton.disabled = isLocked();
       if (result.error) {
-        setMessage("error", result.error.message);
+        var saveMsg = result.error.message;
+        if (saveMsg.indexOf("Unexpected field") !== -1) {
+          saveMsg = "Race predictions need the database update for the new DNF rules (020_multi_dnf.sql) before they can be saved.";
+        }
+        setMessage("error", saveMsg);
         if (result.error.message.indexOf("closed") !== -1) {
           loadWindows(null).catch(handleLoadError);
         }
