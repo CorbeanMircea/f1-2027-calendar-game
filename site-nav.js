@@ -44,4 +44,42 @@
 
   document.body.insertAdjacentHTML("afterbegin", html);
   document.body.classList.add("has-chrome");
+
+  // ---------- Installable app (PWA) ----------
+  // Makes every page installable and keeps the install prompt for the Account page.
+  function addHead(tag, attrs) {
+    var key = Object.keys(attrs)[0];
+    var existing = document.head.querySelector(tag + "[" + key + '="' + attrs[key] + '"]');
+    if (existing) { return existing; }
+    var node = document.createElement(tag);
+    Object.keys(attrs).forEach(function (k) { node.setAttribute(k, attrs[k]); });
+    document.head.appendChild(node);
+    return node;
+  }
+
+  addHead("link", { rel: "manifest", href: "manifest.webmanifest" });
+  addHead("link", { rel: "apple-touch-icon", href: "icons/apple-touch-icon.png" });
+  addHead("meta", { name: "mobile-web-app-capable", content: "yes" });
+  addHead("meta", { name: "apple-mobile-web-app-capable", content: "yes" });
+  addHead("meta", { name: "apple-mobile-web-app-title", content: "Lights Out" });
+  addHead("meta", { name: "apple-mobile-web-app-status-bar-style", content: "black" });
+  var icon = document.head.querySelector('link[rel="icon"]');
+  if (icon) { icon.setAttribute("href", "icons/favicon.png"); icon.setAttribute("type", "image/png"); }
+
+  window.LO_PWA = { prompt: null };
+  window.addEventListener("beforeinstallprompt", function (e) {
+    e.preventDefault();
+    window.LO_PWA.prompt = e;
+    window.dispatchEvent(new Event("lo-install-ready"));
+  });
+  window.addEventListener("appinstalled", function () {
+    window.LO_PWA.prompt = null;
+    window.dispatchEvent(new Event("lo-installed"));
+  });
+
+  if ("serviceWorker" in navigator && (window.location.protocol === "https:" || window.location.hostname === "localhost")) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").catch(function () { /* the site works without it */ });
+    });
+  }
 })();

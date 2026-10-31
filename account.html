@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="site-chrome.css">
   <link rel="stylesheet" href="account.css">
   <link rel="stylesheet" href="profile.css">
+  <link rel="stylesheet" href="account-app.css">
 </head>
 <body>
   <script src="site-nav.js"></script>
@@ -29,7 +30,7 @@
           <label for="email">Email</label>
           <input id="email" name="email" type="email" autocomplete="email" required>
         </div>
-        <div class="field">
+        <div class="field" id="password-field">
           <label for="password">Password (at least 8 characters)</label>
           <input id="password" name="password" type="password" autocomplete="current-password" required>
         </div>
@@ -37,6 +38,12 @@
           <button type="submit" class="btn btn-primary" id="sign-in-button">Sign in</button>
           <button type="button" class="btn" id="sign-up-button">Create account</button>
         </div>
+        <p class="reset-help" id="reset-help" hidden>Enter your email and we will send you a link to choose a new password.</p>
+        <div class="actions" id="reset-actions" hidden>
+          <button type="button" class="btn btn-primary" id="reset-send-button">Send reset link</button>
+          <button type="button" class="btn" id="reset-back-button">Back to sign in</button>
+        </div>
+        <p class="forgot"><button type="button" class="link-btn" id="forgot-button">Forgot your password?</button></p>
       </form>
     </section>
 
@@ -113,6 +120,23 @@
       </section>
     </section>
 
+    <section class="panel" id="recovery-panel" aria-labelledby="recovery-title" hidden>
+      <h2 id="recovery-title">Choose a new password</h2>
+      <form id="recovery-form" novalidate>
+        <div class="field">
+          <label for="new-password">New password (at least 8 characters)</label>
+          <input id="new-password" type="password" autocomplete="new-password" minlength="8">
+        </div>
+        <div class="field">
+          <label for="new-password-2">Repeat the new password</label>
+          <input id="new-password-2" type="password" autocomplete="new-password" minlength="8">
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn btn-primary" id="recovery-save-button">Save new password</button>
+        </div>
+      </form>
+    </section>
+
     <section class="panel" id="signed-in-view" hidden>
       <h2>You are signed in</h2>
       <p class="signed-in-email" id="signed-in-email"></p>
@@ -143,9 +167,46 @@
         <p>Role: <strong id="member-role"></strong></p>
       </div>
 
+      <details class="security" id="security-details">
+        <summary>Change password</summary>
+        <form id="change-form" novalidate>
+          <div class="field">
+            <label for="change-password">New password (at least 8 characters)</label>
+            <input id="change-password" type="password" autocomplete="new-password" minlength="8">
+          </div>
+          <div class="field">
+            <label for="change-password-2">Repeat the new password</label>
+            <input id="change-password-2" type="password" autocomplete="new-password" minlength="8">
+          </div>
+          <div class="actions">
+            <button type="submit" class="btn" id="change-save-button">Save new password</button>
+          </div>
+        </form>
+      </details>
+
       <div class="actions">
         <button type="button" class="btn" id="sign-out-button">Sign out</button>
       </div>
+    </section>
+
+    <section class="panel app-panel" id="app-panel" aria-labelledby="app-title">
+      <h2 id="app-title">Get the app and reminders</h2>
+
+      <h3>Install on your phone</h3>
+      <p class="app-note" id="install-note"></p>
+      <div class="actions">
+        <button type="button" class="btn btn-primary" id="install-button" hidden>Install Lights Out</button>
+      </div>
+
+      <h3>Deadline reminders in your calendar</h3>
+      <p class="app-note">Subscribe once and every prediction deadline appears in your calendar with an alert one day and one hour before. It updates by itself when session times change.</p>
+      <div class="actions">
+        <a class="btn" id="cal-apple" href="#" rel="noopener">Apple / Outlook</a>
+        <a class="btn" id="cal-google" href="#" target="_blank" rel="noopener">Google Calendar</a>
+        <button type="button" class="btn" id="cal-copy">Copy link</button>
+      </div>
+      <input class="feed-url" id="cal-url" type="text" readonly aria-label="Calendar link">
+      <p class="app-note">In Google Calendar the alerts come from your calendar settings: open Settings, choose this calendar and add notifications under "Event notifications".</p>
     </section>
 
     <p class="message" id="auth-message" role="status" aria-live="polite"></p>
@@ -155,6 +216,7 @@
   <script src="config.js"></script>
   <script src="lo-profile.js"></script>
   <script src="account-profile.js"></script>
+  <script src="account-app.js"></script>
   <script src="account.js"></script>
   <script src="admin-link.js"></script>
 </body>
