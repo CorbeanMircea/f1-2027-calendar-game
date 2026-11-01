@@ -341,6 +341,24 @@
   });
 
   client.auth.getSession().then(function (result) {
-    applySession(result.data && result.data.session);
+    var session = result.data && result.data.session;
+    applySession(session);
+
+    // Arriving from the password reset page: confirm it and make signing in easy.
+    if (new URLSearchParams(window.location.search).get("reset") === "done") {
+      var saved = "";
+      try {
+        saved = window.sessionStorage.getItem("lo-reset-email") || "";
+        window.sessionStorage.removeItem("lo-reset-email");
+      } catch (e) { /* ignore */ }
+      if (!session) {
+        if (saved && !emailInput.value) { emailInput.value = saved; }
+        setMessage("ok", "Your password has been changed. Sign in with your new password.");
+        passwordInput.focus();
+      }
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState(null, "", window.location.pathname);
+      }
+    }
   });
 })();

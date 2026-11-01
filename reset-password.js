@@ -119,6 +119,19 @@
       setMsg("", "");
       tidyAddress();
       show("done");
+
+      // A reset ends with signing in again: sign out here, then go to the sign-in page.
+      var email = r.data && r.data.user && r.data.user.email ? r.data.user.email : "";
+      try { window.sessionStorage.setItem("lo-reset-email", email); } catch (e) { /* ignore */ }
+      var pause = new Promise(function (resolve) { window.setTimeout(resolve, 1800); });
+      Promise.all([client.auth.signOut(), pause]).then(function (results) {
+        if (results[0] && results[0].error) { throw results[0].error; }
+        window.location.href = "account.html?reset=done";
+      }).catch(function (err) {
+        console.error(err);
+        $("done-text").textContent = "Your new password is saved, but this device could not be signed out automatically. Open your account and use Sign out, then sign in with the new password.";
+        $("done-link").textContent = "Go to my account";
+      });
     }).catch(function (err) {
       $("save-button").disabled = false;
       console.error(err);
