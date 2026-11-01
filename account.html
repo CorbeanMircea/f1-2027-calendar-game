@@ -120,23 +120,6 @@
       </section>
     </section>
 
-    <section class="panel" id="recovery-panel" aria-labelledby="recovery-title" hidden>
-      <h2 id="recovery-title">Choose a new password</h2>
-      <form id="recovery-form" novalidate>
-        <div class="field">
-          <label for="new-password">New password (at least 8 characters)</label>
-          <input id="new-password" type="password" autocomplete="new-password" minlength="8">
-        </div>
-        <div class="field">
-          <label for="new-password-2">Repeat the new password</label>
-          <input id="new-password-2" type="password" autocomplete="new-password" minlength="8">
-        </div>
-        <div class="actions">
-          <button type="submit" class="btn btn-primary" id="recovery-save-button">Save new password</button>
-        </div>
-      </form>
-    </section>
-
     <section class="panel" id="signed-in-view" hidden>
       <h2>You are signed in</h2>
       <p class="signed-in-email" id="signed-in-email"></p>
@@ -196,6 +179,16 @@
       <p class="app-note" id="install-note"></p>
       <div class="actions">
         <button type="button" class="btn btn-primary" id="install-button" hidden>Install Lights Out</button>
+      </div>
+
+      <div id="push-block" hidden>
+        <h3>Reminders on this device</h3>
+        <p class="app-note" id="push-note"></p>
+        <div class="actions">
+          <button type="button" class="btn btn-primary" id="push-on" hidden>Turn on reminders</button>
+          <button type="button" class="btn" id="push-test" hidden>Send a test</button>
+          <button type="button" class="btn" id="push-off" hidden>Turn off reminders</button>
+        </div>
       </div>
 
       <h3>Deadline reminders in your calendar</h3>

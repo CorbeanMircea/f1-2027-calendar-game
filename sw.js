@@ -36,3 +36,36 @@ self.addEventListener("fetch", function (event) {
     })
   );
 });
+
+// ---------- Push reminders ----------
+
+self.addEventListener("push", function (event) {
+  var data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (e) {
+    data = { body: event.data ? event.data.text() : "" };
+  }
+  event.waitUntil(self.registration.showNotification(data.title || "Lights Out", {
+    body: data.body || "",
+    icon: "icons/icon-192.png",
+    badge: "icons/favicon.png",
+    tag: data.tag || "lights-out",
+    data: { url: data.url || "index.html" }
+  }));
+});
+
+self.addEventListener("notificationclick", function (event) {
+  event.notification.close();
+  var target = new URL((event.notification.data && event.notification.data.url) || "index.html", self.registration.scope).href;
+  event.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (windows) {
+    for (var i = 0; i < windows.length; i++) {
+      if (windows[i].url.indexOf(self.registration.scope) === 0) {
+        return windows[i].focus().then(function (w) {
+          return w && w.url !== target && w.navigate ? w.navigate(target) : w;
+        }).catch(function () { return self.clients.openWindow(target); });
+      }
+    }
+    return self.clients.openWindow(target);
+  }));
+});

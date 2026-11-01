@@ -18,6 +18,16 @@
       icon: "M5 21v-3a4 4 0 014-4h6a4 4 0 014 4v3M9 8a3 3 0 106 0 3 3 0 00-6 0" }
   ];
 
+  // A password-reset link that lands on any other page is sent on to the reset page.
+  (function () {
+    var here = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+    var link = window.location.hash + "&" + window.location.search;
+    if (here !== "reset-password.html" && /type=recovery/.test(link)) {
+      window.location.replace(new URL("reset-password.html", window.location.href).pathname +
+        window.location.search + window.location.hash);
+    }
+  })();
+
   var current = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
   if (current === "") { current = "index.html"; }
 

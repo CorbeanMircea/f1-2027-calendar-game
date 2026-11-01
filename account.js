@@ -32,9 +32,6 @@
   var resetSendButton = document.getElementById("reset-send-button");
   var resetBackButton = document.getElementById("reset-back-button");
   var signInActions = signInButton.parentNode;
-  var recoveryPanel = document.getElementById("recovery-panel");
-  var recoveryForm = document.getElementById("recovery-form");
-  var recoverySaveButton = document.getElementById("recovery-save-button");
   var changeForm = document.getElementById("change-form");
   var changeSaveButton = document.getElementById("change-save-button");
 
@@ -51,7 +48,6 @@
     signOutButton.disabled = busy;
     joinButton.disabled = busy;
     resetSendButton.disabled = busy;
-    recoverySaveButton.disabled = busy;
     changeSaveButton.disabled = busy;
   }
 
@@ -75,6 +71,7 @@
   }
 
   var client = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_PUBLISHABLE_KEY);
+  window.LO_CLIENT = client; // used by account-app.js for the reminder switch
 
   function refreshMembership() {
     if (!currentUser) { return; }
@@ -201,7 +198,11 @@
 
   function handleSignOut() {
     setBusy(true);
-    client.auth.signOut().then(function (result) {
+    // Reminders belong to the signed-in player, so switch them off on this device first.
+    var cleanup = window.LO_PUSH_CLEANUP ? window.LO_PUSH_CLEANUP() : Promise.resolve();
+    cleanup.catch(function () { /* never block signing out */ }).then(function () {
+      return client.auth.signOut();
+    }).then(function (result) {
       setBusy(false);
       if (result.error) {
         setMessage("error", result.error.message);
@@ -265,7 +266,7 @@
     }
     setBusy(true);
     setMessage("", "Sending...");
-    var back = window.location.origin + window.location.pathname;
+    var back = new URL("reset-password.html", window.location.href).href;
     client.auth.resetPasswordForEmail(email, { redirectTo: back }).then(function (result) {
       setBusy(false);
       if (result.error) {
@@ -314,24 +315,9 @@
     });
   }
 
-  function clearRecoveryFromAddress() {
-    if (window.history && window.history.replaceState) {
-      window.history.replaceState(null, "", window.location.pathname);
-    }
-  }
-
   forgotButton.addEventListener("click", function () { showResetMode(true); });
   resetBackButton.addEventListener("click", function () { showResetMode(false); });
   resetSendButton.addEventListener("click", handleSendReset);
-
-  recoveryForm.addEventListener("submit", function (event) {
-    event.preventDefault();
-    savePassword(document.getElementById("new-password"), document.getElementById("new-password-2"), function () {
-      recoveryPanel.hidden = true;
-      clearRecoveryFromAddress();
-      setMessage("ok", "Your password has been changed. You are signed in.");
-    });
-  });
 
   changeForm.addEventListener("submit", function (event) {
     event.preventDefault();
@@ -352,13 +338,6 @@
   // Only update the page inside this callback; do not call the database here.
   client.auth.onAuthStateChange(function (event, session) {
     applySession(session);
-    if (event === "PASSWORD_RECOVERY") {
-      // The player came here from the "choose a new password" email.
-      recoveryPanel.hidden = false;
-      setMessage("", "");
-      var first = document.getElementById("new-password");
-      if (first && first.focus) { first.focus(); }
-    }
   });
 
   client.auth.getSession().then(function (result) {
