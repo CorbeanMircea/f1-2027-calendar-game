@@ -1,0 +1,77 @@
+/* Lights Out picks reveal. Builds on scorecard.css (controls, tabs, sections). */
+
+.sc-tab small { display: block; margin-top: 2px; color: var(--muted); font-family: var(--font-text); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.12em; }
+.sc-tab:disabled { cursor: not-allowed; opacity: 0.45; }
+.sc-tab:disabled small { color: var(--muted); }
+
+#pk-summary, #pk-room, #pk-players { margin-top: 24px; }
+
+.pk-facts { margin: 0; padding: 14px 18px; border: 1px solid var(--hair-strong); background: var(--panel); }
+.pk-facts p { margin: 0; }
+.pk-facts p + p { margin-top: 6px; color: var(--muted); font-size: 0.92rem; }
+.pk-facts b { font-weight: 600; }
+.pk-facts a { text-decoration: underline; text-underline-offset: 4px; }
+
+.pk-room-title { margin: 0 0 4px; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.pk-sub { margin: 0 0 14px; color: var(--muted); font-size: 0.9rem; }
+
+.pk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+.pk-grid .sc-section { margin-top: 0; }
+.pk-body { padding: 4px 18px 14px; }
+
+/* Vote bars */
+.vr {
+  display: grid;
+  grid-template-columns: minmax(0, 9.5rem) minmax(0, 1fr) 4.4rem;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 0;
+  border-top: 1px solid var(--hair);
+}
+
+.vr:first-child { border-top: 0; }
+.vr-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vr-pos { margin-right: 8px; color: var(--muted); font-family: var(--font-display); font-size: 1.05rem; font-weight: 800; }
+.vr-bar { height: 10px; border: 1px solid var(--hair); background: #0a0b0d; }
+.vr-bar i { display: block; height: 100%; background: var(--hair-strong); }
+.vr.lead .vr-bar i { background: var(--yellow); }
+.vr-n { color: var(--muted); font-size: 0.85rem; font-variant-numeric: tabular-nums; text-align: right; }
+.vr-also { grid-column: 2 / -1; margin: -2px 0 0; color: var(--muted); font-size: 0.78rem; }
+
+@media (max-width: 520px) {
+  .vr { grid-template-columns: minmax(0, 7.2rem) minmax(0, 1fr) 3.6rem; gap: 8px; }
+}
+
+/* Player cards */
+.pk-card { margin-top: 0; }
+.pk-card > header { align-items: center; justify-content: flex-start; gap: 12px; }
+.pk-card .pk-av { width: 40px; height: 40px; flex: none; overflow: hidden; border: 1px solid var(--hair-strong); line-height: 0; }
+.pk-card .pk-av svg { width: 100%; height: 100%; }
+.pk-card h3 { font-size: 1.3rem; }
+.pk-card .you { margin-left: 6px; color: var(--muted); font-size: 0.8rem; font-weight: 400; text-transform: none; }
+.pk-card.is-me { border-color: var(--yellow); }
+
+.pk-label { margin: 12px 0 6px; color: var(--muted); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
+.pk-label:first-child { margin-top: 4px; }
+.pk-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+
+.chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 9px;
+  border: 1px solid var(--hair-strong);
+  background: var(--bg);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.chip .pos { color: var(--muted); font-size: 0.9rem; }
+.chip.only { border-color: var(--yellow); }
+.chip.only::after { content: "\2605"; color: var(--yellow); font-size: 0.7rem; }
+
+.pk-ordered { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 6px; margin: 0; padding: 0; list-style: none; }
+
+.pk-legend { margin: 16px 0 0; color: var(--muted); font-size: 0.82rem; }
+.pk-legend .chip { padding: 0 6px; font-size: 0.9rem; }

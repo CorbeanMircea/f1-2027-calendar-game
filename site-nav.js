@@ -30,6 +30,7 @@
 
   var current = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
   if (current === "") { current = "index.html"; }
+  if (current === "picks.html") { current = "scorecard.html"; } // the reveal lives under Score check
 
   function aria(file) { return current === file ? ' aria-current="page"' : ""; }
 

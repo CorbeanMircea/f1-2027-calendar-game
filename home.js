@@ -74,6 +74,7 @@
   }
 
   var client = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_PUBLISHABLE_KEY);
+  window.LO_CLIENT = client; // shared with recap.js so the page uses one connection
 
   // ---------- Reveal on scroll ----------
 
@@ -497,6 +498,10 @@
     } else if (state.kind === "open" || state.kind === "soon") {
       cta = makeLink("btn btn-primary btn-block btn-arrow rc-cta", "predict.html", "Make your predictions");
       cta.setAttribute("data-enter", "1");
+    } else if (state.kind === "locked" && state.session) {
+      cta = makeLink("btn btn-primary btn-block btn-arrow rc-cta", "picks.html", "See everyone's picks");
+    } else if (state.kind === "done") {
+      cta = makeLink("btn btn-primary btn-block btn-arrow rc-cta", "scorecard.html", "See how it was scored");
     } else {
       cta = makeLink("btn btn-primary btn-block btn-arrow rc-cta", "leaderboard.html", "View the leaderboard");
     }

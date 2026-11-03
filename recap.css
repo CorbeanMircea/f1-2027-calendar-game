@@ -1,0 +1,44 @@
+/* Lights Out home page: weekend recap. */
+
+.recap { border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); background: #0f1114; }
+.recap[hidden] { display: none; }
+.recap-in { max-width: var(--maxw); margin: 0 auto; padding: 40px var(--gutter) 44px; }
+.recap .sec-head a.sec-note { text-decoration: underline; text-underline-offset: 4px; }
+
+.rc-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+
+@media (min-width: 900px) {
+  .rc-grid { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 1.3fr); }
+}
+
+.rc-card { padding: 18px; border: 1px solid var(--hair-strong); background: var(--panel); opacity: 0; transform: translateY(14px); transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out); }
+.recap.in .rc-card { opacity: 1; transform: none; }
+.recap.in .rc-card:nth-child(2) { transition-delay: 0.08s; }
+.recap.in .rc-card:nth-child(3) { transition-delay: 0.16s; }
+
+.rc-title { margin: 0 0 14px; color: var(--muted); font-family: var(--font-text); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; }
+
+.rc-av { display: block; flex: none; overflow: hidden; border: 1px solid var(--hair-strong); background: #15181d; line-height: 0; }
+.rc-av svg { display: block; width: 100%; height: 100%; }
+
+.rc-winner { border-top: 3px solid var(--yellow); }
+.rc-win-row { display: flex; align-items: center; gap: 16px; }
+.rc-win-row + .rc-win-row { margin-top: 14px; }
+.rc-who strong { display: block; font-family: var(--font-display); font-size: 2rem; font-weight: 900; line-height: 1; text-transform: uppercase; overflow-wrap: anywhere; }
+.rc-pts { display: block; margin-top: 6px; color: var(--muted); font-size: 0.95rem; }
+.rc-pts b { color: var(--yellow); font-family: var(--font-display); font-size: 1.8rem; font-variant-numeric: tabular-nums; font-weight: 900; }
+
+.rc-podium { margin: 0; padding: 0; list-style: none; }
+.rc-podium li { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-top: 1px solid var(--hair); }
+.rc-podium li:first-child { border-top: 0; padding-top: 0; }
+.rc-rank { width: 1.4rem; font-family: var(--font-display); font-size: 1.6rem; font-weight: 900; text-align: center; }
+.rc-podium li:first-child .rc-rank { color: var(--yellow); }
+.rc-name { flex: 1; min-width: 0; overflow: hidden; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.rc-score { font-family: var(--font-display); font-size: 1.4rem; font-variant-numeric: tabular-nums; font-weight: 800; }
+
+.rc-list { margin: 0; padding: 0; list-style: none; }
+.rc-list li { display: grid; grid-template-columns: 5.6rem minmax(0, 1fr); gap: 10px; padding: 9px 0; border-top: 1px solid var(--hair); font-size: 0.95rem; }
+.rc-list li:first-child { border-top: 0; padding-top: 0; }
+.rc-tag { color: var(--yellow); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; padding-top: 3px; text-transform: uppercase; }
+
+@media (prefers-reduced-motion: reduce) { .rc-card { opacity: 1; transform: none; transition: none; } }
