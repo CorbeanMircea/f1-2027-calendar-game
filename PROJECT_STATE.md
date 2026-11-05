@@ -77,9 +77,12 @@ Old files kept as fallbacks: predict.js, leaderboard.js, next-race.js/css, site-
 Driver portraits and team logos: placeholders only, no asset pipeline yet.
 
 ## Data in the database now
-Rehearsal data: season 2026 drivers, event united-states-2026 (completed), mexico-city-2026 (planned),
-and any related predictions, results and scores. Remove with supabase/maintenance/remove_rehearsal_weekend.sql
-before the 2027 season. 2027: 24 events and 68 sessions, session times null until published. No 2027 drivers yet.
+2026 season rehearsal data: 22 real 2026 drivers and events united-states-2026 (18), mexico-city-2026 (19),
+brazil-2026 (20), las-vegas-2026 (21), qatar-2026 (22), abu-dhabi-2026 (23), each with a qualifying and a race session.
+Only qualifying and race sessions exist for these events. Las Vegas, Qatar and Abu Dhabi session times are null until
+the daily time sync fills them. Event status is still 'scheduled' for every one, including finished weekends.
+Remove all rehearsal data with supabase/maintenance/remove_rehearsal_weekend.sql (check that it covers the four new
+events) before the 2027 season. 2027: 24 events and 68 sessions, times null until published. No 2027 drivers yet.
 
 ## Unverified (owner to confirm or correct)
 - Recap shows correctly on the home page after a real weekend.
