@@ -65,9 +65,12 @@ All predictions are optional. Results are scored only after an admin approves th
 - Level n needs 40 x (n-1)^1.6 XP, cap 50. Seven ranks with badges (lo-profile.js). Level-up banner uses localStorage.
 - Account page driver card: avatar picker, XP bar, four numbers (total XP, sessions scored, best session, average),
   rank ladder, last five XP gains. Home standings show avatar and rank badge.
-- - Statistics views (migration 023, read-only): player_session_stats, player_season_stats, player_event_progress.
+- Statistics views (migration 023, read-only): player_session_stats, player_season_stats, player_event_progress.
   Accuracy is derived from scores.breakdown and the stored pick counts. The Account page does not use them yet (A2).
-- Not built: achievements and the statistics UI.
+- Account page Season section (account-stats.js, account-stats.css): points, position, accuracy, points progression
+  chart (inline SVG, you vs other players), points and accuracy by session type, highlights, round-by-round table.
+  It wraps AccountProfile.render/clear, so account.js and account-profile.js are unchanged.
+- Not built: achievements.
 
 ## Weekend recap
 - recap-engine.js (pure functions) and recap.js render a "Weekend recap" on the home page (index.html, recap.css):
