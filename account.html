@@ -10,7 +10,8 @@
   <link rel="stylesheet" href="site-chrome.css">
   <link rel="stylesheet" href="account.css">
   <link rel="stylesheet" href="profile.css">
-  <link rel="stylesheet" href="account-stats.css"> <!-- NEW -->
+  <link rel="stylesheet" href="account-stats.css">
+  <link rel="stylesheet" href="achievements.css"> <!-- NEW (A3.2b) -->
   <link rel="stylesheet" href="account-app.css">
 </head>
 <body>
@@ -121,7 +122,6 @@
       </section>
     </section>
 
-    <!-- NEW: season statistics -->
     <section class="stats" id="stats-card" aria-label="Season statistics" hidden>
       <div class="stats-head">
         <h2>Season</h2>
@@ -164,7 +164,17 @@
         </section>
       </div>
     </section>
-    <!-- END NEW -->
+
+    <!-- NEW (A3.2b): achievements -->
+    <section class="ach" id="ach-card" aria-label="Achievements" hidden>
+      <div class="ach-head">
+        <h2>Achievements</h2>
+        <p class="ach-count" id="ach-count"></p>
+      </div>
+      <p class="ach-state" id="ach-state" role="status"></p>
+      <ul class="ach-grid" id="ach-grid"></ul>
+    </section>
+    <!-- END NEW (A3.2b) -->
 
     <section class="panel" id="signed-in-view" hidden>
       <h2>You are signed in</h2>
@@ -254,8 +264,10 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1/dist/umd/supabase.js"></script>
   <script src="config.js"></script>
   <script src="lo-profile.js"></script>
+  <script src="lo-achievements.js"></script> <!-- NEW (A3.2b) -->
   <script src="account-profile.js"></script>
-  <script src="account-stats.js"></script> <!-- NEW -->
+  <script src="account-stats.js"></script>
+  <script src="account-achievements.js"></script> <!-- NEW (A3.2b) -->
   <script src="account-app.js"></script>
   <script src="account.js"></script>
   <script src="admin-link.js"></script>

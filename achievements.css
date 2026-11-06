@@ -42,3 +42,93 @@
   .bs-head { padding: 16px 14px 0; }
   .bs-tile figcaption { font-size: 0.52rem; letter-spacing: 0.08em; }
 }
+
+/* ---------- Achievements section (account.html) ---------- */
+
+.ach { margin: 0 0 24px; border: 1px solid var(--hair-strong); background: var(--panel); }
+
+.ach-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 18px 22px 0; }
+
+.ach-head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ach-count { margin: 0; color: var(--muted); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+
+.ach-state { margin: 0; padding: 14px 22px 20px; color: var(--muted); font-size: 0.95rem; }
+.ach-state:empty { display: none; }
+
+.ach-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 16px 0 0; padding: 0; list-style: none; }
+
+.ach-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 12px 16px;
+  border-top: 1px solid var(--hair);
+  border-left: 1px solid var(--hair);
+  text-align: center;
+}
+
+.ach-card:nth-child(3n + 1) { border-left: 0; }
+
+.ach-art .ach-badge { width: 88px; height: auto; margin: 0 auto; }
+
+.ach-name {
+  margin: 12px 0 0;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.ach-level {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.ach-card:not(.is-locked) .ach-level { color: var(--text); }
+.ach-card.is-locked .ach-name { color: var(--muted); }
+
+.ach-bar { width: 100%; max-width: 150px; height: 6px; margin: auto 0 0; border: 1px solid var(--hair-strong); background: #0a0b0d; }
+.ach-level + .ach-bar { margin-top: 14px; }
+.ach-fill { display: block; height: 100%; background: var(--yellow); }
+
+.ach-meta { margin: 6px 0 0; color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.ach-earned { margin: 8px 0 0; color: var(--muted); font-size: 0.72rem; line-height: 1.3; }
+
+.ach-new {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.ach-new i { display: block; width: 7px; height: 7px; background: #e0262c; }
+
+@media (max-width: 600px) {
+  .ach-head { padding: 16px 16px 0; }
+  .ach-state { padding: 14px 16px 18px; }
+  .ach-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ach-card { padding: 18px 8px 14px; }
+  .ach-card:nth-child(3n + 1) { border-left: 1px solid var(--hair); }
+  .ach-card:nth-child(2n + 1) { border-left: 0; }
+}
