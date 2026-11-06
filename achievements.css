@@ -1,0 +1,44 @@
+/* Lights Out: achievement badges. Needs site-chrome.css for the tokens. */
+
+.ach-badge { display: block; }
+
+/* ---------- Badge sheet (badges.html) ---------- */
+
+.bs-wrap { max-width: 920px; margin: 0 auto; padding: 32px 20px 56px; }
+.bs-intro { max-width: 62ch; margin: 0 0 28px; color: var(--muted); }
+
+.bs-row { margin: 0 0 16px; border: 1px solid var(--hair-strong); background: var(--panel); }
+.bs-head { padding: 18px 20px 0; }
+
+.bs-head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.bs-head p { margin: 6px 0 0; color: var(--muted); font-size: 0.92rem; }
+.bs-head .bs-levels { font-size: 0.82rem; font-variant-numeric: tabular-nums; }
+
+.bs-tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; padding: 16px 20px 20px; }
+.bs-tile { margin: 0; text-align: center; }
+.bs-tile .ach-badge { width: 100%; max-width: 120px; height: auto; margin: 0 auto; }
+
+.bs-tile figcaption {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.bs-tile.is-unused { opacity: 0.4; }
+
+@media (max-width: 520px) {
+  .bs-tiles { gap: 4px; padding: 14px 12px 16px; }
+  .bs-head { padding: 16px 14px 0; }
+  .bs-tile figcaption { font-size: 0.52rem; letter-spacing: 0.08em; }
+}
