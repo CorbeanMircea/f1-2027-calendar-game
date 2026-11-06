@@ -77,7 +77,10 @@ All predictions are optional. Results are scored only after an admin approves th
   (status approved), Sharp Shooter needs 8+ predicted slots and 85%+ placed accuracy, Leader and Comeback compare
   positions within a season and accumulate across seasons, Sharp Eye counts exact positions, DNF Oracle uses only
   the dnf_driver points.
-- Not built yet: achievement badges and the Account page achievements section (A3.2a, A3.2b).
+- Badge system (A3.2a): lo-achievements.js (13 emblems, steps I to IV, locked outline, plus display definitions),
+  achievements.css, and the unlinked design-review page badges.html with badge-sheet.js. No database use.
+  The thresholds in lo-achievements.js are for the sheet only; player_achievements is the source of truth.
+- Not built yet: the Account page achievements section (A3.2b).
 
 ## Weekend recap
 - recap-engine.js (pure functions) and recap.js render a "Weekend recap" on the home page (index.html, recap.css):
