@@ -70,7 +70,14 @@ All predictions are optional. Results are scored only after an admin approves th
 - Account page Season section (account-stats.js, account-stats.css): points, position, accuracy, points progression
   chart (inline SVG, you vs other players), points and accuracy by session type, highlights, round-by-round table.
   It wraps AccountProfile.render/clear, so account.js and account-profile.js are unchanged.
-- Not built: achievements.
+- Achievements (migration 024, read-only, computed not stored): view player_achievements (13 achievements per player:
+  progress, level, badge step, next target, and where the current level was earned). player_session_stats gained
+  session_players and won (a win needs rank 1, points above 0 and 2+ scoring players; ties share it) and
+  player_season_stats.session_wins follows it. Ever-present uses the full approved session sequence from results
+  (status approved), Sharp Shooter needs 8+ predicted slots and 85%+ placed accuracy, Leader and Comeback compare
+  positions within a season and accumulate across seasons, Sharp Eye counts exact positions, DNF Oracle uses only
+  the dnf_driver points.
+- Not built yet: achievement badges and the Account page achievements section (A3.2a, A3.2b).
 
 ## Weekend recap
 - recap-engine.js (pure functions) and recap.js render a "Weekend recap" on the home page (index.html, recap.css):
