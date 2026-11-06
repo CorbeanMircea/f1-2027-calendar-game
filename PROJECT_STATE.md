@@ -80,7 +80,10 @@ All predictions are optional. Results are scored only after an admin approves th
 - Badge system (A3.2a): lo-achievements.js (13 emblems, steps I to IV, locked outline, plus display definitions),
   achievements.css, and the unlinked design-review page badges.html with badge-sheet.js. No database use.
   The thresholds in lo-achievements.js are for the sheet only; player_achievements is the source of truth.
-- Not built yet: the Account page achievements section (A3.2b).
+- Account page Achievements section (A3.2b): account-achievements.js reads player_achievements and draws one card per
+  achievement (badge, level, progress bar to the next level, round where the current level was earned) under the Season
+  section. A red NEW marker shows for levels gained since the last visit on this device (localStorage key lo-ach-<user id>;
+  the first visit on a device stores the current levels silently). It wraps AccountProfile.render like account-stats.js.
 
 ## Weekend recap
 - recap-engine.js (pure functions) and recap.js render a "Weekend recap" on the home page (index.html, recap.css):
