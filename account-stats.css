@@ -1,0 +1,136 @@
+/* Lights Out: season statistics on the Account page. Needs site-chrome.css for the tokens. */
+
+.stats { margin: 0 0 24px; border: 1px solid var(--hair-strong); background: var(--panel); }
+
+.stats .sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.stats-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 22px 0; }
+
+.stats-head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.stats-season select {
+  padding: 8px 10px;
+  border: 1px solid var(--hair-strong);
+  background: #0a0b0d;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.stats-state { margin: 0; padding: 14px 22px 20px; color: var(--muted); font-size: 0.95rem; }
+.stats-state:empty { display: none; }
+
+/* Headline numbers */
+.stats-hero {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  margin: 16px 0 0;
+  border-top: 1px solid var(--hair);
+}
+
+.stats-hero > div { padding: 16px 22px 18px; }
+.stats-hero > div + div { border-left: 1px solid var(--hair); }
+
+.stats-hero dt,
+.stats-grid dt {
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.stats-hero dd {
+  margin: 6px 0 0;
+  font-family: var(--font-display);
+  font-size: 2.3rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.stats-hero > div:first-child dd { font-size: clamp(2.6rem, 9vw, 3.6rem); }
+.stats-hero dd .of { color: var(--muted); font-family: var(--font-text); font-size: 0.9rem; font-weight: 600; letter-spacing: 0.06em; }
+.stats-hero small { display: block; margin-top: 6px; color: var(--muted); font-size: 0.82rem; }
+
+@media (max-width: 520px) {
+  .stats-hero { grid-template-columns: 1fr 1fr; }
+  .stats-hero > div:first-child { grid-column: 1 / -1; border-bottom: 1px solid var(--hair); }
+  .stats-hero > div:nth-child(3) { border-left: 1px solid var(--hair); }
+  .stats-hero > div { padding-left: 16px; padding-right: 16px; }
+}
+
+/* Sections */
+.stats-sec { padding: 18px 22px; border-top: 1px solid var(--hair); }
+
+.stats-sec h3 {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-family: var(--font-text);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* Chart */
+.stats-chart svg { display: block; width: 100%; height: auto; }
+.stats-chart .ch-grid { stroke: var(--hair); stroke-width: 1; }
+.stats-chart .ch-axis { fill: var(--muted); font-family: var(--font-text); font-size: 13px; font-variant-numeric: tabular-nums; }
+.stats-chart .ch-other { fill: none; stroke: #5a606a; stroke-width: 1.5; opacity: 0.75; }
+.stats-chart .ch-me { fill: none; stroke: var(--yellow); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+.stats-chart .ch-dot { fill: var(--yellow); stroke: var(--panel); stroke-width: 2; }
+.stats-chart .ch-dot-other { fill: #5a606a; }
+.stats-chart .ch-value { fill: var(--text); font-family: var(--font-display); font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+.stats-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 10px 0 0; color: var(--muted); font-size: 0.82rem; }
+.stats-legend span::before { content: ""; display: inline-block; width: 18px; height: 3px; margin-right: 8px; vertical-align: middle; background: #5a606a; }
+.stats-legend .lg-me::before { background: var(--yellow); }
+
+/* By session type */
+.stats-types { margin: 0; padding: 0; list-style: none; }
+.stats-types li { padding: 10px 0; border-top: 1px solid var(--hair); }
+.stats-types li:first-child { border-top: 0; padding-top: 0; }
+.st-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.st-name { font-weight: 600; }
+.st-meta { color: var(--muted); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.st-pct { font-family: var(--font-display); font-size: 1.4rem; font-variant-numeric: tabular-nums; font-weight: 800; }
+.st-bar { height: 8px; margin-top: 8px; border: 1px solid var(--hair-strong); background: #0a0b0d; }
+.st-fill { display: block; height: 100%; background: var(--text); }
+
+/* Highlights */
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin: 0; border: 1px solid var(--hair); }
+.stats-grid > div { padding: 14px 14px; border-top: 1px solid var(--hair); }
+.stats-grid > div:nth-child(-n + 3) { border-top: 0; }
+.stats-grid > div:not(:nth-child(3n + 1)) { border-left: 1px solid var(--hair); }
+.stats-grid dd { margin: 4px 0 0; font-family: var(--font-display); font-size: 1.7rem; font-variant-numeric: tabular-nums; font-weight: 900; line-height: 1; }
+.stats-grid dd small { color: var(--muted); font-family: var(--font-text); font-size: 0.8rem; font-weight: 600; }
+
+@media (max-width: 520px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-grid > div:nth-child(-n + 3) { border-top: 1px solid var(--hair); }
+  .stats-grid > div:nth-child(-n + 2) { border-top: 0; }
+  .stats-grid > div:not(:nth-child(3n + 1)) { border-left: 0; }
+  .stats-grid > div:nth-child(2n) { border-left: 1px solid var(--hair); }
+}
+
+/* Round by round */
+.stats-rounds summary { cursor: pointer; font-weight: 600; }
+.stats-rounds summary:focus-visible { outline: 2px solid var(--yellow); outline-offset: 3px; }
+.stats-table-wrap { margin-top: 12px; overflow-x: auto; }
+.stats-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.stats-table th { padding: 6px 8px; color: var(--muted); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.14em; text-align: left; text-transform: uppercase; white-space: nowrap; }
+.stats-table td { padding: 9px 8px; border-top: 1px solid var(--hair); font-variant-numeric: tabular-nums; }
+.stats-table th:nth-child(n + 3), .stats-table td:nth-child(n + 3) { text-align: right; }
+.stats-table td:nth-child(2) { min-width: 9em; }
+
+.stats-note { margin: 14px 0 0; color: var(--muted); font-size: 0.82rem; }

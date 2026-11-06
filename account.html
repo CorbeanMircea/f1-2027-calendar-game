@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="site-chrome.css">
   <link rel="stylesheet" href="account.css">
   <link rel="stylesheet" href="profile.css">
+  <link rel="stylesheet" href="account-stats.css"> <!-- NEW -->
   <link rel="stylesheet" href="account-app.css">
 </head>
 <body>
@@ -120,6 +121,51 @@
       </section>
     </section>
 
+    <!-- NEW: season statistics -->
+    <section class="stats" id="stats-card" aria-label="Season statistics" hidden>
+      <div class="stats-head">
+        <h2>Season</h2>
+        <label class="stats-season" id="stats-season-wrap" hidden>
+          <span class="sr-only">Season</span>
+          <select id="stats-season"></select>
+        </label>
+      </div>
+      <p class="stats-state" id="stats-state" role="status"></p>
+      <div id="stats-body" hidden>
+        <dl class="stats-hero">
+          <div><dt>Points</dt><dd id="st-points">0</dd><small id="st-points-sub"></small></div>
+          <div><dt>Position</dt><dd id="st-rank">&ndash;</dd><small id="st-rank-sub"></small></div>
+          <div><dt>Accuracy</dt><dd id="st-acc">&ndash;</dd><small id="st-acc-sub"></small></div>
+        </dl>
+        <section class="stats-sec" aria-label="Points progression">
+          <h3>Points progression</h3>
+          <div class="stats-chart" id="stats-chart"></div>
+          <p class="stats-legend" id="stats-legend"></p>
+        </section>
+        <section class="stats-sec" aria-label="Performance by session type">
+          <h3>By session type</h3>
+          <ul class="stats-types" id="stats-types"></ul>
+        </section>
+        <section class="stats-sec" aria-label="Season highlights">
+          <h3>Highlights</h3>
+          <dl class="stats-grid" id="stats-grid"></dl>
+        </section>
+        <section class="stats-sec" aria-label="Round by round">
+          <details class="stats-rounds">
+            <summary>Round by round</summary>
+            <div class="stats-table-wrap">
+              <table class="stats-table">
+                <thead><tr><th>Round</th><th>Grand Prix</th><th>Points</th><th>Total</th><th>Pos</th></tr></thead>
+                <tbody id="stats-rounds"></tbody>
+              </table>
+            </div>
+          </details>
+          <p class="stats-note">Accuracy counts every driver you predicted in the right place or group: the top 8 for race and sprint, the knockout group or Q3 place for qualifying. Exact positions counts only the exactly right slot.</p>
+        </section>
+      </div>
+    </section>
+    <!-- END NEW -->
+
     <section class="panel" id="signed-in-view" hidden>
       <h2>You are signed in</h2>
       <p class="signed-in-email" id="signed-in-email"></p>
@@ -209,6 +255,7 @@
   <script src="config.js"></script>
   <script src="lo-profile.js"></script>
   <script src="account-profile.js"></script>
+  <script src="account-stats.js"></script> <!-- NEW -->
   <script src="account-app.js"></script>
   <script src="account.js"></script>
   <script src="admin-link.js"></script>
