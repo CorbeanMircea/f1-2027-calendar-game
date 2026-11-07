@@ -109,6 +109,22 @@ events) before the 2027 season. 2027: 24 events and 68 sessions, times null unti
 - Whether tests exist for migrations 018 to 022 (none found).
 - Whether node_modules is ignored by git.
 
+## Season-long predictions (agreed plan, 6 Nov 2026)
+- Picks: Drivers' champion and Constructors' champion, one pair per player per season.
+- Points (added only after an admin approves the official final standings):
+  Drivers' champion: pick finishes 1st 60, 2nd 20, 3rd 10. Constructors' champion: 1st 40, 2nd 15, 3rd 8.
+  +10 if both champion picks finish 1st. Maximum 110. A late joiner's points are halved, rounded down.
+- Opens when the season's drivers are loaded and every Round 1 session has a start time.
+  Closes at the start of the earliest Round 1 session (same UTC rule as session locks).
+- Late joiners: a player who joined the group after that lock may pick until the earliest Round 5 session, at half value.
+- Group-mates see a player's picks only after that player's own window has closed.
+- Season bonus lives in its own tables (never in scores), is added to the leaderboard total and to XP, and does not
+  change session statistics, Season Points or the other achievements.
+- Admin: can set a player's pick with a written reason (logged), and enters/approves the official season result.
+- Milestones: B2.1 tables, save function, window view, RLS, tests (migration 025). B2.2 Season picks card on the
+  Predictions page. B2.3 admin entry and approval of the season result, scoring and rescoring. B2.4 leaderboard, XP
+  and Season section integration. B2.5 optional Title Caller achievement and picks reveal.
+
 ## Outstanding
 1. Achievements and season statistics on the profile (next).
 2. Season-long predictions: Drivers' and Constructors' champion (plan first, scoring untouched until agreed).
