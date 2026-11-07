@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="tiles.css">
   <link rel="stylesheet" href="pages.css">
   <link rel="stylesheet" href="predict-ui.css">
+  <link rel="stylesheet" href="season-picks.css"> <!-- NEW (B2.2) -->
 </head>
 <body>
   <script src="site-nav.js"></script>
@@ -71,6 +72,17 @@
       </div>
     </section>
 
+    <!-- NEW (B2.2): season picks -->
+    <section class="season-card" id="season-card" aria-label="Season picks" hidden>
+      <div class="sp-head">
+        <h2>Season picks</h2>
+        <p class="sp-sub" id="sp-sub"></p>
+      </div>
+      <p class="sp-state" id="sp-state" role="status"></p>
+      <div id="sp-body"></div>
+    </section>
+    <!-- END NEW (B2.2) -->
+
     <p class="message" id="pred-message" role="status" aria-live="polite"></p>
   </main>
 
@@ -79,6 +91,7 @@
   <script src="predict-tiles.js"></script>
   <script src="predict-lights.js"></script>
   <script src="predict-ui.js"></script>
+  <script src="season-picks.js"></script> <!-- NEW (B2.2) -->
   <script src="admin-link.js"></script>
 </body>
 </html>
