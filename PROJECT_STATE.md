@@ -130,11 +130,18 @@ events) before the 2027 season. 2027: 24 events and 68 sessions, times null unti
 - B2.2 done: season-picks.js and season-picks.css add a Season picks card to predict.html (waiting, open, late-entry and
   locked states). It reuses the chip styles of predict-ui.css and duplicates the TEAM_COLORS list of predict-tiles.js.
   The form shows only when 2027 drivers and every Round 1 session time exist, so test it with the temporary-data recipe.
+- B2.3a done: migration 026 adds season_results (versioned top 3 drivers and top 3 constructors, one approved per season,
+  players see only the approved row), season_scores, calc_season_points (60/20/10, 40/15/8, +10 double, half value for
+  late entries rounded down), recalculate_season_scores, and admin functions: admin_save_season_result (every save is a
+  new pending version), admin_approve_season_result (only once the main and the late pick windows are closed; rescores),
+  admin_reject_season_result, admin_season_overview. admin_set_season_prediction now rescores when a result is approved.
+  Test: supabase/tests/026_season_results_scoring_test.sql (intentional error, report ALL OK). Season points are NOT in
+  the leaderboard, XP or any total yet (B2.4). The admin screen is B2.3b.
 
 ## Outstanding
-1. Achievements and season statistics on the profile (next).
-2. Season-long predictions: Drivers' and Constructors' champion (plan first, scoring untouched until agreed).
-3. Driver photo and team logo asset pipeline (owner supplies the images).
-4. Mexico City rehearsal, then run remove_rehearsal_weekend.sql.
-5. Real 2027 drivers and session times when published. Check the Gulf races and any calendar change.
-6. Tests for migrations 018 to 022. Update this file after each milestone.
+1. B2.3b admin screen for season results and pick overrides; then B2.4 (leaderboard, XP and Season section include the
+   season bonus) and B2.5 (Title Caller achievement, picks reveal).
+2. Driver photo and team logo asset pipeline (owner supplies the images).
+3. Real 2027 drivers and session times when published. Check the Gulf races and any calendar change.
+4. Remove the 2026 rehearsal data with remove_rehearsal_weekend.sql before the 2027 season (check it covers all six events).
+5. Tests for migrations 018 to 022. Update this file after each milestone.
