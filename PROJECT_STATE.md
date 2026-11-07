@@ -124,6 +124,12 @@ events) before the 2027 season. 2027: 24 events and 68 sessions, times null unti
 - Milestones: B2.1 tables, save function, window view, RLS, tests (migration 025). B2.2 Season picks card on the
   Predictions page. B2.3 admin entry and approval of the season result, scoring and rescoring. B2.4 leaderboard, XP
   and Season section integration. B2.5 optional Title Caller achievement and picks reveal.
+- B2.1 done: migration 025 (season_prediction_windows view, season_predictions and season_prediction_log tables,
+  submit_season_prediction and admin_set_season_prediction); behaviour test supabase/tests/025_season_predictions_test.sql
+  (ends with an intentional error that rolls back; report ALL OK). Season picks give no points yet.
+- B2.2 done: season-picks.js and season-picks.css add a Season picks card to predict.html (waiting, open, late-entry and
+  locked states). It reuses the chip styles of predict-ui.css and duplicates the TEAM_COLORS list of predict-tiles.js.
+  The form shows only when 2027 drivers and every Round 1 session time exist, so test it with the temporary-data recipe.
 
 ## Outstanding
 1. Achievements and season statistics on the profile (next).
