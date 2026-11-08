@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="predict.css">
   <link rel="stylesheet" href="leaderboard.css">
   <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="admin-season.css"> <!-- NEW (B2.3b) -->
 </head>
 <body>
   <script src="site-nav.js"></script>
@@ -51,7 +52,18 @@
       <h2 class="admin-section-title">Recently approved</h2>
       <p class="placeholder">Use Correct if a result changes after approval (for example, a penalty). The correction is saved as a new pending version.</p>
       <div id="recent-list"></div>
-
+            <!-- NEW (B2.3b): season results -->
+      <section id="season-admin" hidden>
+        <div class="ss-heading">
+          <h2 class="admin-section-title">Season results</h2>
+          <button type="button" class="btn btn-small" id="season-refresh">Refresh</button>
+        </div>
+        <p class="placeholder">The official final standings of a season (top 3 drivers and top 3 constructors). Approving scores every player's season picks. Approval opens once the main lock and the late entry window have passed. A change after approval is saved as a new pending version first.</p>
+        <p class="placeholder" id="season-empty" hidden>No season picks or results yet. They appear here once players make season picks.</p>
+        <div id="season-list"></div>
+        <p class="message" id="season-message" role="status" aria-live="polite"></p>
+      </section>
+      <!-- END NEW (B2.3b) -->
       <h2 class="admin-section-title">Import log</h2>
       <div class="board-table-wrap">
         <table class="board-table log-table">
@@ -75,6 +87,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1/dist/umd/supabase.js"></script>
   <script src="config.js"></script>
   <script src="admin.js"></script>
+  <script src="admin-season.js"></script> <!-- NEW (B2.3b) -->
   <script src="admin-link.js"></script>
 </body>
 </html>

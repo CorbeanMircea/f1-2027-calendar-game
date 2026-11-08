@@ -1,0 +1,18 @@
+/* Lights Out: Season results section of the admin panel. Load after admin.css. */
+
+.ss-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 12px; }
+.ss-heading .admin-section-title { margin-right: auto; }
+
+#season-admin .ss-sub { margin: 18px 0 8px; font-size: 1rem; }
+#season-admin .step-hint { margin: 6px 0 12px; }
+#season-admin .preview-table td:nth-child(2) { color: var(--muted); }
+#season-admin .preview-table td.num { white-space: nowrap; }
+#season-admin .editor .field input[type="text"] {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0d0d14;
+  color: var(--text);
+  font-size: 1rem;
+}
