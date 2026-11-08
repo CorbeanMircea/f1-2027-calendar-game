@@ -3,7 +3,7 @@ select 'season totals match the leaderboard' as check_name,
   count(*) = 0 as ok
 from public.player_season_stats s
 full join public.leaderboard l on l.season = s.season and l.user_id = s.user_id
-where s.total_points is distinct from l.total_points
+where s.total_points is distinct from l.session_points
    or s.sessions_scored is distinct from l.sessions_scored
 union all
 select 'one stats row per score row',

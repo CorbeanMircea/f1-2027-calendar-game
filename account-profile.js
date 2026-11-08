@@ -52,7 +52,7 @@
     els.avatar.innerHTML = P.avatarSvg(a, 112);
   }
 
-  function drawLevel(xp, sessions, best) {
+  function drawLevel(xp, sessions, best, sessionXp) {
     var lv = P.levelFor(xp);
     var rank = P.rankFor(lv.level);
 
@@ -68,7 +68,7 @@
     countUp(els.sXp, lv.xp);
     els.sSessions.textContent = fmt(sessions);
     els.sBest.textContent = fmt(best);
-    els.sAvg.textContent = sessions > 0 ? fmt(Math.round(lv.xp / sessions)) : "0";
+    els.sAvg.textContent = sessions > 0 ? fmt(Math.round((typeof sessionXp === "number" ? sessionXp : lv.xp) / sessions)) : "0";
 
     // Rank ladder: shows how the badge changes as the player climbs.
     var html = "";
@@ -119,7 +119,7 @@
     var uid = state.user.id;
     var client = state.client;
     return Promise.all([
-      client.from("player_xp").select("avatar, xp, sessions_scored, best_session").eq("user_id", uid).limit(1),
+      client.from("player_xp").select("avatar, xp, session_xp, sessions_scored, best_session").eq("user_id", uid).limit(1),
       client.from("scores").select("points, computed_at, sessions(session_type, events(name))")
         .eq("user_id", uid).order("computed_at", { ascending: false }).limit(5)
     ]).then(function (res) {
@@ -131,7 +131,7 @@
       if (row) {
         state.avatar = P.parseAvatar(row.avatar);
         drawAvatar();
-        drawLevel(row.xp, row.sessions_scored, row.best_session);
+        drawLevel(row.xp, row.sessions_scored, row.best_session, typeof row.session_xp === "number" ? row.session_xp : row.xp);
         drawRecent(recent);
         return;
       }

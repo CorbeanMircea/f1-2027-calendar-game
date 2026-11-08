@@ -185,7 +185,7 @@
         client.from("results").select("session_id, data").eq("status", "approved").in("session_id", ids),
         client.from("predictions").select("user_id, session_id, picks").in("session_id", ids),
         client.from("drivers").select("id, code, full_name"),
-        client.from("player_xp").select("user_id, avatar, xp")
+        client.from("player_xp").select("user_id, avatar, xp, session_xp")
       ]).then(function (more) {
         for (var i = 0; i < 4; i++) { if (more[i].error) { throw more[i].error; } }
         var results = {};
@@ -197,7 +197,12 @@
         var avatars = {};
         var xp = {};
         if (!more[4].error) {
-          (more[4].data || []).forEach(function (x) { if (x.avatar) { avatars[x.user_id] = x.avatar; } if (typeof x.xp === "number") { xp[x.user_id] = x.xp; } });
+          // Session XP only: the recap compares levels before and after this weekend, and the season bonus is not part of a weekend.
+          (more[4].data || []).forEach(function (x) {
+            if (x.avatar) { avatars[x.user_id] = x.avatar; }
+            var base = typeof x.session_xp === "number" ? x.session_xp : x.xp;
+            if (typeof base === "number") { xp[x.user_id] = base; }
+          });
         }
 
         var recap = R.buildRecap({
