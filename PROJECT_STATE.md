@@ -137,6 +137,12 @@ events) before the 2027 season. 2027: 24 events and 68 sessions, times null unti
   admin_reject_season_result, admin_season_overview. admin_set_season_prediction now rescores when a result is approved.
   Test: supabase/tests/026_season_results_scoring_test.sql (intentional error, report ALL OK). Season points are NOT in
   the leaderboard, XP or any total yet (B2.4). The admin screen is B2.3b.
+  - B2.3b done: admin screen "Season results" in admin.html (admin-season.js, admin-season.css; admin.js untouched).
+  Per season with picks or a result: lock status, approved and pending result, points preview, Approve (only once all
+  pick windows are closed), Edit, Reject, Enter final standings, players' picks with points, pick override with a
+  required reason, and the log of admin pick changes. Migration 027 makes admin_season_overview list players without
+  picks as {user_id, name}. Test: supabase/tests/027_admin_season_overview_missing_test.sql.
+- Season bonus is still not in the leaderboard, XP or Season section: that is B2.4.
 
 ## Outstanding
 1. B2.3b admin screen for season results and pick overrides; then B2.4 (leaderboard, XP and Season section include the
