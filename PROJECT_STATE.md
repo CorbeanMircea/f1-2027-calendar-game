@@ -143,6 +143,14 @@ events) before the 2027 season. 2027: 24 events and 68 sessions, times null unti
   required reason, and the log of admin pick changes. Migration 027 makes admin_season_overview list players without
   picks as {user_id, name}. Test: supabase/tests/027_admin_season_overview_missing_test.sql.
 - Season bonus is still not in the leaderboard, XP or Season section: that is B2.4.
+- B2.3b verified (027 test ALL OK). B2.4a done: migration 028 re-creates leaderboard (total_points = session_points +
+  bonus_points; new trailing columns session_points, bonus_points) and player_xp (xp = session_xp + bonus_xp, lifetime
+  across seasons; new trailing columns session_xp, bonus_xp). A player needs one scored session in a season to be on
+  that season's leaderboard. Session stats, achievements and Season Points stay session-only. recap.js now reads
+  session_xp (level-ups are about the weekend); the Account "Average" uses session_xp. The 023 test compares season
+  stats with leaderboard.session_points. home.js reads the leaderboard view, so the home top 5 includes the bonus.
+- Still to do in B2.4b: standings.js (the leaderboard page adds up scores itself, so it does not show the bonus yet)
+  and the Season section on the Account page (league total and position, with the bonus as its own line).
 
 ## Outstanding
 1. B2.3b admin screen for season results and pick overrides; then B2.4 (leaderboard, XP and Season section include the
