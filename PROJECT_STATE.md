@@ -151,11 +151,17 @@ events) before the 2027 season. 2027: 24 events and 68 sessions, times null unti
   stats with leaderboard.session_points. home.js reads the leaderboard view, so the home top 5 includes the bonus.
 - Still to do in B2.4b: standings.js (the leaderboard page adds up scores itself, so it does not show the bonus yet)
   and the Season section on the Account page (league total and position, with the bonus as its own line).
+- B2.4b done: standings.js (leaderboard page) reads season_scores for the season and adds the bonus to the final table
+  only (never to an earlier weekend, so Move after approval shows the bonus effect); the player breakdown gets a
+  "Season picks" line (half value shows "Before halving"); a missing table silently means session points only.
+  account-stats.js (Season section) takes points and position from the leaderboard view (incl. bonus), shows
+  "incl. N from season picks" and a final "Season picks" row in the rounds table; the chart and statistics stay
+  session-only; if the leaderboard bonus columns are missing it falls back to session numbers.
+  The leaderboard page does not subscribe to season_scores in realtime: it updates on reload or when you return to the tab.
 
 ## Outstanding
-1. B2.3b admin screen for season results and pick overrides; then B2.4 (leaderboard, XP and Season section include the
-   season bonus) and B2.5 (Title Caller achievement, picks reveal).
+1. B2.5: Title Caller achievement and a reveal of everyone's season picks once the windows close.
 2. Driver photo and team logo asset pipeline (owner supplies the images).
-3. Real 2027 drivers and session times when published. Check the Gulf races and any calendar change.
+3. Real 2027 drivers and session times when published; check the Gulf races and any calendar change.
 4. Remove the 2026 rehearsal data with remove_rehearsal_weekend.sql before the 2027 season (check it covers all six events).
 5. Tests for migrations 018 to 022. Update this file after each milestone.
