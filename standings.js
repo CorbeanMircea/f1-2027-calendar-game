@@ -21,7 +21,11 @@
     sprint_qualifying: "Sprint Qualifying",
     sprint: "Sprint",
     qualifying: "Qualifying",
-    race: "Race"
+    race: "Race",
+    season_drivers: "Drivers' champion",
+    season_constructors: "Constructors' champion",
+    season_double: "Both champions right",
+    season_half: "Before halving"
   };
 
   var user = null;
@@ -84,7 +88,7 @@
   // ---------- data ----------
 
   function loadModel(season) {
-    var model = { events: [], sessionInfo: {}, scores: [], names: {}, extras: {} };
+    var model = { events: [], sessionInfo: {}, scores: [], names: {}, extras: {}, bonus: {} };
 
     return client.from("events").select("id, name, round, start_date")
       .eq("season", season).order("start_date", { ascending: true })
@@ -113,6 +117,12 @@
       .then(function (r) {
         if (r.error) { throw r.error; }
         (r.data || []).forEach(function (p) { model.names[p.id] = p.display_name; });
+        // Season picks points (database update 026). If the table is missing the board shows session points only.
+        return client.from("season_scores").select("user_id, points, breakdown").eq("season", season).then(function (b) {
+          if (!b.error) { (b.data || []).forEach(function (row) { model.bonus[row.user_id] = row; }); }
+        }, function () { /* ignore: session points only */ });
+      })
+      .then(function () {
         // Avatars and levels (database update 019). Missing view: the board still works.
         return client.from("player_xp").select("user_id, avatar, xp").then(function (x) {
           if (!x.error) { (x.data || []).forEach(function (p) { model.extras[p.user_id] = p; }); }
@@ -142,7 +152,9 @@
           var rec = weekendMap[weekends[i].id][id];
           if (rec) { points += rec.total; }
         }
-        return { id: id, name: model.names[id], points: points };
+        // The season picks bonus belongs to the final table only, never to an earlier weekend.
+        var bonus = count === weekends.length && model.bonus[id] ? model.bonus[id].points : 0;
+        return { id: id, name: model.names[id], points: points + bonus, bonus: bonus };
       });
       rows.sort(function (a, b) {
         if (b.points !== a.points) { return b.points - a.points; }
@@ -187,6 +199,18 @@
         var rec = weekendMap[w.id][row.id];
         return { name: w.name, points: rec ? rec.total : 0, parts: rec ? rec.parts : [] };
       });
+      if (row.bonus > 0) {
+        var bd = (model.bonus[row.id] && model.bonus[row.id].breakdown) || {};
+        var bparts = [];
+        if (bd.half) {
+          bparts.push({ type: "season_half", points: bd.subtotal });
+        } else {
+          if (bd.drivers) { bparts.push({ type: "season_drivers", points: bd.drivers }); }
+          if (bd.constructors) { bparts.push({ type: "season_constructors", points: bd.constructors }); }
+          if (bd.double) { bparts.push({ type: "season_double", points: bd.double }); }
+        }
+        row.detail.unshift({ name: "Season picks" + (bd.half ? " (half value)" : ""), points: row.bonus, parts: bparts });
+      }
     });
 
     return { rows: current, hasScores: weekends.length > 0, extras: model.extras };

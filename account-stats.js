@@ -1,5 +1,6 @@
 // Lights Out: season statistics on the Account page.
-// Reads the read-only views from migration 023 (player_season_stats, player_event_progress).
+// Reads the read-only views from migration 023 (player_season_stats, player_event_progress) and, for the league
+// total and position, the leaderboard view (which includes the season picks bonus once a season result is approved).
 // It wraps AccountProfile.render/clear so account.js and account-profile.js stay untouched.
 (function () {
   "use strict";
@@ -133,23 +134,38 @@
 
   // ---------- Render ----------
 
-  function renderHero(mine, all) {
-    els.points.textContent = fmt(mine.total_points);
-    els.pointsSub.textContent = fmt(mine.sessions_scored) + (mine.sessions_scored === 1 ? " session scored" : " sessions scored");
-
-    els.rank.textContent = ordinal(mine.season_rank);
-    var of = el("span", "of", " of " + all.length);
-    els.rank.appendChild(of);
+  // The league view: the player's total (with the season picks bonus), the bonus, and the position among players.
+  // Falls back to session-only numbers when the leaderboard columns are not available.
+  function leagueFor(mine, all, league) {
+    var uid = mine.user_id;
+    var mineLeague = null;
+    (league || []).forEach(function (r) { if (r.user_id === uid) { mineLeague = r; } });
+    var pool = mineLeague ? league : all;
+    var total = mineLeague ? Number(mineLeague.total_points) : Number(mine.total_points);
+    var bonus = mineLeague ? Number(mineLeague.bonus_points) || 0 : 0;
     var best = 0;
     var second = null;
-    all.forEach(function (p) { if (p.total_points > best) { best = p.total_points; } });
-    if (mine.season_rank > 1) {
-      els.rankSub.textContent = fmt(best - mine.total_points) + " pts behind the leader";
+    var ahead = 0;
+    pool.forEach(function (p) {
+      var pts = Number(p.total_points);
+      if (pts > best) { best = pts; }
+      if (pts > total) { ahead++; }
+      if (p.user_id !== uid && (second === null || pts > second)) { second = pts; }
+    });
+    return { total: total, bonus: bonus, rank: ahead + 1, count: pool.length, best: best, second: second };
+  }
+
+  function renderHero(mine, all, lg) {
+    els.points.textContent = fmt(lg.total);
+    els.pointsSub.textContent = fmt(mine.sessions_scored) + (mine.sessions_scored === 1 ? " session scored" : " sessions scored") +
+      (lg.bonus > 0 ? " \u00b7 incl. " + fmt(lg.bonus) + " from season picks" : "");
+
+    els.rank.textContent = ordinal(lg.rank);
+    els.rank.appendChild(el("span", "of", " of " + lg.count));
+    if (lg.rank > 1) {
+      els.rankSub.textContent = fmt(lg.best - lg.total) + " pts behind the leader";
     } else {
-      all.forEach(function (p) {
-        if (p.user_id !== mine.user_id && (second === null || p.total_points > second)) { second = p.total_points; }
-      });
-      els.rankSub.textContent = second === null ? "" : fmt(mine.total_points - second) + " pts clear of 2nd";
+      els.rankSub.textContent = lg.second === null ? "" : (lg.total === lg.second ? "Level on points" : fmt(lg.total - lg.second) + " pts clear of 2nd");
     }
 
     els.acc.textContent = pct(mine.placed_accuracy, true);
@@ -202,7 +218,7 @@
     });
   }
 
-  function renderRounds(progress, uid) {
+  function renderRounds(progress, uid, lg) {
     els.rounds.textContent = "";
     progress.filter(function (r) { return r.user_id === uid; }).forEach(function (r) {
       var tr = el("tr");
@@ -213,9 +229,18 @@
       tr.appendChild(el("td", "", ordinal(r.season_rank)));
       els.rounds.appendChild(tr);
     });
+    if (lg.bonus > 0) {
+      var tr2 = el("tr");
+      tr2.appendChild(el("td", "", "Final"));
+      tr2.appendChild(el("td", "", "Season picks"));
+      tr2.appendChild(el("td", "", "+" + fmt(lg.bonus)));
+      tr2.appendChild(el("td", "", fmt(lg.total)));
+      tr2.appendChild(el("td", "", ordinal(lg.rank)));
+      els.rounds.appendChild(tr2);
+    }
   }
 
-  function renderSeason(token, rows, progress) {
+  function renderSeason(token, rows, progress, league) {
     if (token !== state.token) { return; }
     var uid = state.user.id;
     var mine = null;
@@ -226,12 +251,13 @@
       return;
     }
     showState("");
-    renderHero(mine, rows);
+    var lg = leagueFor(mine, rows, league);
+    renderHero(mine, rows, lg);
     els.chart.innerHTML = drawChart(progress, uid);
     els.legend.innerHTML = '<span class="lg-me">You</span>' + (rows.length > 1 ? "<span>Other players</span>" : "");
     renderTypes(mine);
     renderGrid(mine);
-    renderRounds(progress, uid);
+    renderRounds(progress, uid, lg);
     els.body.hidden = false;
   }
 
@@ -252,11 +278,13 @@
       state.client.from("player_season_stats").select("*").eq("season", season),
       state.client.from("player_event_progress")
         .select("season, round, event_name, user_id, event_points, cumulative_points, season_rank")
-        .eq("season", season).order("round", { ascending: true })
+        .eq("season", season).order("round", { ascending: true }),
+      // League totals incl. the season picks bonus (migration 028). If this fails the section shows session points only.
+      state.client.from("leaderboard").select("user_id, total_points, session_points, bonus_points").eq("season", season)
     ]).then(function (res) {
       if (token !== state.token) { return; }
       if (res[0].error || res[1].error) { return failure(res[0].error || res[1].error); }
-      renderSeason(token, res[0].data || [], res[1].data || []);
+      renderSeason(token, res[0].data || [], res[1].data || [], res[2].error ? null : (res[2].data || []));
     });
   }
 
