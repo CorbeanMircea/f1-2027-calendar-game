@@ -84,6 +84,11 @@ All predictions are optional. Results are scored only after an admin approves th
   achievement (badge, level, progress bar to the next level, round where the current level was earned) under the Season
   section. A red NEW marker shows for levels gained since the last visit on this device (localStorage key lo-ach-<user id>;
   the first visit on a device stores the current levels silently). It wraps AccountProfile.render like account-stats.js.
+- Title Caller (migration 029, the 14th achievement): view player_achievements_all = the 13 rows of player_achievements
+  plus title_caller (same columns). A call = the player's Drivers' or Constructors' champion pick finished 1st in an
+  approved season result; calls add up over seasons, half-value picks count; levels at 1/2/4 calls = badge steps II/III/IV;
+  earned at the season's last round, labelled "Season picks". account-achievements.js reads the new view and falls back to
+  player_achievements if it is missing. New laurel-around-1 emblem in lo-achievements.js.
 
 ## Weekend recap
 - recap-engine.js (pure functions) and recap.js render a "Weekend recap" on the home page (index.html, recap.css):

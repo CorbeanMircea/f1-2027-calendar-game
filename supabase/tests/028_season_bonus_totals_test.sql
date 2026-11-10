@@ -23,6 +23,12 @@ begin
     raise exception 'The test needs two players with 2026 session scores';
   end if;
 
+  -- Clear any 2026/2027 season data inside this test (rolled back at the end), so existing rows cannot interfere.
+  delete from public.season_scores where season in (2026, 2027);
+  delete from public.season_prediction_log where season in (2026, 2027);
+  delete from public.season_predictions where season in (2026, 2027);
+  delete from public.season_results where season in (2026, 2027);
+
   select count(*) into v_cnt0 from public.leaderboard;
   select * into a from public.leaderboard where season = 2026 and user_id = v_u1;
   select * into b from public.leaderboard where season = 2026 and user_id = v_u2;

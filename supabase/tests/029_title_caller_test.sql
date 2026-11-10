@@ -21,6 +21,12 @@ begin
   if v_u1 is null or v_u2 is null or v_u3 is null then
     raise exception 'The test needs three players with scored sessions';
   end if;
+  
+  -- Clear any 2026/2027 season data inside this test (rolled back at the end), so existing rows cannot interfere.
+  delete from public.season_scores where season in (2026, 2027);
+  delete from public.season_prediction_log where season in (2026, 2027);
+  delete from public.season_predictions where season in (2026, 2027);
+  delete from public.season_results where season in (2026, 2027);
 
   insert into public.drivers (id, season, code, full_name, team_name, car_number, external_id, is_active)
   select replace(d.id, '2026-', '2027-'), 2027, d.code, d.full_name, d.team_name, d.car_number, null, true
