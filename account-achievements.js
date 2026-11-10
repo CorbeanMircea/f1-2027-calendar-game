@@ -122,10 +122,19 @@
     els.count.textContent = "";
     showState("Loading achievements...");
 
-    client.from("player_achievements")
-      .select("achievement, sort_order, progress, level, max_level, step, next_target, next_step, earned_season, earned_round, earned_event")
-      .eq("user_id", user.id)
-      .order("sort_order", { ascending: true })
+    var COLUMNS = "achievement, sort_order, progress, level, max_level, step, next_target, next_step, earned_season, earned_round, earned_event";
+    function query(view) {
+      return client.from(view).select(COLUMNS).eq("user_id", user.id).order("sort_order", { ascending: true });
+    }
+
+    // player_achievements_all (migration 029) adds Title Caller. If it is not there yet, use the original 13.
+    query("player_achievements_all")
+      .then(function (first) {
+        if (first.error && /does not exist|schema cache|PGRST20[0-9]|42P01/i.test((first.error.message || "") + " " + (first.error.code || ""))) {
+          return query("player_achievements");
+        }
+        return first;
+      })
       .then(function (res) {
         if (token !== state.token) { return; }
         if (res.error) { return failure(res.error); }

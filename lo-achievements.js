@@ -221,6 +221,23 @@
       return sh(c, d, "accent") + '<g transform="translate(0 12)">' + sh(c, d, "main") + "</g>";
     },
 
+    title_caller: function (c) {
+      // A pit-board 1 inside two branches of angled leaves. More leaves at each step.
+      var n = [4, 4, 5, 6][c.locked ? 0 : c.step - 1], out = "";
+      function leaf(angle, tilt) {
+        var p = pt(20, 21, 15.5, angle);
+        var t = rad(angle + 90 + tilt);
+        var dx = Math.cos(t) * 3.7, dy = -Math.sin(t) * 3.7;
+        return sh(c, barD(p[0] - dx, p[1] - dy, p[0] + dx, p[1] + dy, 2.8), "main");
+      }
+      for (var k = 0; k < n; k++) {
+        var a = 252 - k * (112 / (n - 1));
+        out += leaf(a, 32) + leaf(180 - a, -32);
+      }
+      out += '<g transform="translate(13.3 8.5) scale(0.72)">' + sh(c, polyD(ONE), "accent") + "</g>";
+      return out;
+    },
+
     sharp_shooter: function (c) {
       var out = "";
       out += sh(c, octD(20, 20, 36, 8) + octD(20, 20, 30, 6.5), "main");
@@ -304,7 +321,9 @@
     { key: "comeback", name: "Comeback", text: "Rounds where you gained two or more places in the standings.", unit: "rounds",
       tiers: [[1, 2], [3, 3], [6, 4]] },
     { key: "sharp_shooter", name: "Sharp Shooter", text: "Sessions with at least 85% of your predicted slots right.", unit: "sessions",
-      tiers: [[1, 2], [5, 3], [15, 4]] }
+      tiers: [[1, 2], [5, 3], [15, 4]] },
+    { key: "title_caller", name: "Title Caller", text: "Your Drivers' or Constructors' champion pick finished 1st. Each correct call counts once; calls add up over seasons.", unit: "champions called",
+      tiers: [[1, 2], [2, 3], [4, 4]] }
   ];
 
   var BY_KEY = {};
