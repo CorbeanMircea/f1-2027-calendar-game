@@ -312,15 +312,50 @@
     };
   }
 
-  // Opens an editor inside "host". config: { title, type, season, data, saveLabel, save(data) -> promise }
+  // Opens an editor inside "host". config: { title, type, season, sessionId, data, saveLabel, save(data) -> promise }
+  // The drivers offered are the EFFECTIVE LINEUP of the session (database function session_lineup): the active drivers of
+  // the season, adjusted by any driver substitution that applies to that session. Without substitutions this is the same
+  // list as before. If the lineup cannot be read, no editor is opened (it never falls back to a guessed list).
   function openEditor(host, config) {
     host.textContent = "";
-    var list = driversBySeason[config.season] || [];
-    if (list.length === 0) {
+    var all = driversBySeason[config.season] || [];
+    if (all.length === 0) {
       host.appendChild(el("p", "editor-message error", "No drivers are loaded for this season."));
       return;
     }
+    if (!config.sessionId) {
+      host.appendChild(el("p", "editor-message error", "This session could not be identified. Reload the page and try again."));
+      return;
+    }
 
+    var ticket = String(++editorSeq);
+    host.setAttribute("data-ticket", ticket);
+    var loading = el("div", "editor");
+    loading.appendChild(el("p", "editor-message", "Loading the driver lineup..."));
+    host.appendChild(loading);
+
+    client.rpc("session_lineup", { p_session_id: config.sessionId }).then(function (res) {
+      if (host.getAttribute("data-ticket") !== ticket) { return; }   // a newer editor was opened in this place
+      var ids = res && !res.error && Array.isArray(res.data) ? res.data : [];
+      var list = all.filter(function (d) { return ids.indexOf(d.id) !== -1; });
+      host.textContent = "";
+      if (ids.length === 0 || list.length !== ids.length) {
+        host.appendChild(el("p", "editor-message error",
+          "Could not load the driver lineup for this session. Reload the page and try again."));
+        return;
+      }
+      startEditor(host, config, list);
+    }).catch(function (err) {
+      if (host.getAttribute("data-ticket") !== ticket) { return; }
+      console.error(err);
+      host.textContent = "";
+      host.appendChild(el("p", "editor-message error",
+        "Could not load the driver lineup for this session. Reload the page and try again."));
+    });
+  }
+
+  function startEditor(host, config, list) {
+    host.textContent = "";
     var uid = "ed" + (++editorSeq) + "-";
     var box = el("div", "editor");
     box.appendChild(el("h4", "", config.title));
@@ -489,6 +524,7 @@
         title: "Edit this result (saved as a new pending version)",
         type: item.session_type,
         season: item.season,
+        sessionId: item.session_id,
         data: item.data,
         saveLabel: "Save as new pending version",
         save: function (data) {
@@ -529,6 +565,7 @@
         title: "Enter the result by hand (saved as a pending result)",
         type: item.session_type,
         season: item.season,
+        sessionId: item.session_id,
         data: null,
         saveLabel: "Save as pending result",
         save: function (data) {
@@ -558,6 +595,7 @@
         title: "Correct this approved result (saved as a new pending version; the current one stays in force until you approve it)",
         type: item.session_type,
         season: item.season,
+        sessionId: item.session_id,
         data: item.data,
         saveLabel: "Save correction as pending",
         save: function (data) {

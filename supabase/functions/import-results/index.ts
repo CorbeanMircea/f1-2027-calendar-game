@@ -9,6 +9,11 @@
 //   ?key=SECRET&task=times&mode=import                         updates times for all upcoming events
 //
 // It never approves a result, never edits an event, and logs every change to import_log.
+//
+// M1 (driver lineup): the qualifying and derived sprint-qualifying results are built from the EFFECTIVE LINEUP of the session
+// (database function session_lineup_external, service role only) instead of "all active drivers". With no substitutions the
+// lineup is exactly the active drivers, so nothing changes. If the lineup cannot be read, that session is logged as an error
+// and nothing is saved for it.
 
 import { createClient } from "npm:@supabase/supabase-js@2.100.1";
 
@@ -167,6 +172,19 @@ async function loadSchedule(season: number, cache: Map<string, Row[]>): Promise<
 
 // ---------- task: results ----------
 
+// The effective lineup of one session as API driver ids (database function session_lineup_external, service role only).
+async function lineupExternal(db: Row, sessionId: string): Promise<string[]> {
+  const res = await db.rpc("session_lineup_external", { p_session_id: sessionId });
+  if (res.error) {
+    throw new Error("Could not read the driver lineup for " + sessionId + ": " + res.error.message);
+  }
+  const ids = (res.data ?? []) as string[];
+  if (!Array.isArray(ids) || ids.length === 0) {
+    throw new Error("The driver lineup for " + sessionId + " is empty");
+  }
+  return ids;
+}
+
 async function processEvent(db: Row, ev: Row, apply: boolean, cache: Map<string, Row[]>): Promise<Row[]> {
   const report: Row[] = [];
 
@@ -192,17 +210,15 @@ async function processEvent(db: Row, ev: Row, apply: boolean, cache: Map<string,
   }
 
   // Our drivers for this season, mapped by the API's driver id.
-  const driversResult = await db.from("drivers").select("id, external_id, is_active").eq("season", ev.season);
+  const driversResult = await db.from("drivers").select("id, external_id").eq("season", ev.season);
   if (driversResult.error) {
     await log("all", "error", "Could not read drivers: " + driversResult.error.message);
     return report;
   }
   const extToOurs = new Map<string, string>();
-  const activeExternal: string[] = [];
   for (const d of driversResult.data ?? []) {
     if (d.external_id) {
       extToOurs.set(d.external_id, d.id);
-      if (d.is_active) { activeExternal.push(d.external_id); }
     }
   }
   if (extToOurs.size === 0) {
@@ -234,23 +250,31 @@ async function processEvent(db: Row, ev: Row, apply: boolean, cache: Map<string,
       ?.SprintResults ?? [])
     : [];
 
-  const wanted: { type: string; source: string; has: boolean; build: () => Row }[] = [
+  const wanted: { type: string; source: string; has: boolean; lineup: boolean; build: (allIds: string[]) => Row }[] = [
     {
       type: "qualifying",
       source: "jolpica",
       has: qualifyingRows.length > 0,
-      build: () => buildQualifying(qualifyingRows, activeExternal),
+      lineup: true,
+      build: (allIds) => buildQualifying(qualifyingRows, allIds),
     },
-    { type: "race", source: "jolpica", has: raceRows.length > 0, build: () => buildRace(raceRows) },
+    { type: "race", source: "jolpica", has: raceRows.length > 0, lineup: false, build: () => buildRace(raceRows) },
   ];
   if (ev.has_sprint) {
     wanted.push({
       type: "sprint_qualifying",
       source: "jolpica-derived-sprint-grid",
       has: sprintRows.length > 0,
-      build: () => deriveSprintQualifying(sprintRows, activeExternal),
+      lineup: true,
+      build: (allIds) => deriveSprintQualifying(sprintRows, allIds),
     });
-    wanted.push({ type: "sprint", source: "jolpica", has: sprintRows.length > 0, build: () => buildSprint(sprintRows) });
+    wanted.push({
+      type: "sprint",
+      source: "jolpica",
+      has: sprintRows.length > 0,
+      lineup: false,
+      build: () => buildSprint(sprintRows),
+    });
   }
 
   for (const w of wanted) {
@@ -260,7 +284,8 @@ async function processEvent(db: Row, ev: Row, apply: boolean, cache: Map<string,
       continue;
     }
     try {
-      const data = mapData(w.build(), extToOurs);
+      const allIds = w.lineup ? await lineupExternal(db, sessionId) : [];
+      const data = mapData(w.build(allIds), extToOurs);
 
       const latest = await db.from("results").select("id, version, status, data, api_snapshot")
         .eq("session_id", sessionId).order("version", { ascending: false }).limit(1);
