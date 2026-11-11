@@ -14,6 +14,8 @@
 // (database function session_lineup_external, service role only) instead of "all active drivers". With no substitutions the
 // lineup is exactly the active drivers, so nothing changes. If the lineup cannot be read, that session is logged as an error
 // and nothing is saved for it.
+// M2: if the results feed lists a driver who is not in the session's lineup (for example a substitute who has not been
+// registered yet), the session is logged as an error that names those drivers, and nothing is saved for it.
 
 import { createClient } from "npm:@supabase/supabase-js@2.100.1";
 
@@ -285,6 +287,16 @@ async function processEvent(db: Row, ev: Row, apply: boolean, cache: Map<string,
     }
     try {
       const allIds = w.lineup ? await lineupExternal(db, sessionId) : [];
+      if (w.lineup) {
+        const feed = w.type === "qualifying" ? qualifyingRows : sprintRows;
+        const outside = feed.map(driverId).filter((id: string) => !allIds.includes(id));
+        if (outside.length > 0) {
+          throw new Error(
+            "The results feed lists drivers who are not in this session's lineup: " + outside.join(", ") +
+            ". Register the driver substitution in Admin before importing.",
+          );
+        }
+      }
       const data = mapData(w.build(allIds), extToOurs);
 
       const latest = await db.from("results").select("id, version, status, data, api_snapshot")
