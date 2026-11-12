@@ -1,0 +1,44 @@
+/* Lights Out: Admin "Driver changes" (M2b). Uses the existing .field, .btn, .placeholder and .message styles. */
+
+.dc-subtitle { margin: 1.6rem 0 .6rem; font-size: 1.05rem; }
+
+.dc-form { display: grid; gap: .9rem; margin-top: 1rem; }
+.dc-label { display: block; margin-bottom: .4rem; }
+.dc-radios { display: flex; flex-wrap: wrap; gap: 1rem; }
+.dc-radio { display: inline-flex; align-items: center; gap: .45rem; cursor: pointer; }
+.dc-sub { display: grid; gap: .8rem; padding-left: .9rem; border-left: 2px solid rgba(255, 255, 255, .12); }
+.dc-form input[type="text"] {
+  width: 100%; box-sizing: border-box; padding: .6rem .7rem; border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, .18); background: rgba(255, 255, 255, .04); color: inherit; font: inherit;
+}
+
+.dc-preview { display: grid; gap: .8rem; }
+.dc-summary { margin: 0; font-weight: 600; }
+.dc-sessions { display: grid; gap: .5rem; }
+.dc-session {
+  display: flex; align-items: flex-start; gap: .7rem; padding: .7rem .8rem; cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, .14); border-radius: 8px;
+}
+.dc-session.is-disabled { opacity: .55; cursor: not-allowed; }
+.dc-session input { margin-top: .25rem; }
+.dc-session-text { display: grid; gap: .15rem; }
+.dc-session-meta { font-size: .85rem; opacity: .75; }
+.dc-session-note { font-size: .85rem; color: #ffb4b4; }
+
+.dc-warning {
+  padding: .8rem; border-radius: 8px; border: 1px solid #e0a030; background: rgba(224, 160, 48, .1);
+}
+.dc-warning p { margin: 0 0 .6rem; }
+
+.dc-card { margin: .9rem 0; padding: .9rem 1rem; border: 1px solid rgba(255, 255, 255, .14); border-radius: 10px; }
+.dc-card-head { margin-bottom: .2rem; }
+.dc-meta { margin: .15rem 0; font-size: .9rem; opacity: .8; }
+.dc-chips { display: flex; flex-wrap: wrap; gap: .4rem; margin: .6rem 0; }
+.dc-chip { padding: .2rem .6rem; border-radius: 999px; font-size: .8rem; border: 1px solid rgba(255, 255, 255, .2); }
+.dc-chip.is-on { border-color: #3fb27f; color: #8be0b8; }
+.dc-chip.is-off { opacity: .65; }
+.dc-details { margin: .4rem 0 .6rem; }
+.dc-details summary { cursor: pointer; font-size: .9rem; }
+.dc-log { margin: .25rem 0; font-size: .85rem; opacity: .85; }
+.dc-revert { margin-top: .6rem; }
+.dc-revert-box { display: grid; gap: .7rem; padding: .8rem; border: 1px dashed rgba(255, 255, 255, .25); border-radius: 8px; }

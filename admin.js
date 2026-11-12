@@ -312,6 +312,16 @@
     };
   }
 
+  // Reads the drivers of one season again (a driver can be added after this page loaded, for example a substitute).
+  function refreshSeasonDrivers(season) {
+    return client.from("drivers").select("id, season, code, full_name, is_active").eq("season", season).order("code")
+      .then(function (res) {
+        if (res.error) { throw res.error; }
+        driversBySeason[season] = res.data || [];
+        driversBySeason[season].forEach(function (d) { driverNames[d.id] = d.code + " - " + d.full_name; });
+      });
+  }
+
   // Opens an editor inside "host". config: { title, type, season, sessionId, data, saveLabel, save(data) -> promise }
   // The drivers offered are the EFFECTIVE LINEUP of the session (database function session_lineup): the active drivers of
   // the season, adjusted by any driver substitution that applies to that session. Without substitutions this is the same
@@ -335,9 +345,16 @@
     host.appendChild(loading);
 
     client.rpc("session_lineup", { p_session_id: config.sessionId }).then(function (res) {
-      if (host.getAttribute("data-ticket") !== ticket) { return; }   // a newer editor was opened in this place
+      if (host.getAttribute("data-ticket") !== ticket) { return null; }   // a newer editor was opened in this place
       var ids = res && !res.error && Array.isArray(res.data) ? res.data : [];
-      var list = all.filter(function (d) { return ids.indexOf(d.id) !== -1; });
+      var known = {};
+      all.forEach(function (d) { known[d.id] = true; });
+      var missing = ids.some(function (id) { return !known[id]; });
+      if (!missing) { return ids; }
+      return refreshSeasonDrivers(config.season).then(function () { return ids; });
+    }).then(function (ids) {
+      if (ids === null || host.getAttribute("data-ticket") !== ticket) { return; }
+      var list = (driversBySeason[config.season] || []).filter(function (d) { return ids.indexOf(d.id) !== -1; });
       host.textContent = "";
       if (ids.length === 0 || list.length !== ids.length) {
         host.appendChild(el("p", "editor-message error",

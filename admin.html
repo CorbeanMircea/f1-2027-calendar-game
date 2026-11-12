@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="leaderboard.css">
   <link rel="stylesheet" href="admin.css">
   <link rel="stylesheet" href="admin-season.css"> <!-- NEW (B2.3b) -->
+  <link rel="stylesheet" href="admin-changes.css"> <!-- NEW (M2b) -->
 </head>
 <body>
   <script src="site-nav.js"></script>
@@ -64,6 +65,21 @@
         <p class="message" id="season-message" role="status" aria-live="polite"></p>
       </section>
       <!-- END NEW (B2.3b) -->
+
+      <!-- NEW (M2b): driver changes (substitutions) -->
+      <section id="changes-admin" hidden>
+        <div class="ss-heading">
+          <h2 class="admin-section-title">Driver changes</h2>
+          <button type="button" class="btn btn-small" id="changes-refresh">Refresh</button>
+        </div>
+        <p class="placeholder">Register a driver substitution for a Grand Prix weekend. It applies to the sessions that have not taken place yet. Saved predictions are never changed, and players who saved a prediction for an affected session are notified.</p>
+        <div id="changes-form"></div>
+        <h3 class="dc-subtitle">Registered substitutions</h3>
+        <p class="placeholder" id="changes-empty" hidden>No substitutions have been registered.</p>
+        <div id="changes-list"></div>
+        <p class="message" id="changes-message" role="status" aria-live="polite"></p>
+      </section>
+      <!-- END NEW (M2b) -->
       <h2 class="admin-section-title">Import log</h2>
       <div class="board-table-wrap">
         <table class="board-table log-table">
@@ -88,6 +104,7 @@
   <script src="config.js"></script>
   <script src="admin.js"></script>
   <script src="admin-season.js"></script> <!-- NEW (B2.3b) -->
+  <script src="admin-changes.js"></script> <!-- NEW (M2b) -->
   <script src="admin-link.js"></script>
 </body>
 </html>
