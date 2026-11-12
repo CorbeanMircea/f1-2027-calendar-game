@@ -5,7 +5,14 @@
 .dc-form { display: grid; gap: .9rem; margin-top: 1rem; }
 .dc-label { display: block; margin-bottom: .4rem; }
 .dc-radios { display: flex; flex-wrap: wrap; gap: 1rem; }
-.dc-radio { display: inline-flex; align-items: center; gap: .45rem; cursor: pointer; }
+.dc-form .field .dc-radio,
+.dc-preview .dc-radio,
+.dc-revert-box .dc-radio {
+  display: inline-flex; flex-direction: row; align-items: center; gap: .5rem; width: auto; cursor: pointer;
+}
+.dc-form .field .dc-radio input,
+.dc-preview .dc-radio input,
+.dc-revert-box .dc-radio input { width: auto; margin: 0; flex: none; }
 .dc-sub { display: grid; gap: .8rem; padding-left: .9rem; border-left: 2px solid rgba(255, 255, 255, .12); }
 .dc-form input[type="text"] {
   width: 100%; box-sizing: border-box; padding: .6rem .7rem; border-radius: 6px;
