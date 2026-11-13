@@ -1,0 +1,16 @@
+/* Lights Out: notifications card on the Predictions page (M5). Informational only. */
+
+.notices-card {
+  margin: 1rem 0; padding: 1rem 1.1rem; border: 1px solid rgba(255, 215, 0, .35); border-radius: 12px;
+  background: rgba(255, 215, 0, .05);
+}
+.notices-card .nt-head { display: flex; align-items: center; justify-content: space-between; gap: .8rem; flex-wrap: wrap; }
+.notices-card .nt-head h2 { margin: 0; font-size: 1.15rem; }
+.notices-card .nt-sub { margin: .25rem 0 .6rem; font-size: .88rem; opacity: .8; }
+.notices-card .nt-item { padding: .75rem 0; border-top: 1px solid rgba(255, 255, 255, .12); }
+.notices-card .nt-item:first-of-type { border-top: 0; }
+.notices-card .nt-title { margin: 0 0 .2rem; font-weight: 700; }
+.notices-card .nt-body { margin: 0 0 .35rem; font-size: .93rem; }
+.notices-card .nt-meta { margin: 0 0 .5rem; font-size: .8rem; opacity: .7; }
+.notices-card .nt-item.is-read { opacity: .6; }
+.notices-card .nt-foot { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: .4rem; }

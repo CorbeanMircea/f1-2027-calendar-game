@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="predict-ui.css">
   <link rel="stylesheet" href="season-picks.css"> <!-- NEW (B2.2) -->
   <link rel="stylesheet" href="predict-changes.css"> <!-- NEW (M3) -->
+  <link rel="stylesheet" href="notices.css"> <!-- NEW (M5) -->
 </head>
 <body>
   <script src="site-nav.js"></script>
@@ -36,6 +37,18 @@
         <a class="btn btn-primary" href="account.html">Go to Account</a>
       </div>
     </section>
+
+    <!-- NEW (M5): notifications (informational only) -->
+    <section class="notices-card" id="notices-card" aria-label="Notifications" hidden>
+      <div class="nt-head">
+        <h2>Notifications <span id="nt-count"></span></h2>
+        <button type="button" class="btn btn-small" id="nt-all">Mark all as read</button>
+      </div>
+      <p class="nt-sub">These are for your information. Your saved predictions are never changed and nothing here needs an answer.</p>
+      <div id="nt-list"></div>
+      <div class="nt-foot"><button type="button" class="btn btn-small" id="nt-more" hidden></button></div>
+    </section>
+    <!-- END NEW (M5) -->
 
     <section class="panel" id="predict-panel" hidden>
       <h2>Make your prediction</h2>
@@ -93,6 +106,7 @@
   <script src="predict-lights.js"></script>
   <script src="predict-ui.js"></script>
   <script src="season-picks.js"></script> <!-- NEW (B2.2) -->
+  <script src="notices.js"></script> <!-- NEW (M5) -->
   <script src="admin-link.js"></script>
 </body>
 </html>

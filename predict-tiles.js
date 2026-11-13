@@ -1025,7 +1025,20 @@
 
     changesEl.appendChild(el("h3", "wc-title", "Weekend changes"));
 
-    changes.forEach(function (c) {
+    // A reverted replacement is shown once (the latest time), so repeated test or correction cycles do not pile up.
+    var seenReverted = {};
+    var shownChanges = [];
+    for (var ci = changes.length - 1; ci >= 0; ci--) {
+      var item = changes[ci];
+      if (item.status === "reverted") {
+        var key = (item.out && item.out.id) + ">" + (item.in && item.in.id);
+        if (seenReverted[key]) { continue; }
+        seenReverted[key] = true;
+      }
+      shownChanges.unshift(item);
+    }
+
+    shownChanges.forEach(function (c) {
       var out = (c.out && (c.out.code + " " + c.out.name)) || "a driver";
       var inn = (c.in && (c.in.code + " " + c.in.name)) || "a driver";
       var line = c.status === "applied"
