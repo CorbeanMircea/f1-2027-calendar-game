@@ -1,0 +1,16 @@
+/* Lights Out: "Weekend changes" strip and withdrawn-driver markers on the Predictions page (M3). */
+
+.weekend-changes {
+  margin: 1rem 0; padding: .9rem 1rem; border: 1px solid rgba(255, 255, 255, .16); border-radius: 10px;
+  background: rgba(255, 255, 255, .03);
+}
+.weekend-changes .wc-title { margin: 0 0 .5rem; font-size: 1rem; }
+.weekend-changes .wc-item { margin: .3rem 0; font-size: .92rem; }
+.weekend-changes .wc-notice {
+  margin-top: .7rem; padding: .7rem .8rem; border-radius: 8px; border: 1px solid #e0a030; background: rgba(224, 160, 48, .08);
+}
+.weekend-changes .wc-text { margin: 0 0 .6rem; font-size: .92rem; }
+
+.tile-withdrawn { display: block; margin-top: .15rem; font-size: .7rem; letter-spacing: .04em; text-transform: uppercase; color: #e0a030; }
+.tile.is-withdrawn:not(.is-selected):not(.is-submitted) { opacity: .5; }
+.dchip.is-withdrawn:not(.is-selected) { opacity: .5; }

@@ -66,6 +66,11 @@
   var windowsById = {};
   var eventsById = {};
   var drivers = [];
+  var allDrivers = [];
+  var currentType = null;
+  var currentExisting = null;
+  var currentInfo = null;
+  var currentStandIns = {};
   var controller = null;
   var loadToken = 0;
   var lockMs = null;
@@ -77,6 +82,11 @@
   }
 
   function setShown(node, on) { node.hidden = !on; }
+
+  var changesEl = document.createElement("div");
+  changesEl.className = "weekend-changes";
+  changesEl.hidden = true;
+  if (formEl && formEl.parentNode) { formEl.parentNode.insertBefore(changesEl, formEl); }
 
   function showGate(text) {
     gateText.textContent = text;
@@ -122,6 +132,67 @@
   function lastName(full) {
     var parts = String(full).trim().split(/\s+/);
     return parts[parts.length - 1];
+  }
+
+  // A copy of a driver row, with optional extra flags (the original rows are never changed).
+  function copyDriver(d, extra) {
+    var out = {};
+    Object.keys(d).forEach(function (k) { out[k] = d[k]; });
+    if (extra) { Object.keys(extra).forEach(function (k) { out[k] = extra[k]; }); }
+    return out;
+  }
+
+  function findIn(list, id) {
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id === id) { return list[i]; }
+    }
+    return null;
+  }
+
+  function isRanking(type) {
+    return type === "qualifying" || type === "sprint_qualifying";
+  }
+
+  // The drivers offered for one session when a substitution applies (info.use is true).
+  // Race and Sprint: the lineup, plus a withdrawn driver the player already saved (kept visible, flagged).
+  // Qualifying and Sprint Qualifying are a full ranking of the field, so a saved withdrawn driver stands in for the
+  // lineup driver who replaced him until the player swaps (the field size stays the same as on the server).
+  function poolFor(type, all, info) {
+    var standIns = info.stand_ins || {};
+    var withdrawn = Object.keys(standIns);
+    var replaced = {};
+    withdrawn.forEach(function (id) { replaced[standIns[id]] = true; });
+
+    var pool = [];
+    (info.lineup || []).forEach(function (id) {
+      var d = findIn(all, id);
+      if (!d) { return; }
+      if (isRanking(type) && replaced[id]) { return; }
+      pool.push(d);
+    });
+    withdrawn.forEach(function (id) {
+      var d = findIn(all, id);
+      if (d && !findIn(pool, id)) { pool.push(copyDriver(d, { withdrawn: true, replacedBy: standIns[id] })); }
+    });
+    return pool;
+  }
+
+  function replaceDriverInPicks(picks, from, to) {
+    if (!picks) { return picks; }
+    var out = JSON.parse(JSON.stringify(picks));
+    ["q1_out", "q2_out", "q3_order", "top8", "dnf_drivers"].forEach(function (key) {
+      if (Array.isArray(out[key])) {
+        out[key] = out[key].map(function (id) { return id === from ? to : id; });
+      }
+    });
+    if (out.fastest_lap === from) { out.fastest_lap = to; }
+    if (out.dnf_driver === from) { out.dnf_driver = to; }
+    return out;
+  }
+
+  function isMissingFunction(err) {
+    var text = (err && (err.message || "")) + " " + ((err && err.code) || "");
+    return /does not exist|schema cache|PGRST202|42883/i.test(text);
   }
 
   function teamColor(name) {
@@ -217,6 +288,7 @@
     info.appendChild(el("span", "tile-code", d.code));
     info.appendChild(el("span", "tile-name", d.full_name));
     info.appendChild(el("span", "tile-team", d.team_name));
+    if (d.withdrawn) { info.appendChild(el("span", "tile-withdrawn", "Withdrawn")); }
     tile.appendChild(info);
 
     tile.addEventListener("click", function () { onClick(d.id); });
@@ -243,12 +315,14 @@
         t.classList.toggle("is-blocked", !!s.blocked);
         t.classList.toggle("is-full", !s.selected && !!s.full && !s.blocked);
         t.classList.toggle("is-locked", locked);
-        t.disabled = locked || !!s.blocked || (!s.selected && !!s.full);
+        t.classList.toggle("is-withdrawn", !!d.withdrawn);
+        t.disabled = locked || !!s.blocked || (!s.selected && !!s.full) || (!!d.withdrawn && !s.selected);
         t.setAttribute("aria-pressed", s.selected ? "true" : "false");
         t._badge.hidden = !s.selected;
         t._badge.textContent = s.selected ? s.badge : "";
         t.setAttribute("aria-label", d.full_name + ", " + d.team_name +
-          (s.selected ? ", selected " + s.badge : "") + (s.blocked ? ", not available" : ""));
+          (s.selected ? ", selected " + s.badge : "") + (s.blocked ? ", not available" : "") +
+          (d.withdrawn ? ", withdrawn" : ""));
       });
     }
 
@@ -276,8 +350,8 @@
         if (d) {
           btn.style.setProperty("--team", teamColor(d.team_name));
           btn.appendChild(el("span", "slot-code", d.code));
-          btn.appendChild(el("span", "slot-name", lastName(d.full_name)));
-          btn.setAttribute("aria-label", "Position " + (index + 1) + ": " + d.full_name +
+          btn.appendChild(el("span", "slot-name", lastName(d.full_name) + (d.withdrawn ? " (withdrawn)" : "")));
+          btn.setAttribute("aria-label", "Position " + (index + 1) + ": " + d.full_name + (d.withdrawn ? " (withdrawn)" : "") +
             (moving === index ? ". Selected. Choose another position to swap." : ". Choose to move or swap."));
           btn.setAttribute("aria-pressed", moving === index ? "true" : "false");
           btn.addEventListener("click", function () { handlers.onTap(index); });
@@ -446,7 +520,7 @@
       b.style.setProperty("--team", teamColor(d.team_name));
       if (d.car_number) { b.appendChild(el("span", "dc-num", String(d.car_number))); }
       b.appendChild(el("span", "dc-code", d.code));
-      b.appendChild(el("span", "dc-name", lastName(d.full_name)));
+      b.appendChild(el("span", "dc-name", lastName(d.full_name) + (d.withdrawn ? " (withdrawn)" : "")));
       b.addEventListener("click", function () { chipCfg.onToggle(d.id); });
       chips[d.id] = b;
       wrap.appendChild(b);
@@ -459,7 +533,8 @@
         var s = chipCfg.stateOf(d.id);
         b.classList.toggle("is-selected", !!s.selected);
         b.classList.toggle("is-disabled", !!s.disabled && !s.selected);
-        b.disabled = locked || (!!s.disabled && !s.selected);
+        b.classList.toggle("is-withdrawn", !!d.withdrawn);
+        b.disabled = locked || (!!s.disabled && !s.selected) || (!!d.withdrawn && !s.selected);
         b.setAttribute("aria-pressed", s.selected ? "true" : "false");
         b.setAttribute("aria-label", d.full_name + ", " + d.team_name +
           (s.selected ? ", selected" : "") + (s.why ? ", " + s.why : ""));
@@ -938,6 +1013,75 @@
 
   // ---------- loading ----------
 
+  // "Weekend changes" strip: the driver changes that apply to the selected session, and a notice for each withdrawn
+  // driver the player already saved. Saved picks are never changed here; the swap button only changes the form.
+  function renderChanges(w) {
+    changesEl.textContent = "";
+    var info = currentInfo;
+    var changes = (info && info.changes) || [];
+    var ids = Object.keys(currentStandIns);
+    if (changes.length === 0 && ids.length === 0) { changesEl.hidden = true; return; }
+
+    changesEl.appendChild(el("h3", "wc-title", "Weekend changes"));
+
+    changes.forEach(function (c) {
+      var out = (c.out && (c.out.code + " " + c.out.name)) || "a driver";
+      var inn = (c.in && (c.in.code + " " + c.in.name)) || "a driver";
+      var line = c.status === "applied"
+        ? out + " is replaced by " + inn + " for this session."
+        : "The replacement of " + out + " by " + inn + " was reverted for this session.";
+      var when = c.changed_at
+        ? " " + new Date(c.changed_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) + "."
+        : "";
+      changesEl.appendChild(el("p", "wc-item", line + when));
+    });
+
+    ids.forEach(function (wId) {
+      var wd = findIn(allDrivers, wId);
+      var rd = findIn(allDrivers, currentStandIns[wId]);
+      if (!wd) { return; }
+      var box = el("div", "wc-notice");
+      var text = "Your saved prediction includes " + wd.code + " " + wd.full_name + ", who is no longer in the lineup. " +
+        "It stays saved and still counts, whatever you decide.";
+      if (rd && isRanking(w.target_type)) {
+        text += " " + rd.code + " " + rd.full_name + " took his place. You can swap him in, then save.";
+      } else if (rd) {
+        text += " To change it, remove " + wd.code + " and choose " + rd.code + ".";
+      }
+      box.appendChild(el("p", "wc-text", text));
+      if (rd && isRanking(w.target_type) && !isLocked()) {
+        var btn = el("button", "btn btn-small", "Use " + rd.code + " instead of " + wd.code);
+        btn.type = "button";
+        btn.addEventListener("click", function () { swapStandIn(w, wId); });
+        box.appendChild(btn);
+      }
+      changesEl.appendChild(box);
+    });
+    changesEl.hidden = false;
+  }
+
+  // Player-initiated: replace a withdrawn driver by his replacement in the form. Nothing is saved until "Save prediction".
+  function swapStandIn(w, wId) {
+    if (isLocked() || !currentType) { return; }
+    var rId = currentStandIns[wId];
+    var r = findIn(allDrivers, rId);
+    if (!r) { return; }
+    drivers = drivers.filter(function (d) { return d.id !== wId; });
+    drivers.push(copyDriver(r));
+    currentExisting = replaceDriverInPicks(currentExisting, wId, rId);
+    delete currentStandIns[wId];
+    try {
+      controller = buildForm(currentType, currentExisting);
+    } catch (err) {
+      setMessage("error", err.message);
+      return;
+    }
+    controller.refresh();
+    saveButton.disabled = isLocked();
+    renderChanges(w);
+    setMessage("", "Swapped in the form only. Save your prediction to keep this change.");
+  }
+
   function loadSession(sessionId) {
     var token = ++loadToken;
     var w = windowsById[sessionId];
@@ -950,23 +1094,44 @@
       new Date(w.lock_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) +
       " (your local time). You can change your picks until then.";
     fieldsEl.textContent = "";
+    changesEl.textContent = "";
+    changesEl.hidden = true;
     saveButton.disabled = true;
     controller = null;
     setStatus("", "");
 
     return Promise.all([
-      client.from("drivers").select("id, code, full_name, team_name, car_number")
-        .eq("season", ev.season).eq("is_active", true).order("code"),
+      client.from("drivers").select("id, code, full_name, team_name, car_number, is_active")
+        .eq("season", ev.season).order("code"),
       client.from("predictions").select("picks")
-        .eq("user_id", user.id).eq("session_id", sessionId).limit(1)
+        .eq("user_id", user.id).eq("session_id", sessionId).limit(1),
+      client.rpc("prediction_form_lineup", { p_session_id: sessionId })
     ]).then(function (results) {
       if (token !== loadToken) { return; }
       var driversResult = results[0];
       var existingResult = results[1];
+      var lineupResult = results[2];
       if (driversResult.error) { throw driversResult.error; }
       if (existingResult.error) { throw existingResult.error; }
 
-      drivers = driversResult.data || [];
+      var info = null;
+      if (lineupResult.error) {
+        if (!isMissingFunction(lineupResult.error)) { throw lineupResult.error; }
+        console.warn("prediction_form_lineup is not installed yet (033_prediction_form_lineup.sql); using the standard lineup.");
+      } else {
+        info = lineupResult.data;
+      }
+
+      allDrivers = driversResult.data || [];
+      currentInfo = info;
+      currentStandIns = {};
+      if (info && info.use === true) {
+        currentStandIns = JSON.parse(JSON.stringify(info.stand_ins || {}));
+        drivers = poolFor(w.target_type, allDrivers, info);
+      } else {
+        // No substitution applies: exactly the previous behaviour (the active drivers of the season).
+        drivers = allDrivers.filter(function (d) { return d.is_active; });
+      }
       if (drivers.length === 0) {
         setMessage("error", "The driver list for this season has not been loaded yet.");
         return;
@@ -976,6 +1141,8 @@
       var existing = existingResult.data && existingResult.data[0]
         ? existingResult.data[0].picks
         : null;
+      currentType = w.target_type;
+      currentExisting = existing;
       try {
         controller = buildForm(w.target_type, existing);
       } catch (err) {
@@ -986,6 +1153,7 @@
       controller.refresh();
       saveButton.disabled = isLocked();
       scheduleLockCheck();
+      renderChanges(w);
     });
   }
 
