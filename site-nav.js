@@ -1,7 +1,8 @@
 // Lights Out: shared navigation. One source for the top bar and the mobile bottom bar.
 // Add <script src="site-nav.js"></script> as the first thing inside <body> on every page,
 // and link site-chrome.css in <head>. The script runs before the page is painted, so
-// there is no flash. Nothing here reads user data; the markup is fixed.
+// there is no flash. This file reads no user data; the markup is fixed. The unread-notification badge is a separate
+// script (nav-badge.js) that this file loads: it reads only the signed-in player's own unread count.
 (function () {
   "use strict";
 
@@ -87,6 +88,12 @@
     window.LO_PWA.prompt = null;
     window.dispatchEvent(new Event("lo-installed"));
   });
+
+  // Unread-notification badge on the Predictions link (loads after the page; does nothing without the site configuration).
+  var badgeScript = document.createElement("script");
+  badgeScript.src = "nav-badge.js";
+  badgeScript.defer = true;
+  document.head.appendChild(badgeScript);
 
   if ("serviceWorker" in navigator && (window.location.protocol === "https:" || window.location.hostname === "localhost")) {
     window.addEventListener("load", function () {

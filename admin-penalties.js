@@ -61,6 +61,19 @@
     });
   }
 
+  // Ask the push function to deliver the new change notices right away (otherwise the 15-minute schedule does).
+  // Best effort: a failure here changes nothing.
+  function flushPush() {
+    client.auth.getSession().then(function (r) {
+      var s = r.data && r.data.session;
+      if (!s) { return null; }
+      var base = String(cfg.SUPABASE_URL || "").replace(/\/+$/, "");
+      return window.fetch(base + "/functions/v1/send-reminders?task=notices", {
+        headers: { authorization: "Bearer " + s.access_token, apikey: cfg.SUPABASE_PUBLISHABLE_KEY }
+      });
+    }).catch(function () { /* the schedule delivers it anyway */ });
+  }
+
   function errorText(err, fallback) {
     return (err && err.message) ? err.message : fallback;
   }
@@ -358,6 +371,7 @@
         state.busy = false;
         if (res.error) { throw res.error; }
         var out = res.data || {};
+        flushPush();
         setMessage("ok", "Grid penalty registered. " + (out.notified || 0) + (out.notified === 1 ? " player was" : " players were") + " notified.");
         return loadHistory().then(function () { buildForm(); });
       }).catch(function (err) {
@@ -490,6 +504,7 @@
         state.busy = false;
         if (res.error) { throw res.error; }
         var out = res.data || {};
+        flushPush();
         setMessage("ok", (replacement ? "Penalty corrected. " : "Penalty revoked. ") + (out.notified || 0) +
           (out.notified === 1 ? " player was" : " players were") + " notified.");
         return loadHistory();

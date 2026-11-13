@@ -169,6 +169,7 @@
         if (!r.read_at && (ids === null || ids.indexOf(r.id) !== -1)) { r.read_at = now; }
       });
       render();
+      window.dispatchEvent(new Event("lo-notices-changed"));
     }).catch(function (err) {
       state.busy = false;
       console.error(err);
