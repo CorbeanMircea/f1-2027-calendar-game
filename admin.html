@@ -80,6 +80,21 @@
         <p class="message" id="changes-message" role="status" aria-live="polite"></p>
       </section>
       <!-- END NEW (M2b) -->
+
+      <!-- NEW (M4): grid penalties -->
+      <section id="penalties-admin" hidden>
+        <div class="ss-heading">
+          <h2 class="admin-section-title">Grid penalties</h2>
+          <button type="button" class="btn btn-small" id="penalties-refresh">Refresh</button>
+        </div>
+        <p class="placeholder">Record a grid penalty for a Sprint or a Race. It is information only: it does not change any result, classification, prediction or score. Players who saved a prediction for that session are notified.</p>
+        <div id="penalties-form"></div>
+        <h3 class="dc-subtitle">Registered penalties</h3>
+        <p class="placeholder" id="penalties-empty" hidden>No grid penalties have been registered.</p>
+        <div id="penalties-list"></div>
+        <p class="message" id="penalties-message" role="status" aria-live="polite"></p>
+      </section>
+      <!-- END NEW (M4) -->
       <h2 class="admin-section-title">Import log</h2>
       <div class="board-table-wrap">
         <table class="board-table log-table">
@@ -105,6 +120,7 @@
   <script src="admin.js"></script>
   <script src="admin-season.js"></script> <!-- NEW (B2.3b) -->
   <script src="admin-changes.js"></script> <!-- NEW (M2b) -->
+  <script src="admin-penalties.js"></script> <!-- NEW (M4) -->
   <script src="admin-link.js"></script>
 </body>
 </html>

@@ -1019,8 +1019,9 @@
     changesEl.textContent = "";
     var info = currentInfo;
     var changes = (info && info.changes) || [];
+    var penalties = (info && info.penalties) || [];
     var ids = Object.keys(currentStandIns);
-    if (changes.length === 0 && ids.length === 0) { changesEl.hidden = true; return; }
+    if (changes.length === 0 && ids.length === 0 && penalties.length === 0) { changesEl.hidden = true; return; }
 
     changesEl.appendChild(el("h3", "wc-title", "Weekend changes"));
 
@@ -1035,6 +1036,27 @@
         : "";
       changesEl.appendChild(el("p", "wc-item", line + when));
     });
+
+    penalties.forEach(function (p) {
+      var who = p.driver ? p.driver.code + " " + p.driver.name : "A driver";
+      var what = p.penalty_type === "places"
+        ? p.places + "-place grid penalty"
+        : (p.penalty_type === "pit_lane" ? "pit-lane start" : "start from the back of the grid");
+      var where = "";
+      if (p.original_position && p.adjusted_position) {
+        where = " (from P" + p.original_position + " to P" + p.adjusted_position + ")";
+      } else if (p.adjusted_position) {
+        where = " (starts P" + p.adjusted_position + ")";
+      }
+      var when = p.registered_at
+        ? " Registered " + new Date(p.registered_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) + "."
+        : "";
+      changesEl.appendChild(el("p", "wc-item", "Grid penalty: " + who + ", " + what + where + ". " + p.reason + "." + when));
+    });
+    if (penalties.length > 0) {
+      changesEl.appendChild(el("p", "wc-item wc-note",
+        "A grid penalty changes the starting grid only. Your saved prediction and the scoring rules are not affected."));
+    }
 
     ids.forEach(function (wId) {
       var wd = findIn(allDrivers, wId);

@@ -16,6 +16,9 @@
 // and nothing is saved for it.
 // M2: if the results feed lists a driver who is not in the session's lineup (for example a substitute who has not been
 // registered yet), the session is logged as an error that names those drivers, and nothing is saved for it.
+// M4: Sprint Qualifying is derived from the sprint starting grid. If a grid penalty is registered for the Sprint, or the
+// sprint grid shows a driver without a normal grid slot (for example a pit-lane start), the derived classification would be
+// wrong, so no Sprint Qualifying result is created: it is logged as skipped and entered by an admin instead.
 
 import { createClient } from "npm:@supabase/supabase-js@2.100.1";
 
@@ -286,6 +289,25 @@ async function processEvent(db: Row, ev: Row, apply: boolean, cache: Map<string,
       continue;
     }
     try {
+      if (w.type === "sprint_qualifying") {
+        const check = await db.rpc("session_has_grid_penalty", { p_session_id: ev.id + "-sprint" });
+        if (check.error) {
+          throw new Error("Could not check for Sprint grid penalties: " + check.error.message);
+        }
+        const noGridSlot = sprintRows.some((r: Row) => num(r.grid) < 1);
+        if (check.data === true || noGridSlot) {
+          await log(
+            w.type,
+            "skipped",
+            "Sprint Qualifying is derived from the sprint starting grid, which " +
+              (check.data === true ? "a registered grid penalty" : "a pit-lane start or missing grid slot") +
+              " changes. Enter the Sprint Qualifying result manually in Admin.",
+            null,
+            round,
+          );
+          continue;
+        }
+      }
       const allIds = w.lineup ? await lineupExternal(db, sessionId) : [];
       if (w.lineup) {
         const feed = w.type === "qualifying" ? qualifyingRows : sprintRows;
