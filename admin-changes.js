@@ -6,10 +6,11 @@
 (function () {
   "use strict";
 
-  // Set this to true once the prediction form shows the updated lineup (milestone M3). Until then, registering a
-  // substitution for a session whose predictions are still open would stop players from saving a complete prediction,
-  // so the screen asks for an explicit acknowledgement first.
-  var FORM_AWARE = false;
+  // true = the Predictions page shows the updated lineup (milestone M3 is deployed). Deploy this file only after
+  // predict-tiles.js and 033_prediction_form_lineup.sql are live. If you ever need to go back to the old prediction
+  // form, set it to false: registering a substitution for a session whose predictions are still open would then stop
+  // players from saving a complete prediction, so the screen asks for an explicit acknowledgement first.
+  var FORM_AWARE = true;
 
   var cfg = window.APP_CONFIG || {};
   var section = document.getElementById("changes-admin");
@@ -336,7 +337,7 @@
       var text = el("span", "dc-session-text");
       text.appendChild(el("strong", "", typeLabel(s.session_type)));
       var timing = s.timing === "taken_place" ? "Already taken place" : (s.timing === "unknown" ? "Start time unknown" : "Upcoming");
-      text.appendChild(el("span", "dc-session-meta", when(s.start_utc) + " \u00b7 " + timing + " \u00b7 " + s.predictions +
+      text.appendChild(el("span", "dc-session-meta", (s.start_utc ? when(s.start_utc) + " \u00b7 " : "") + timing + " \u00b7 " + s.predictions +
         (s.predictions === 1 ? " saved prediction" : " saved predictions")));
       if (s.reason) { text.appendChild(el("span", "dc-session-note", s.reason)); }
       row.appendChild(cb);
@@ -414,7 +415,7 @@
         if (res.error) { throw res.error; }
         var out = res.data || {};
         setMessage("ok", "Substitution registered. " + (out.notified || 0) + (out.notified === 1 ? " player was" : " players were") +
-          " notified. Reload this page before entering or correcting results for this event, so the new driver appears.");
+          " notified.");
         return Promise.all([loadDrivers(), loadHistory()]).then(function () { buildForm(); });
       }).catch(function (err) {
         state.busy = false;
@@ -524,6 +525,16 @@
     go.addEventListener("click", function () {
       if (state.busy) { return; }
       if (reason.value.trim().length < 3) { setMessage("error", "A reason of at least three characters is required."); return; }
+      // Exactly the sessions shown: those with a known start time, plus the unknown-time ones that are ticked.
+      var ticked = unknownBoxes.filter(function (b) { return b.checked; }).map(function (b) { return b.getAttribute("data-session"); });
+      var targets = applied.filter(function (id) {
+        var s = sessions[id];
+        return (s && s.start_utc) || ticked.indexOf(id) !== -1;
+      });
+      if (targets.length === 0) {
+        setMessage("error", "Tick at least one session to revert.");
+        return;
+      }
       if (!window.confirm("Revert this substitution (" + ev.name + ")?\n\nPlayers with a saved prediction for the affected sessions will be notified.")) { return; }
       state.busy = true;
       go.disabled = true;
@@ -531,8 +542,8 @@
       client.rpc("admin_revert_substitution", {
         p_substitution_id: sub.id,
         p_reason: reason.value.trim(),
-        p_session_ids: null,
-        p_confirm_unknown: unknownBoxes.filter(function (b) { return b.checked; }).map(function (b) { return b.getAttribute("data-session"); })
+        p_session_ids: targets,
+        p_confirm_unknown: ticked
       }).then(function (res) {
         state.busy = false;
         if (res.error) { throw res.error; }
