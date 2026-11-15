@@ -12,6 +12,8 @@
 //   VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT (for example mailto:you@example.com)
 //   IMPORT_SECRET is the same one the result importer already uses.
 // Deploy with JWT verification OFF (the function checks the secret or the login itself).
+// Browser calls (the Account page test, the Admin screens) first send a CORS preflight (OPTIONS) request without a login.
+// The function answers it itself, and adds the CORS headers to every response, so it works whatever the gateway does.
 
 const SITE_URL = "https://corbeanmircea.github.io/f1-2027-calendar-game/";
 
@@ -108,6 +110,12 @@ export function noticePayload(row: NoticeRow) {
       title = `Grid penalty withdrawn: ${gp}`;
       body = `${code(p.driver)} (${session}): the penalty was withdrawn. ${note}`;
       break;
+    case "prediction_corrected":
+      title = p.reverted ? `Prediction restored: ${gp}` : `Prediction corrected: ${gp}`;
+      body = p.reverted
+        ? `An administrator restored your original ${session} prediction.`
+        : `An administrator corrected your ${session} prediction. This was not a change made by you.`;
+      break;
     case "grid_penalty_updated":
       title = `Grid penalty corrected: ${gp}`;
       body = `${code(p.driver)} (${session}): now ${penaltyWords(p.penalty)}. ${note}`;
@@ -116,8 +124,16 @@ export function noticePayload(row: NoticeRow) {
   return { title, body, url: "predict.html", tag: `notice-${row.notification_id}` };
 }
 
+// Logins are bearer tokens in a header (no cookies), so any origin may read the answer; the function still checks the login.
+const CORS = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-headers": "authorization, apikey, content-type, x-client-info, x-import-secret",
+  "access-control-allow-methods": "GET, POST, OPTIONS",
+  "access-control-max-age": "86400",
+};
+
 function json(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+  return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json", ...CORS } });
 }
 
 type Env = { get(name: string): string | undefined };
@@ -125,6 +141,7 @@ type Env = { get(name: string): string | undefined };
 type Deps = { createClient: (url: string, key: string) => any; webpush: any };
 
 export async function handle(req: Request, env: Env, deps: Deps): Promise<Response> {
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   try {
     const url = new URL(req.url);
     const supabaseUrl = env.get("SUPABASE_URL");

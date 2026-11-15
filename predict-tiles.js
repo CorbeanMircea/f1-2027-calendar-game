@@ -71,6 +71,7 @@
   var currentExisting = null;
   var currentInfo = null;
   var currentStandIns = {};
+  var currentCorrections = [];
   var controller = null;
   var loadToken = 0;
   var lockMs = null;
@@ -188,6 +189,21 @@
     if (out.fastest_lap === from) { out.fastest_lap = to; }
     if (out.dnf_driver === from) { out.dnf_driver = to; }
     return out;
+  }
+
+  // Short text of a picks object with driver codes (for the "your original submission" line).
+  function picksSummary(type, p) {
+    function names(ids) {
+      return (ids || []).map(function (id) { var d = findIn(allDrivers, id); return d ? d.code : id; }).join(", ");
+    }
+    if (!p) { return ""; }
+    if (isRanking(type)) {
+      return "Out first: " + names(p.q1_out) + ". Out second: " + names(p.q2_out) + ". Final order: " + names(p.q3_order) + ".";
+    }
+    var parts = ["Top 8: " + names(p.top8)];
+    if (p.fastest_lap) { parts.push("Fastest lap: " + names([p.fastest_lap])); }
+    if (p.dnf_drivers && p.dnf_drivers.length) { parts.push("DNF: " + names(p.dnf_drivers)); }
+    return parts.join(". ") + ".";
   }
 
   function isMissingFunction(err) {
@@ -1021,7 +1037,7 @@
     var changes = (info && info.changes) || [];
     var penalties = (info && info.penalties) || [];
     var ids = Object.keys(currentStandIns);
-    if (changes.length === 0 && ids.length === 0 && penalties.length === 0) { changesEl.hidden = true; return; }
+    if (changes.length === 0 && ids.length === 0 && penalties.length === 0 && currentCorrections.length === 0) { changesEl.hidden = true; return; }
 
     changesEl.appendChild(el("h3", "wc-title", "Weekend changes"));
 
@@ -1069,6 +1085,20 @@
     if (penalties.length > 0) {
       changesEl.appendChild(el("p", "wc-item wc-note",
         "A grid penalty changes the starting grid only. Your saved prediction and the scoring rules are not affected."));
+    }
+
+    // Corrections made by an administrator to THIS player's saved prediction (never a change made by the player).
+    if (currentCorrections.length > 0) {
+      var last = currentCorrections[currentCorrections.length - 1];
+      var first = currentCorrections[0];
+      var note = el("div", "wc-notice");
+      note.appendChild(el("p", "wc-text",
+        "An administrator corrected your saved prediction on " +
+        new Date(last.created_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) + ". Reason: " + last.reason +
+        ". This was not a change made by you. You submitted your original prediction on " +
+        new Date(first.original_created_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) + "."));
+      note.appendChild(el("p", "wc-text", "Your original picks: " + picksSummary(w.target_type, first.before_picks)));
+      changesEl.appendChild(note);
     }
 
     ids.forEach(function (wId) {
@@ -1140,12 +1170,16 @@
         .eq("season", ev.season).order("code"),
       client.from("predictions").select("picks")
         .eq("user_id", user.id).eq("session_id", sessionId).limit(1),
-      client.rpc("prediction_form_lineup", { p_session_id: sessionId })
+      client.rpc("prediction_form_lineup", { p_session_id: sessionId }),
+      client.from("prediction_corrections")
+        .select("id, action, reason, created_at, before_picks, original_created_at, reverts_id")
+        .eq("user_id", user.id).eq("session_id", sessionId).order("created_at")
     ]).then(function (results) {
       if (token !== loadToken) { return; }
       var driversResult = results[0];
       var existingResult = results[1];
       var lineupResult = results[2];
+      var correctionsResult = results[3];
       if (driversResult.error) { throw driversResult.error; }
       if (existingResult.error) { throw existingResult.error; }
 
@@ -1158,6 +1192,14 @@
       }
 
       allDrivers = driversResult.data || [];
+      // The corrections still in force (a correction that was reverted no longer counts). If the table is not installed yet, none.
+      currentCorrections = [];
+      if (!correctionsResult.error) {
+        var rows = correctionsResult.data || [];
+        var undone = {};
+        rows.forEach(function (c) { if (c.action === "revert") { undone[c.reverts_id] = true; } });
+        currentCorrections = rows.filter(function (c) { return c.action === "correct" && !undone[c.id]; });
+      }
       currentInfo = info;
       currentStandIns = {};
       if (info && info.use === true) {

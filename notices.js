@@ -112,6 +112,19 @@
           (p.penalty && p.penalty.reason ? " " + p.penalty.reason + "." : "") + " " + PENALTY_NOTE
       };
     }
+    if (n.kind === "prediction_corrected") {
+      var score = "";
+      if (typeof p.points_before === "number" && typeof p.points_after === "number" && p.points_before !== p.points_after) {
+        score = " Your score for this session changed from " + p.points_before + " to " + p.points_after + " points.";
+      }
+      return {
+        title: (p.reverted ? "Prediction restored: " : "Prediction corrected: ") + gp + " (" + sessionName(p.session) + ")",
+        body: (p.reverted
+          ? "An administrator restored your original " + sessionName(p.session) + " prediction."
+          : "An administrator corrected your " + sessionName(p.session) + " prediction. This was not a change made by you.") +
+          (p.reason ? " Reason: " + p.reason + "." : "") + score + " Your original submission is kept in the history."
+      };
+    }
     return { title: "Update: " + gp, body: "There is an update for this weekend. " + KEEP };
   }
 

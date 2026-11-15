@@ -95,6 +95,21 @@
         <p class="message" id="penalties-message" role="status" aria-live="polite"></p>
       </section>
       <!-- END NEW (M4) -->
+
+      <!-- NEW (M6): prediction corrections -->
+      <section id="corrections-admin" hidden>
+        <div class="ss-heading">
+          <h2 class="admin-section-title">Prediction corrections</h2>
+          <button type="button" class="btn btn-small" id="corrections-refresh">Refresh</button>
+        </div>
+        <p class="placeholder">Correct a saved prediction after the session has locked, for example to put the replacement of a substituted driver into it. This is exceptional: it never reopens a session, the player's submission time is not changed, his original picks are kept, and only his score for that session is recalculated. The player is notified.</p>
+        <div id="corrections-form"></div>
+        <h3 class="dc-subtitle">Corrections made</h3>
+        <p class="placeholder" id="corrections-empty" hidden>No predictions have been corrected.</p>
+        <div id="corrections-list"></div>
+        <p class="message" id="corrections-message" role="status" aria-live="polite"></p>
+      </section>
+      <!-- END NEW (M6) -->
       <h2 class="admin-section-title">Import log</h2>
       <div class="board-table-wrap">
         <table class="board-table log-table">
@@ -121,6 +136,7 @@
   <script src="admin-season.js"></script> <!-- NEW (B2.3b) -->
   <script src="admin-changes.js"></script> <!-- NEW (M2b) -->
   <script src="admin-penalties.js"></script> <!-- NEW (M4) -->
+  <script src="admin-corrections.js"></script> <!-- NEW (M6) -->
   <script src="admin-link.js"></script>
 </body>
 </html>
