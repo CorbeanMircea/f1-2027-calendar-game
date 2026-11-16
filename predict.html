@@ -18,8 +18,9 @@
   <link rel="stylesheet" href="season-picks.css"> <!-- NEW (B2.2) -->
   <link rel="stylesheet" href="predict-changes.css"> <!-- NEW (M3) -->
   <link rel="stylesheet" href="notices.css"> <!-- NEW (M5) -->
+  <link rel="stylesheet" href="predict-layout.css"> <!-- NEW (R1): layout, load last -->
 </head>
-<body>
+<body class="pl-page">
   <script src="site-nav.js"></script>
   <header class="pg-head">
     <div class="pg-head-in">
@@ -29,7 +30,7 @@
     </div>
   </header>
 
-  <main class="account-wrap">
+  <main class="account-wrap pl-wrap">
     <section class="panel" id="gate" hidden>
       <h2>Sign in required</h2>
       <p class="placeholder" id="gate-text"></p>
@@ -37,6 +38,17 @@
         <a class="btn btn-primary" href="account.html">Go to Account</a>
       </div>
     </section>
+
+    <!-- NEW (R1): left rail (desktop) or context bar (phone) and the main column -->
+    <div class="pl" id="pl" data-view="session">
+    <aside class="pl-rail" id="pl-rail" aria-label="Choose what to predict">
+      <div class="pl-rail-in" id="pl-rail-in"></div>
+    </aside>
+    <div class="pl-main">
+    <div class="pl-banner" id="pl-banner" hidden>
+      <p>Season picks are open. Pick your Drivers' and Constructors' champions.</p>
+      <button type="button" class="btn btn-small" id="pl-banner-go">Open season picks</button>
+    </div>
 
     <!-- NEW (M5): notifications (informational only) -->
     <section class="notices-card" id="notices-card" aria-label="Notifications" hidden>
@@ -98,6 +110,9 @@
     <!-- END NEW (B2.2) -->
 
     <p class="message" id="pred-message" role="status" aria-live="polite"></p>
+    </div>
+    </div>
+    <!-- END NEW (R1) -->
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1/dist/umd/supabase.js"></script>
@@ -105,6 +120,7 @@
   <script src="predict-tiles.js"></script>
   <script src="predict-lights.js"></script>
   <script src="predict-ui.js"></script>
+  <script src="predict-shell.js"></script> <!-- NEW (R1) -->
   <script src="season-picks.js"></script> <!-- NEW (B2.2) -->
   <script src="notices.js"></script> <!-- NEW (M5) -->
   <script src="admin-link.js"></script>

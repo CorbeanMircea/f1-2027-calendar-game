@@ -1,0 +1,218 @@
+/* Lights Out: Predictions page layout (redesign phase 1: shell).
+   Everything is scoped to body.pl-page, so no other page changes. Load AFTER every other stylesheet.
+   Desktop (1000px and up): a sticky rail on the left (Grand Prix, sessions, season picks) and the form on the right.
+   Below 1000px the rail becomes a compact bar above the form. */
+
+body.pl-page { --maxw: 1440px; }
+
+body.pl-page .pg-head-in { padding-top: 18px; padding-bottom: 14px; }
+body.pl-page .pg-title { font-size: clamp(2.1rem, 6vw, 3.2rem); }
+
+body.pl-page .account-wrap.pl-wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 20px var(--gutter) 56px;
+}
+
+.pl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.pl-main { min-width: 0; }
+.pl-rail { min-width: 0; }
+
+/* Until the shell has built the rail, the page looks and works as before (the old tabs stay visible). */
+.pl:not(.shell-ready) .pl-rail,
+.pl.no-rail .pl-rail { display: none; }
+.pl.shell-ready #form-area .sess-tabs,
+.pl.shell-ready #form-area .sess-ctx { display: none; }
+
+@media (min-width: 1000px) {
+  .pl.shell-ready:not(.no-rail) { grid-template-columns: 300px minmax(0, 1fr); gap: 24px; }
+
+  .pl-rail {
+    position: sticky;
+    top: calc(var(--header-h) + 16px);
+    max-height: calc(100vh - var(--header-h) - 32px);
+    overflow-y: auto;
+  }
+}
+
+/* ----- rail ----- */
+.pl-rail-in { display: grid; gap: 12px; }
+
+.pl-card { border: 1px solid var(--hair-strong); background: var(--panel); }
+
+.pl-event { padding: 12px; }
+
+.pl-label {
+  display: block;
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.pl-event-row { display: flex; align-items: stretch; gap: 6px; }
+
+.pl-nav-btn {
+  flex: none;
+  width: 40px;
+  border: 1px solid var(--hair-strong);
+  border-radius: 0;
+  background: #0a0b0d;
+  color: var(--text);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pl-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.pl-nav-btn:focus-visible { outline: 2px solid var(--yellow); outline-offset: 1px; }
+
+.pl-event-select {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--hair-strong);
+  border-radius: 0;
+  background: #0a0b0d;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.pl-event-select:focus-visible { outline: 2px solid var(--yellow); outline-offset: 1px; }
+
+.pl-event-sub { margin: 8px 0 0; color: var(--muted); font-size: 0.82rem; }
+
+.pl-sessions { margin: 0; padding: 0; list-style: none; }
+
+.pl-sess {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  border-bottom: 1px solid var(--hair);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: inset 3px 0 0 transparent;
+  color: var(--muted);
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.2s, background-color 0.2s, box-shadow 0.25s var(--ease-out);
+}
+
+.pl-sessions li:last-child .pl-sess { border-bottom: 0; }
+
+.pl-sess-name {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.pl-sess-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 0.78rem; }
+.pl-lock { color: var(--muted); }
+
+.pl-sess:hover { color: var(--text); }
+.pl-sess[aria-current="true"] { background: #181b20; box-shadow: inset 3px 0 0 var(--yellow); color: var(--text); }
+.pl-sess:focus-visible { outline: 2px solid var(--yellow); outline-offset: -2px; }
+
+.pl-chip {
+  padding: 1px 7px;
+  border: 1px solid var(--hair-strong);
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.pl-chip.is-todo { border-color: var(--yellow); color: var(--yellow); }
+.pl-chip.is-saved { border-color: transparent; padding-left: 0; color: var(--text); }
+.pl-chip.is-saved::before { content: "\2713\00a0"; color: var(--yellow); }
+
+/* Season picks is the last row of the same list, set apart from the sessions */
+.pl-season-item { border-top: 1px solid var(--hair-strong); }
+
+/* ----- banner and head of the main column ----- */
+.pl-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--yellow);
+  background: var(--panel);
+}
+
+.pl-banner[hidden] { display: none; }
+.pl-banner p { margin: 0; }
+.pl-banner .btn { min-height: 38px; padding: 0 16px; font-size: 1.05rem; }
+
+.pl-head { margin: 0 0 12px; }
+.pl-head-ev {
+  margin: 0 0 2px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.pl-head-ty { margin: 0; font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 900; text-transform: uppercase; }
+
+/* ----- the two views of the main column ----- */
+.pl .season-card { margin: 0; }
+.pl[data-view="session"] .season-card { display: none; }
+.pl[data-view="season"] #predict-panel,
+.pl[data-view="season"] #notices-card { display: none; }
+.pl[data-view="season"] .season-card[hidden] { display: none; }
+
+/* ----- phone and tablet: the rail is a compact bar above the form ----- */
+@media (max-width: 999px) {
+  .pl-rail-in { gap: 8px; }
+  .pl-event { padding: 8px 10px; }
+  .pl-event .pl-label, .pl-event-sub { display: none; }
+  .pl-nav-btn { width: 44px; }
+  .pl-event-select { padding: 10px; }
+
+  .pl-sessions {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .pl-sessions li { flex: 0 0 auto; scroll-snap-align: start; }
+  .pl-season-item { border-top: 0; border-left: 1px solid var(--hair-strong); }
+
+  .pl-sess {
+    min-width: 112px;
+    padding: 8px 14px 9px;
+    border-bottom: 0;
+    border-right: 1px solid var(--hair);
+    box-shadow: inset 0 3px 0 transparent;
+  }
+
+  .pl-sess[aria-current="true"] { box-shadow: inset 0 3px 0 var(--yellow); }
+  .pl-sess-name { font-size: 1.2rem; }
+  .pl-lock { display: none; }
+  .pl-head-ev { display: none; }
+  .pl-head { margin-bottom: 8px; }
+  .pl-head-ty { font-size: 1.8rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pl-sess { transition: none; }
+}
