@@ -63,9 +63,28 @@
     var out = [];
     for (var i = 0; i < select.options.length; i++) {
       var p = split(select.options[i].textContent);
-      out.push({ id: select.options[i].value, event: p.event, type: p.type });
+      out.push({
+        id: select.options[i].value,
+        eventId: select.options[i].getAttribute("data-event-id"),
+        event: p.event,
+        type: p.type
+      });
     }
     return out;
+  }
+
+  function applyEventTheme(current) {
+    if (!current) {
+      pl.style.removeProperty("--event-atmos");
+      pl.style.removeProperty("--event-accent");
+      pl.style.removeProperty("--event-highlight");
+      return;
+    }
+
+    var theme = window.LO_THEME.forEvent({ id: current.eventId, name: current.event });
+    pl.style.setProperty("--event-atmos", theme.atmos);
+    pl.style.setProperty("--event-accent", theme.accent);
+    pl.style.setProperty("--event-highlight", theme.highlight);
   }
 
   function seasonInfo() {
@@ -115,6 +134,7 @@
     }
 
     if (opts.length === 0 && !season) {
+      applyEventTheme(null);
       pl.classList.add("no-rail");
       banner.hidden = true;
       return;
@@ -124,6 +144,7 @@
     var current = null;
     for (var c = 0; c < opts.length; c++) { if (opts[c].id === select.value) { current = opts[c]; } }
     if (!current && opts.length) { current = opts[0]; }
+    applyEventTheme(current);
 
     // Sessions have appeared after an automatic switch to Season picks (the menu fills in a moment after the page loads): go back.
     if (opts.length > 0 && state.auto) {

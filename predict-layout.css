@@ -219,3 +219,118 @@ body.pl-page .account-wrap.pl-wrap {
 @media (prefers-reduced-motion: reduce) {
   .pl-sess { transition: none; }
 }
+
+/* Event palette accents follow the selected Grand Prix without changing status colors. */
+.pl {
+  --event-atmos: #8a8f98;
+  --event-accent: #b34c4c;
+  --event-highlight: #d6b86a;
+}
+
+#pl .pl-head {
+  min-height: 84px;
+  padding-left: 12px;
+  border-left: 3px solid var(--event-accent);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.025), transparent 82%);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--event-accent) 10%, transparent), transparent 82%);
+}
+
+#pl .pl-head-ev { color: var(--event-atmos); }
+#pl .pl-head-ty { color: var(--event-accent); }
+#pl .pl-event {
+  border-top: 2px solid var(--event-accent);
+  background: var(--panel);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--event-accent) 8%, var(--panel)), var(--panel) 60%);
+}
+#pl .pl-event-select:hover,
+#pl .pl-event-select:focus-visible { border-color: var(--event-accent); }
+#pl .pl-nav-btn:focus-visible,
+#pl .pl-event-select:focus-visible,
+#pl .pl-sess:focus-visible { outline-color: var(--event-highlight); }
+
+#pl .pl-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--event-atmos);
+}
+#pl .pl-label::before {
+  width: 6px;
+  height: 6px;
+  background: var(--event-accent);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--event-accent) 70%, transparent);
+  content: "";
+}
+#pl .pl-event-row { gap: 8px; }
+#pl .pl-nav-btn {
+  border-color: var(--hair-strong);
+  background: #0a0b0d;
+  color: var(--event-highlight);
+  transition: background-color 0.18s, border-color 0.18s, transform 0.18s;
+}
+#pl .pl-nav-btn:not(:disabled):hover {
+  border-color: var(--event-accent);
+  background: color-mix(in srgb, var(--event-accent) 12%, #0a0b0d);
+  transform: translateY(-1px);
+}
+#pl .pl-event-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 36px;
+  border-color: color-mix(in srgb, var(--event-accent) 48%, var(--hair-strong));
+  background-color: #0a0b0d;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--event-highlight) 50%),
+    linear-gradient(135deg, var(--event-highlight) 50%, transparent 50%);
+  background-position: calc(100% - 14px) 50%, calc(100% - 9px) 50%;
+  background-repeat: no-repeat;
+  background-size: 5px 5px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background-color 0.18s, border-color 0.18s, box-shadow 0.18s;
+}
+#pl .pl-event-select:hover { background-color: color-mix(in srgb, var(--event-accent) 7%, #0a0b0d); }
+#pl .pl-event-select:focus-visible {
+  border-color: var(--event-highlight);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--event-highlight) 20%, transparent);
+}
+
+#pl .pl-sess[aria-current="true"] {
+  background: #181b20;
+  background: color-mix(in srgb, var(--event-accent) 9%, #181b20);
+  box-shadow: inset 3px 0 0 var(--event-highlight);
+}
+#pl .pl-sess[aria-current="true"] .pl-sess-name { color: var(--event-highlight); }
+#pl .pl-chip.is-todo { border-color: var(--event-highlight); color: var(--event-highlight); }
+#pl .form-step h3 {
+  padding-left: 12px;
+  border-bottom-color: var(--event-atmos);
+  border-left: 2px solid var(--event-accent);
+}
+#pl .counter:not(.done) { border-color: var(--event-highlight); color: var(--event-highlight); }
+#pl .tile { transition: border-color 0.15s, background-color 0.15s, transform 0.15s; }
+#pl .tile.is-selected {
+  border-color: var(--event-highlight);
+  outline-color: var(--event-highlight);
+  background: #1c1f25;
+  background: color-mix(in srgb, var(--event-highlight) 9%, var(--panel));
+}
+#pl .slot.is-filled { border-color: var(--event-highlight); }
+#pl .dchip.is-selected { border-color: var(--event-highlight); outline-color: var(--event-highlight); }
+#pl .tile:focus-visible,
+#pl .slot:focus-visible,
+#pl .dchip:focus-visible { outline-color: var(--event-highlight); }
+#pl .inline-choice input { accent-color: var(--event-highlight); }
+
+@media (max-width: 999px) {
+  #pl .pl-sess[aria-current="true"] { box-shadow: inset 0 3px 0 var(--event-highlight); }
+  #pl .pl-head { min-height: 78px; padding-top: 6px; padding-bottom: 6px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #pl .pl-nav-btn,
+  #pl .pl-event-select { transition: none; }
+  #pl .pl-nav-btn:not(:disabled):hover { transform: none; }
+}

@@ -1259,10 +1259,12 @@
       sessionSelect.textContent = "";
       list.forEach(function (w) {
         windowsById[w.session_id] = w;
-        sessionSelect.appendChild(makeOption(
+        var option = makeOption(
           w.session_id,
           eventsById[w.event_id].name + " - " + TYPE_LABEL[w.target_type]
-        ));
+        );
+        option.setAttribute("data-event-id", w.event_id);
+        sessionSelect.appendChild(option);
       });
 
       if (list.length === 0) {
