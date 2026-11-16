@@ -329,6 +329,8 @@
     hero.classList.remove("has-photo");
     hero.setAttribute("data-race", theme.stem);
     hero.style.setProperty("--atmos", theme.atmos);
+    hero.style.setProperty("--event-accent", theme.accent);
+    hero.style.setProperty("--event-highlight", theme.highlight);
     motifEl.innerHTML = theme.motif;
     setCircuit(theme.line);
 
@@ -375,7 +377,8 @@
     var title = el("h1", "hero-title");
     var suffix = " Grand Prix";
     var hasSuffix = ev.name.length > suffix.length && ev.name.slice(-suffix.length) === suffix;
-    title.appendChild(el("span", "t-main", hasSuffix ? ev.name.slice(0, -suffix.length) : ev.name));
+    var mainTitle = hasSuffix ? ev.name.slice(0, -suffix.length) : ev.name;
+    title.appendChild(el("span", mainTitle.length >= 9 ? "t-main t-main-long" : "t-main", mainTitle));
     if (hasSuffix) { title.appendChild(el("span", "t-sub", "Grand Prix")); }
     textBox.appendChild(reveal(title, i++, animate));
 
@@ -824,8 +827,8 @@
   function loadEvent(isReload) {
     var todayIso = new Date().toISOString().slice(0, 10);
     return client.from("events")
-      .select("id, season, round, name, circuit, locality, country, start_date, end_date, has_sprint, status")
-      .lt("season", 9000).neq("status", "cancelled").gte("end_date", todayIso)
+        .select("id, season, round, name, circuit, locality, country, start_date, end_date, has_sprint, status")
+        .lt("season", 9000).neq("status", "cancelled").gte("end_date", todayIso)
       .order("start_date", { ascending: true }).limit(1)
       .then(function (result) {
         if (result.error) { throw result.error; }
@@ -848,23 +851,23 @@
 
         return client.from("sessions").select("id, session_type, start_utc").eq("event_id", ev.id)
           .then(function (sessions) {
-            if (sessions.error) { throw sessions.error; }
-            current.sessions = sessions.data || [];
+          if (sessions.error) { throw sessions.error; }
+          current.sessions = sessions.data || [];
             return current.signedIn ? loadAccountData() : null;
           })
           .then(function (standings) {
-            var animate = !isReload;
-            renderHeroText(animate);
-            renderPanel(animate);
-            renderSchedule(animate);
-            standingsBox.textContent = "";
-            if (!current.signedIn) {
-              renderStandings(null, "Sign in to see the standings.", false);
-              return;
-            }
-            showStandings(standings, false);
-            startRealtime();
-          });
+          var animate = !isReload;
+          renderHeroText(animate);
+          renderPanel(animate);
+          renderSchedule(animate);
+          standingsBox.textContent = "";
+          if (!current.signedIn) {
+            renderStandings(null, "Sign in to see the standings.", false);
+            return;
+          }
+          showStandings(standings, false);
+          startRealtime();
+        });
       });
   }
 

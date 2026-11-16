@@ -7,35 +7,35 @@
 (function () {
   "use strict";
 
-  // stem -> [environment motif, atmosphere tint]
+  // stem -> [environment motif, atmosphere, accent, highlight]
   var RACES = {
-    "bahrain": ["desert", "#c9a26b"],
-    "saudi-arabia": ["coast", "#6f93a3"],
-    "australia": ["hills", "#7fa383"],
-    "japan": ["mountain", "#b98b92"],
-    "china": ["skyline", "#8f9aa8"],
-    "miami": ["coast", "#6fb0b0"],
-    "canada": ["skyline", "#8396ad"],
-    "monaco": ["harbour", "#c28d6b"],
-    "portugal": ["hills", "#b79a6b"],
-    "great-britain": ["grandstand", "#8c9a8e"],
-    "austria": ["mountain", "#7f9f86"],
-    "belgium": ["pines", "#6f8f7a"],
-    "hungary": ["hills", "#b8a066"],
-    "italy": ["pines", "#a3a07a"],
-    "spain": ["skyline", "#c0916e"],
-    "azerbaijan": ["skyline", "#7e95b5"],
-    "turkey": ["skyline", "#a08f7e"],
-    "singapore": ["skyline", "#7aa0a6"],
-    "united-states": ["skyline", "#a98a7a"],
-    "mexico": ["stadium", "#6f9f78"],
-    "mexico-city": ["stadium", "#6f9f78"],
-    "brazil": ["hills", "#78a07e"],
-    "las-vegas": ["skyline", "#a07fb0"],
-    "qatar": ["desert", "#c4a37a"],
-    "abu-dhabi": ["skyline", "#c2a070"]
+    "bahrain": ["desert", "#c9a26b", "#e05a33", "#f2d28b"],
+    "saudi-arabia": ["coast", "#6f93a3", "#c65d36", "#f2c14e"],
+    "australia": ["hills", "#7fa383", "#e28f41", "#66c7b5"],
+    "japan": ["mountain", "#b98b92", "#e34b4a", "#f2d7a0"],
+    "china": ["skyline", "#8f9aa8", "#d64141", "#e9b44c"],
+    "miami": ["coast", "#6fb0b0", "#ef6a3a", "#ffce5c"],
+    "canada": ["skyline", "#8396ad", "#e34245", "#f0c75e"],
+    "monaco": ["harbour", "#c28d6b", "#d9485f", "#e8c547"],
+    "portugal": ["hills", "#b79a6b", "#2e8b57", "#e15b3e"],
+    "great-britain": ["grandstand", "#8c9a8e", "#d64e4e", "#d7c292"],
+    "austria": ["mountain", "#7f9f86", "#e04f3d", "#f2c14e"],
+    "belgium": ["pines", "#6f8f7a", "#e0b246", "#d94f45"],
+    "hungary": ["hills", "#b8a066", "#ce4b49", "#547a61"],
+    "italy": ["pines", "#a3a07a", "#238b57", "#d94b45"],
+    "spain": ["skyline", "#c0916e", "#dc4a3d", "#e9bd59"],
+    "azerbaijan": ["skyline", "#7e95b5", "#c94c4c", "#d8a84e"],
+    "turkey": ["skyline", "#a08f7e", "#d95f3c", "#5cafa5"],
+    "singapore": ["skyline", "#7aa0a6", "#d94f70", "#f0c754"],
+    "united-states": ["skyline", "#a98a7a", "#d94a42", "#73a7c6"],
+    "mexico": ["stadium", "#6f9f78", "#d95f3d", "#e8c84a"],
+    "mexico-city": ["stadium", "#6f9f78", "#d95f3d", "#e8c84a"],
+    "brazil": ["hills", "#78a07e", "#e6b93d", "#4d9c72"],
+    "las-vegas": ["skyline", "#9a75b5", "#f3a712", "#47d7c8"],
+    "qatar": ["desert", "#c4a37a", "#8d5f3d", "#d9c7a2"],
+    "abu-dhabi": ["skyline", "#c2a070", "#3f7890", "#d9534f"]
   };
-  var FALLBACK = ["grandstand", "#8a8f98"];
+  var FALLBACK = ["grandstand", "#8a8f98", "#b34c4c", "#d6b86a"];
 
   // Event stems that share artwork with another stem (2027 "mexico" uses the Mexico City files).
   var ASSET_ALIAS = { "mexico": "mexico-city" };
@@ -241,7 +241,16 @@
     var info = RACES[stem] || FALLBACK;
     var seed = hash(stem);
     var draw = MOTIFS[info[0]] || MOTIFS.grandstand;
-    return { stem: stem, assetStem: ASSET_ALIAS[stem] || stem, motifName: info[0], atmos: info[1], motif: draw(rng(seed ^ 0x9e3779b9)), line: racingLine(seed) };
+    return {
+      stem: stem,
+      assetStem: ASSET_ALIAS[stem] || stem,
+      motifName: info[0],
+      atmos: info[1],
+      accent: info[2],
+      highlight: info[3],
+      motif: draw(rng(seed ^ 0x9e3779b9)),
+      line: racingLine(seed)
+    };
   }
 
   function loadPhoto(stem) {

@@ -10,6 +10,8 @@
 
 .hero-lo {
   --atmos: #8a8f98;
+  --event-accent: #b34c4c;
+  --event-highlight: #d6b86a;
   --ground-h: 96px;
   position: relative;
   overflow: hidden;
@@ -81,10 +83,10 @@
   text-transform: uppercase;
 }
 
-.plate-cap span + span { color: var(--muted); }
+.plate-cap span + span { color: var(--event-highlight); }
 
 .has-photo .motif { display: none; }
-.has-photo .circuit { top: 46%; }
+.has-photo .circuit { top: 46%; right: 0; width: 100%; max-width: none; }
 
 .circuit {
   top: 4%;
@@ -92,6 +94,8 @@
   width: 118vw;
   max-width: 880px;
   opacity: 0;
+  transform: rotate(-90deg);
+  transform-origin: center;
   transition: opacity 0.6s linear;
 }
 
@@ -106,9 +110,30 @@
   stroke-dashoffset: 1;
 }
 
-.c-under { stroke: rgba(243, 243, 240, 0.05); stroke-width: 16; }
-.c-line { stroke: rgba(243, 243, 240, 0.3); stroke-width: 2; }
-.c-start { stroke: var(--text); stroke-width: 4; opacity: 0; transition: opacity 0.4s linear 1.4s; }
+.c-under {
+  stroke: var(--event-accent);
+  stroke-width: 22;
+  opacity: 0.38;
+  filter: drop-shadow(0 0 8px var(--event-accent));
+}
+.c-line {
+  stroke: var(--event-highlight);
+  stroke-width: 4.5;
+  opacity: 0.92;
+  filter: drop-shadow(0 0 3px var(--event-highlight));
+}
+.c-start {
+  stroke: var(--event-highlight);
+  stroke-width: 4;
+  opacity: 0;
+  filter: drop-shadow(0 0 5px var(--event-highlight));
+  transition: opacity 0.4s linear 1.4s;
+}
+
+@keyframes circuit-led-pulse {
+  from { opacity: 0.72; }
+  to { opacity: 1; }
+}
 
 .is-themed .c-under,
 .is-themed .c-line {
@@ -117,6 +142,7 @@
 }
 
 .is-themed .c-start { opacity: 1; }
+.is-themed .c-line { animation: circuit-led-pulse 1.8s ease-in-out 2.4s infinite alternate; }
 
 .motif {
   left: 0;
@@ -133,6 +159,10 @@
 .motif .m1 { fill: #1c1f25; }
 .motif .m2 { fill: #15181d; }
 .motif .ms { fill: none; stroke: #1c1f25; stroke-width: 4; stroke-linecap: round; }
+.motif .m3 { fill: var(--event-accent); opacity: 0.38; }
+.motif .m4 { fill: var(--event-highlight); opacity: 0.5; }
+.motif .m-line { fill: none; stroke: var(--atmos); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; opacity: 0.7; }
+.motif .m-accent { fill: var(--event-highlight); opacity: 0.45; }
 
 .ground { left: 0; right: 0; bottom: 0; height: var(--ground-h); border-top: 1px solid var(--hair); background: #14161a; }
 
@@ -186,7 +216,15 @@
   .has-photo .rehearsal-note { grid-column: 1; grid-row: 6; }
   .has-photo .hero-side { grid-column: 2; grid-row: 1 / span 6; }
   .has-photo .plate-cap { padding-inline: 14px; }
-  .has-photo .circuit { top: 18%; right: 28%; width: 46vw; }
+  .has-photo .circuit { top: 18%; right: 0; width: 46vw; max-width: 880px; }
+}
+
+@media (min-width: 1400px) {
+  .has-photo .circuit { top: 20%; right: 8%; width: 36vw; max-width: 680px; }
+}
+
+@media (min-width: 1980px) {
+  .has-photo .circuit { right: calc((100vw - var(--maxw)) / 2 - 252px); }
 }
 
 .hero-text { min-width: 0; }
@@ -203,7 +241,7 @@
   display: flex;
   align-items: center;
   padding: 0 14px;
-  border: 1px solid var(--hair-strong);
+  border: 1px solid var(--atmos);
   color: var(--text);
   font-family: var(--font-display);
   font-size: 3rem;
@@ -213,23 +251,29 @@
 }
 
 .kicker-text { display: flex; flex-direction: column; justify-content: center; margin: 0; gap: 2px; }
-.k1 { color: var(--muted); font-size: 0.74rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; }
+.k1 { color: var(--atmos); font-size: 0.74rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; }
 .k2 { font-size: 1.05rem; font-weight: 500; }
 
 .hero-title { margin: 0; text-transform: uppercase; }
 
 .t-main {
   display: block;
+  color: var(--event-accent);
   font-size: clamp(3.4rem, 15vw, 8.2rem);
   font-weight: 900;
   line-height: 0.86;
   overflow-wrap: anywhere;
 }
 
+.t-main-long {
+  font-size: clamp(2.8rem, 11vw, 7rem);
+  overflow-wrap: normal;
+}
+
 .t-sub {
   display: block;
   margin-top: 8px;
-  color: var(--muted);
+  color: var(--event-highlight);
   font-size: clamp(1.3rem, 4.5vw, 2rem);
   font-weight: 700;
   letter-spacing: 0.3em;
@@ -246,7 +290,7 @@
 }
 
 .hero-facts div { padding: 12px 16px 12px 0; border-bottom: 1px solid var(--hair); }
-.hero-facts dt { color: var(--muted); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
+.hero-facts dt { color: var(--atmos); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
 .hero-facts dd { margin: 2px 0 0; font-weight: 500; }
 
 .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
@@ -296,7 +340,7 @@
   .plate img { transform: none; transition: none; }
 
   .c-under,
-  .c-line { stroke-dashoffset: 0; transition: none !important; }
+  .c-line { stroke-dashoffset: 0; animation: none; transition: none !important; }
   .c-start { transition: none; }
 }
 
@@ -304,8 +348,8 @@
 
 .rc {
   --flag: var(--muted);
-  border: 1px solid var(--hair-strong);
-  background: rgba(13, 14, 16, 0.94);
+  border: 1px solid var(--event-accent);
+  background: rgba(13, 14, 16, 0.28);
 }
 
 .rc:empty { display: none; }
@@ -324,7 +368,7 @@
   border-bottom: 1px solid var(--hair);
 }
 
-.rc-title { white-space: nowrap; color: var(--muted); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; }
+.rc-title { white-space: nowrap; color: var(--event-highlight); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; }
 
 .rc-flag {
   display: inline-flex;
@@ -344,7 +388,7 @@
 
 .rc-label {
   margin: 0 0 10px;
-  color: var(--muted);
+  color: var(--atmos);
   font-size: 0.74rem;
   font-weight: 600;
   letter-spacing: 0.18em;
@@ -355,7 +399,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   border: 1px solid var(--hair);
-  background: #0a0b0d;
+  background: rgba(10, 11, 13, 0.42);
 }
 
 .cd-cell { padding: 10px 4px 8px; text-align: center; }
@@ -393,7 +437,7 @@
   margin: 0;
   padding: 14px 16px;
   border: 1px solid var(--hair);
-  background: #0a0b0d;
+  background: rgba(10, 11, 13, 0.42);
   font-family: var(--font-display);
   font-size: clamp(1.8rem, 7vw, 2.4rem);
   font-weight: 900;
