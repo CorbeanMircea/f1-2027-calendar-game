@@ -59,7 +59,12 @@ body .field select {
   background: #0a0b0d;
   color: var(--text);
   font-size: 1rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
+
+body .field select option { font-family: var(--font-display); }
 
 body .field select:focus-visible { outline: 2px solid var(--yellow); outline-offset: 1px; }
 

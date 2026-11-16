@@ -157,6 +157,128 @@
 .legend, .updated { margin: 16px 0 0; color: var(--muted); font-size: 0.82rem; }
 .updated { margin-top: 6px; font-variant-numeric: tabular-nums; }
 
+/* Clearer hierarchy while keeping the existing standings and interactions unchanged. */
+#board-panel {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.018), transparent 42%),
+    var(--panel);
+}
+
+.board-top {
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--hair);
+}
+
+.board-top .field {
+  max-width: 280px;
+}
+
+.live-badge {
+  max-width: 100%;
+  line-height: 1.35;
+}
+
+.standings-head {
+  padding: 0 0 10px;
+  border-bottom: 1px solid var(--hair-strong);
+}
+
+.standing {
+  --rank-accent: transparent;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--rank-accent) 7%, transparent), transparent 55%);
+}
+
+.standing.rank-1 { --rank-accent: var(--yellow); }
+.standing.rank-2 { --rank-accent: #c5ced8; }
+.standing.rank-3 { --rank-accent: #d38b61; }
+
+.standing.rank-1::before,
+.standing.rank-2::before,
+.standing.rank-3::before {
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  background: var(--rank-accent);
+}
+
+.standing.rank-2 .pos,
+.standing.rank-3 .pos { color: var(--rank-accent); }
+
+.standing.rank-1 .av,
+.standing.rank-2 .av,
+.standing.rank-3 .av { border-color: color-mix(in srgb, var(--rank-accent) 70%, var(--hair-strong)); }
+
+.standing.rank-1 .points { color: var(--yellow); }
+.standing.rank-2 .points { color: #c5ced8; }
+.standing.rank-3 .points { color: #d38b61; }
+
+.standing.is-me {
+  background:
+    linear-gradient(90deg, rgba(225, 6, 0, 0.08), transparent 58%),
+    #101216;
+  box-shadow: inset 2px 0 0 var(--red), -14px 0 0 #101216, 14px 0 0 #101216;
+}
+
+.standing-row {
+  min-height: 78px;
+  transition: background-color 0.18s ease;
+}
+
+@media (hover: hover) {
+  .standing-row:hover { background: rgba(255, 255, 255, 0.025); }
+}
+
+.last5 {
+  padding: 3px 4px 0;
+  border-bottom: 1px solid var(--hair-strong);
+}
+
+.bar {
+  transition: background-color 0.18s ease, filter 0.18s ease;
+}
+
+.bar.best { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--yellow) 50%, transparent)); }
+
+.detail {
+  margin: 0 0 12px 68px;
+  padding: 0 12px 14px;
+  border-left: 2px solid var(--hair-strong);
+  background: #111317;
+}
+
+.detail li { align-items: flex-start; }
+.detail .w-name { color: var(--text); }
+.detail .w-points { max-width: 68%; line-height: 1.45; }
+
+.sc-link {
+  color: var(--yellow);
+  text-decoration-color: color-mix(in srgb, var(--yellow) 50%, transparent);
+  text-underline-offset: 4px;
+}
+
+.legend {
+  padding-top: 12px;
+  border-top: 1px solid var(--hair);
+  line-height: 1.5;
+}
+
+.updated { font-variant-numeric: tabular-nums; }
+
+@media (max-width: 760px) and (min-width: 601px) {
+  .standings-head,
+  .standing-row {
+    grid-template-columns: 2.3rem 46px minmax(0, 1fr) 3rem 76px 4.5rem;
+    gap: 10px;
+  }
+
+  .av { width: 46px; height: 46px; }
+  .pos { font-size: 2rem; }
+  .points { font-size: 1.9rem; }
+}
+
 /* Phones: avatar and name on top, the form below the name */
 @media (max-width: 600px) {
   #board-panel { padding: 16px; }
@@ -179,8 +301,51 @@
   .you { display: none; }
   .name-top { gap: 6px; }
   .detail { padding-left: 0; }
-  .standing.is-me { box-shadow: -16px 0 0 #101216, 16px 0 0 #101216; }
+  .standing.is-me { box-shadow: inset 2px 0 0 var(--red), -16px 0 0 #101216, 16px 0 0 #101216; }
   .standing.rank-1::before { left: -16px; }
+
+  .standing-row { min-height: 72px; }
+  .meta { gap: 8px; }
+  .move {
+    position: relative;
+    min-width: 54px;
+    padding-top: 12px;
+    font-size: 0.78rem;
+  }
+  .move::after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: var(--muted);
+    content: "MOVE";
+    font-size: 0.55rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+  }
+  .last5 {
+    position: relative;
+    margin-top: 10px;
+    padding: 2px 3px 0;
+  }
+  .last5::before {
+    position: absolute;
+    top: -13px;
+    left: 0;
+    color: var(--muted);
+    content: "LAST 5";
+    font-size: 0.55rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+  }
+
+  .detail { margin-left: 0; padding: 0 10px 12px; }
+  .detail li { flex-direction: column; gap: 2px; }
+  .detail .w-points { max-width: none; text-align: left; }
+  .legend { margin-top: 12px; }
 }
 
-@media (prefers-reduced-motion: reduce) { .standing { will-change: auto; } }
+@media (prefers-reduced-motion: reduce) {
+  .standing { will-change: auto; }
+  .standing-row,
+  .bar { transition: none; }
+}

@@ -24,7 +24,12 @@
   background: #0a0b0d;
   color: var(--text);
   font-size: 0.95rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
+
+.stats-season select option { font-family: var(--font-display); }
 
 .stats-state { margin: 0; padding: 14px 22px 20px; color: var(--muted); font-size: 0.95rem; }
 .stats-state:empty { display: none; }
