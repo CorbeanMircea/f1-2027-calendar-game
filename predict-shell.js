@@ -20,7 +20,7 @@
   var pickStatus = document.getElementById("pick-status");
   if (!pl || !rail || !select || !area) { return; }
 
-  var state = { windows: {}, saved: {}, view: "session" };
+  var state = { windows: {}, saved: {}, view: "session", auto: false };
   var client = null;
   if (window.supabase && cfg.SUPABASE_URL && cfg.SUPABASE_PUBLISHABLE_KEY &&
       String(cfg.SUPABASE_PUBLISHABLE_KEY).indexOf("PASTE_") !== 0) {
@@ -82,12 +82,14 @@
   }
 
   function setView(view) {
+    state.auto = false;
     state.view = view;
     pl.setAttribute("data-view", view);
     render();
   }
 
   function choose(id) {
+    state.auto = false;
     state.view = "session";
     pl.setAttribute("data-view", "session");
     if (select.value !== id) {
@@ -123,8 +125,15 @@
     for (var c = 0; c < opts.length; c++) { if (opts[c].id === select.value) { current = opts[c]; } }
     if (!current && opts.length) { current = opts[0]; }
 
-    // No open session (for example: only season picks are open): show the season picks.
+    // Sessions have appeared after an automatic switch to Season picks (the menu fills in a moment after the page loads): go back.
+    if (opts.length > 0 && state.auto) {
+      state.auto = false;
+      state.view = "session";
+      pl.setAttribute("data-view", "session");
+    }
+    // No open session (for example: only season picks are open): show the season picks, until a session appears.
     if (opts.length === 0 && state.view === "session") {
+      state.auto = true;
       state.view = "season";
       pl.setAttribute("data-view", "season");
     }
