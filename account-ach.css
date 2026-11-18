@@ -1,0 +1,99 @@
+/* Lights Out: achievement preview and filter (Account page, redesign phase A3). Load after account-layout.css. */
+
+/* ----- filter ----- */
+.ach-filters { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 22px 0; }
+
+.ach-filter {
+  padding: 6px 14px;
+  border: 1px solid var(--hair-strong);
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.ach-filter:hover { color: var(--text); }
+.ach-filter[aria-pressed="true"] { border-color: var(--yellow); color: var(--text); }
+.ach-filter:focus-visible { outline: 2px solid var(--yellow); outline-offset: 1px; }
+
+#ach-grid[data-filter="earned"] .ach-card.is-locked { display: none; }
+#ach-grid[data-filter="locked"] .ach-card:not(.is-locked) { display: none; }
+
+.ach-filter-empty { margin: 0; padding: 16px 22px 22px; color: var(--muted); }
+
+.ach-card { cursor: default; }
+.ach-card:focus-visible { outline: 2px solid var(--yellow); outline-offset: -2px; }
+
+/* ----- preview ----- */
+.ach-pop {
+  position: fixed;
+  z-index: 90;
+  width: 320px;
+  max-width: calc(100vw - 24px);
+  padding: 16px 18px;
+  border: 1px solid var(--hair-strong);
+  background: #181b20;
+  color: var(--text);
+}
+
+.ach-pop[hidden] { display: none; }
+
+.ap-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+
+.ap-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.ap-state { flex: none; color: var(--muted); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
+.ap-rule { margin: 8px 0 12px; color: var(--muted); font-size: 0.92rem; line-height: 1.4; }
+
+.ach-pop .ach-bar { max-width: none; margin: 0; }
+.ap-next { margin: 8px 0 0; font-size: 0.92rem; font-variant-numeric: tabular-nums; }
+
+.ap-levels { margin: 12px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--hair); }
+
+.ap-levels li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--hair);
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ap-levels li.is-done { color: var(--text); }
+.ap-levels li.is-done span:first-child::before { content: "\2713\00a0"; color: var(--yellow); }
+.ap-levels li.is-next { color: var(--text); box-shadow: inset 3px 0 0 var(--yellow); padding-left: 8px; }
+
+.ap-earned { margin: 10px 0 0; color: var(--muted); font-size: 0.78rem; }
+
+.ap-close { display: none; margin-top: 14px; }
+
+/* phone: a sheet at the bottom of the screen */
+@media (max-width: 700px) {
+  .ach-filters { padding: 12px 16px 0; }
+  .ach-pop.is-sheet {
+    left: 12px;
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    top: auto;
+    width: auto;
+    max-width: none;
+    max-height: 70vh;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .ach-pop.is-sheet .ap-close { display: inline-block; }
+}

@@ -78,6 +78,15 @@
     if (!locked && r.earned_round) {
       li.appendChild(el("p", "ach-earned", "Level " + r.level + " reached in R" + r.earned_round + " \u00b7 " + r.earned_event));
     }
+
+    // What the preview (account-ach-preview.js) needs: the numbers of the database view, and keyboard access.
+    li.tabIndex = 0;
+    li.setAttribute("data-key", def.key);
+    li.setAttribute("data-level", String(r.level));
+    li.setAttribute("data-max", String(r.max_level));
+    li.setAttribute("data-progress", String(r.progress));
+    li.setAttribute("data-next", maxed ? "" : String(r.next_target));
+    li.setAttribute("data-earned", !locked && r.earned_round ? "R" + r.earned_round + " \u00b7 " + r.earned_event : "");
     return li;
   }
 
