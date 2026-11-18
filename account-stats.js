@@ -10,14 +10,36 @@
   if (!card || !AP) { return; }
 
   var $ = function (id) { return document.getElementById(id); };
+  var BATTLE_CAR_SCALE_X = 1.23;
+  var BATTLE_CAR_LENGTH = 179 * BATTLE_CAR_SCALE_X;
+  var BATTLE_GAP_UNITS_PER_POINT = 6;
+  var BATTLE_MAX_OFFSET = 480 - BATTLE_CAR_LENGTH - 24;
+  var BATTLE_CAR_ORIGIN = 7;
+  var BATTLE_LOAD_GHOST_X = 248;
+  var BATTLE_LOAD_YOU_X = 12;
   var els = {
     seasonWrap: $("stats-season-wrap"), season: $("stats-season"), state: $("stats-state"), body: $("stats-body"),
     points: $("st-points"), pointsSub: $("st-points-sub"), rank: $("st-rank"), rankSub: $("st-rank-sub"),
     acc: $("st-acc"), accSub: $("st-acc-sub"), chart: $("stats-chart"), legend: $("stats-legend"),
-    types: $("stats-types"), grid: $("stats-grid"), rounds: $("stats-rounds")
+    types: $("stats-types"), grid: $("stats-grid"), rounds: $("stats-rounds"),
+    battleVisual: $("bt-visual"), battleGraphic: $("bt-graphic"), battleGhostCar: $("bt-ghost-car"),
+    battleYouCar: $("bt-you-car"), battleGapMarker: $("bt-gap-marker"),
+    battleGapFill: $("bt-gap-fill"), battleGapStart: $("bt-gap-start"), battleGapDot: $("bt-gap-dot"),
+    battleRivalLegend: $("bt-rival-legend"), battleRivalKey: $("bt-rival-key"),
+    battleGap: $("bt-gap"), battleContext: $("bt-context"), battleScores: $("bt-scores"),
+    battleYouPoints: $("bt-you-points"), battleRivalScoreName: $("bt-rival-score-name"),
+    battleRivalPoints: $("bt-rival-points")
   };
 
   var state = { client: null, user: null, token: 0, season: null };
+  var battleMotion = {
+    frame: null,
+    current: { ghostX: BATTLE_LOAD_GHOST_X, ghostY: 0, youX: BATTLE_LOAD_YOU_X, youY: 0 },
+    initialized: false,
+    relation: null,
+    season: null,
+    rivalId: null
+  };
 
   // ---------- Helpers ----------
 
@@ -49,6 +71,231 @@
   function showState(text) {
     els.state.textContent = text || "";
     els.state.hidden = !text;
+  }
+
+  function reducedMotion() {
+    return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }
+
+  function stopBattleAnimation() {
+    if (battleMotion.frame !== null) {
+      window.cancelAnimationFrame(battleMotion.frame);
+      battleMotion.frame = null;
+    }
+    els.battleGraphic.removeAttribute("data-overtake");
+  }
+
+  function setBattleCarPositions(positions) {
+    els.battleGhostCar.setAttribute("transform", "translate(" + positions.ghostX.toFixed(2) + " " + positions.ghostY.toFixed(2) +
+      ") scale(" + BATTLE_CAR_SCALE_X + " 1) translate(-" + BATTLE_CAR_ORIGIN + " 0)");
+    els.battleYouCar.setAttribute("transform", "translate(" + positions.youX.toFixed(2) + " " + positions.youY.toFixed(2) +
+      ") scale(" + BATTLE_CAR_SCALE_X + " 1) translate(-" + BATTLE_CAR_ORIGIN + " 0)");
+    battleMotion.current = positions;
+  }
+
+  function updateBattleGapPositions(positions) {
+    var youCenter = positions.youX + BATTLE_CAR_LENGTH / 2;
+    var ghostCenter = positions.ghostX + BATTLE_CAR_LENGTH / 2;
+    var leftCenter = Math.min(youCenter, ghostCenter);
+    var rightCenter = Math.max(youCenter, ghostCenter);
+    var relation = Math.abs(positions.youX - positions.ghostX) < 0.1
+      ? "tied"
+      : positions.youX > positions.ghostX ? "leading" : "chasing";
+
+    if (relation === "tied") { leftCenter -= 4; rightCenter += 4; }
+    els.battleGraphic.setAttribute("data-state", relation);
+    els.battleGapFill.setAttribute("d", "M" + leftCenter.toFixed(1) + " 151H" + rightCenter.toFixed(1));
+    els.battleGapStart.setAttribute("cx", leftCenter.toFixed(1));
+    els.battleGapDot.setAttribute("cx", rightCenter.toFixed(1));
+  }
+
+  function animateBattleCars(target, hasRival, passer) {
+    stopBattleAnimation();
+    var initial = !battleMotion.initialized;
+    var from = battleMotion.current;
+    var initialPasser = null;
+    if (initial && hasRival) {
+      var middle = (target.ghostX + target.youX) / 2;
+      var spread = 28;
+      if (target.youX > target.ghostX) {
+        from = { ghostX: middle + spread, ghostY: 0, youX: middle - spread, youY: 0 };
+        initialPasser = "you";
+      } else if (target.youX < target.ghostX) {
+        from = { ghostX: middle - spread, ghostY: 0, youX: middle + spread, youY: 0 };
+        initialPasser = "rival";
+      } else {
+        from = { ghostX: middle - spread, ghostY: 0, youX: middle + spread, youY: 0 };
+      }
+    } else if (initial) {
+      from = { ghostX: BATTLE_LOAD_GHOST_X, ghostY: 0, youX: BATTLE_LOAD_YOU_X, youY: 0 };
+    }
+    var animationPasser = passer || initialPasser;
+    var moved = Math.abs(from.ghostX - target.ghostX) > 0.1 || Math.abs(from.youX - target.youX) > 0.1 ||
+      Math.abs(from.ghostY - target.ghostY) > 0.1 || Math.abs(from.youY - target.youY) > 0.1;
+
+    if (initial) {
+      setBattleCarPositions(from);
+      if (hasRival) { updateBattleGapPositions(from); }
+    }
+    if (reducedMotion() || (!initial && !moved && !animationPasser)) {
+      setBattleCarPositions(target);
+      if (hasRival) { updateBattleGapPositions(target); }
+      battleMotion.initialized = true;
+      return;
+    }
+
+    var duration = animationPasser ? 1300 : initial ? 900 : 700;
+    var startTime = null;
+    battleMotion.initialized = true;
+    if (animationPasser) { els.battleGraphic.setAttribute("data-overtake", animationPasser); }
+
+    function frame(time) {
+      if (startTime === null) { startTime = time; }
+      var progress = Math.min((time - startTime) / duration, 1);
+      var eased = progress * progress * (3 - 2 * progress);
+      var passLift = animationPasser ? -8 * Math.sin(Math.PI * progress) : 0;
+      var positions = {
+        ghostX: from.ghostX + (target.ghostX - from.ghostX) * eased,
+        ghostY: from.ghostY + (target.ghostY - from.ghostY) * eased + (animationPasser === "rival" ? passLift : 0),
+        youX: from.youX + (target.youX - from.youX) * eased,
+        youY: from.youY + (target.youY - from.youY) * eased + (animationPasser === "you" ? passLift : 0)
+      };
+      setBattleCarPositions(positions);
+      if (hasRival) { updateBattleGapPositions(positions); }
+      if (progress < 1) {
+        battleMotion.frame = window.requestAnimationFrame(frame);
+      } else {
+        setBattleCarPositions(target);
+        if (hasRival) { updateBattleGapPositions(target); }
+        battleMotion.frame = null;
+        els.battleGraphic.removeAttribute("data-overtake");
+      }
+    }
+
+    battleMotion.frame = window.requestAnimationFrame(frame);
+  }
+
+  function showBattleState(text) {
+    stopBattleAnimation();
+    battleMotion.relation = null;
+    battleMotion.season = null;
+    battleMotion.rivalId = null;
+    els.battleVisual.hidden = true;
+    els.battleRivalLegend.hidden = true;
+    els.battleContext.hidden = true;
+    els.battleScores.hidden = true;
+    els.battleGapMarker.setAttribute("display", "none");
+    els.battleGap.textContent = text;
+    els.battleGap.setAttribute("aria-label", text);
+  }
+
+  function renderBattle(userId, league) {
+    if (!Array.isArray(league)) {
+      showBattleState("League standings are unavailable right now.");
+      return;
+    }
+    var ranked = league.map(function (row) {
+      return {
+        userId: row.user_id,
+        name: String(row.display_name || "League player"),
+        points: Number(row.total_points)
+      };
+    }).filter(function (row) { return row.userId && isFinite(row.points); });
+    ranked.sort(function (a, b) {
+      return b.points - a.points || a.name.localeCompare(b.name);
+    });
+
+    var mine = null;
+    ranked.forEach(function (row) { if (row.userId === userId) { mine = row; } });
+    if (!mine) {
+      showBattleState("Your league score isn't available for this season yet.");
+      return;
+    }
+
+    var ahead = [];
+    var tied = [];
+    var behind = [];
+    ranked.forEach(function (row) {
+      if (row.userId === userId) { return; }
+      if (row.points > mine.points) { ahead.push(row); }
+      else if (row.points === mine.points) { tied.push(row); }
+      else { behind.push(row); }
+    });
+    ahead.sort(function (a, b) { return a.points - b.points || a.name.localeCompare(b.name); });
+    behind.sort(function (a, b) { return b.points - a.points || a.name.localeCompare(b.name); });
+    var rival = ahead[0] || tied[0] || behind[0] || null;
+    var gap = rival ? Math.abs(mine.points - rival.points) : 0;
+    var youAhead = rival && mine.points > rival.points;
+    var relation = !rival ? "waiting" : gap === 0 ? "tied" : youAhead ? "leading" : "chasing";
+    var passer = null;
+    if (battleMotion.initialized && battleMotion.season === state.season && rival &&
+        battleMotion.rivalId === rival.userId) {
+      if ((battleMotion.relation === "chasing" || battleMotion.relation === "tied") && relation === "leading") {
+        passer = "you";
+      } else if ((battleMotion.relation === "leading" || battleMotion.relation === "tied") && relation === "chasing") {
+        passer = "rival";
+      }
+    }
+    battleMotion.relation = relation;
+    battleMotion.season = state.season;
+    battleMotion.rivalId = rival ? rival.userId : null;
+
+    els.battleVisual.hidden = false;
+    els.battleRivalLegend.hidden = !rival;
+    els.battleContext.hidden = !rival;
+    els.battleScores.hidden = !rival;
+    els.battleGraphic.setAttribute("data-state", relation);
+    var target = {
+      ghostX: battleMotion.current.ghostX,
+      ghostY: 0,
+      youX: (480 - BATTLE_CAR_LENGTH) / 2,
+      youY: 0
+    };
+    if (rival) {
+      var offset = Math.min(gap * BATTLE_GAP_UNITS_PER_POINT, BATTLE_MAX_OFFSET);
+      var leftX = (480 - BATTLE_CAR_LENGTH - offset) / 2;
+      var rightX = leftX + offset;
+      target.ghostX = youAhead ? leftX : rightX;
+      target.youX = youAhead ? rightX : leftX;
+      target.youY = gap === 0 ? 2 : 0;
+      els.battleGhostCar.removeAttribute("display");
+      els.battleGapMarker.removeAttribute("display");
+    } else {
+      els.battleGhostCar.setAttribute("display", "none");
+      els.battleGapMarker.setAttribute("display", "none");
+    }
+    animateBattleCars(target, !!rival, passer);
+    els.battleRivalKey.textContent = rival ? rival.name : "No rival yet";
+    if (!rival) {
+      els.battleGap.textContent = "Waiting for a rival";
+      els.battleGap.setAttribute("aria-label", "Waiting for another player to score.");
+      return;
+    }
+    els.battleYouPoints.textContent = fmt(mine.points) + (mine.points === 1 ? " pt" : " pts");
+    els.battleRivalScoreName.textContent = rival.name;
+    els.battleRivalPoints.textContent = fmt(rival.points) + (rival.points === 1 ? " pt" : " pts");
+    var mineRank = 1;
+    var rivalRank = 1;
+    ranked.forEach(function (row) {
+      if (row.points > mine.points) { mineRank++; }
+      if (row.points > rival.points) { rivalRank++; }
+    });
+    if (gap === 0) {
+      els.battleContext.textContent = "You and " + rival.name + " are tied for " + ordinal(mineRank) + " place.";
+    } else if (youAhead) {
+      els.battleContext.textContent = "You're in " + ordinal(mineRank) + " place; " + rival.name + " is in " + ordinal(rivalRank) + ".";
+    } else {
+      els.battleContext.textContent = "Catch " + rival.name + " in " + ordinal(rivalRank) + " place.";
+    }
+
+    if (gap === 0) {
+      els.battleGap.textContent = "Level";
+      els.battleGap.setAttribute("aria-label", "You and " + rival.name + " are level on points.");
+    } else {
+      els.battleGap.textContent = fmt(gap) + (gap === 1 ? " pt" : " pts");
+      els.battleGap.setAttribute("aria-label", "You are " + (youAhead ? "leading " : "chasing ") + rival.name +
+        " by " + fmt(gap) + (gap === 1 ? " point." : " points."));
+    }
   }
 
   // ---------- Chart (inline SVG, no libraries) ----------
@@ -243,6 +490,7 @@
   function renderSeason(token, rows, progress, league) {
     if (token !== state.token) { return; }
     var uid = state.user.id;
+    renderBattle(uid, league);
     var mine = null;
     rows.forEach(function (r) { if (r.user_id === uid) { mine = r; } });
     if (!mine) {
@@ -265,6 +513,7 @@
     console.error(err);
     var text = (err && (err.message || "")) + " " + (err && err.code || "");
     els.body.hidden = true;
+    showBattleState("League battle is unavailable right now.");
     showState(/does not exist|schema cache|PGRST20[0-9]|42P01/i.test(text)
       ? "Statistics need the latest database update (023_player_stats.sql)."
       : "Could not load statistics. Please reload the page.");
@@ -280,22 +529,31 @@
         .select("season, round, event_name, user_id, event_points, cumulative_points, season_rank")
         .eq("season", season).order("round", { ascending: true }),
       // League totals incl. the season picks bonus (migration 028). If this fails the section shows session points only.
-      state.client.from("leaderboard").select("user_id, total_points, session_points, bonus_points").eq("season", season)
+      state.client.from("leaderboard").select("user_id, display_name, total_points, session_points, bonus_points").eq("season", season)
     ]).then(function (res) {
       if (token !== state.token) { return; }
       if (res[0].error || res[1].error) { return failure(res[0].error || res[1].error); }
-      renderSeason(token, res[0].data || [], res[1].data || [], res[2].error ? null : (res[2].data || []));
+      var stats = res[0].data || [];
+      var league = res[2].data || [];
+      if (res[2].error) {
+        console.warn("Could not load bonus-inclusive leaderboard; falling back to session-only standings.", res[2].error);
+        league = stats;
+      }
+      renderSeason(token, stats, res[1].data || [], league);
     });
   }
 
-  function start(client, user) {
+  function start(client, user, quiet) {
     state.client = client;
     state.user = user;
     state.token++;
     var token = state.token;
     card.hidden = false;
-    els.body.hidden = true;
-    showState("Loading statistics...");
+    if (!quiet) {
+      els.body.hidden = true;
+      showBattleState("Loading your league battle...");
+      showState("Loading statistics...");
+    }
 
     client.from("player_season_stats").select("season").eq("user_id", user.id).order("season", { ascending: false })
       .then(function (res) {
@@ -304,6 +562,7 @@
         var seasons = (res.data || []).map(function (r) { return r.season; });
         if (seasons.length === 0) {
           els.seasonWrap.hidden = true;
+          showBattleState("League points appear after the first scored session.");
           showState("No scored sessions yet. Statistics appear after an admin approves a result.");
           return;
         }
@@ -333,9 +592,16 @@
     state.token++;
     state.user = null;
     state.season = null;
+    stopBattleAnimation();
+    battleMotion.current = { ghostX: BATTLE_LOAD_GHOST_X, ghostY: 0, youX: BATTLE_LOAD_YOU_X, youY: 0 };
+    battleMotion.initialized = false;
+    battleMotion.relation = null;
+    battleMotion.season = null;
+    battleMotion.rivalId = null;
     card.hidden = true;
     els.body.hidden = true;
     els.chart.textContent = "";
+    showBattleState("League points appear after the first scored session.");
   }
 
   // ---------- Hook into the existing profile card ----------
@@ -350,4 +616,9 @@
     origClear.apply(AP, arguments);
     clear();
   };
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden || !state.client || !state.user) { return; }
+    start(state.client, state.user, true);
+  });
 })();

@@ -8,7 +8,7 @@
     return;
   }
 
-  var client = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_PUBLISHABLE_KEY);
+  var client = window.LO_CLIENT || window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_PUBLISHABLE_KEY);
 
   // The link only appears for administrators. The admin page and the server check this again.
   client.auth.getSession().then(function (result) {

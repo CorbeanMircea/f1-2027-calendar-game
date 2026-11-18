@@ -139,6 +139,64 @@
                 </dl>
               </section>
 
+              <section class="ac-card ac-battle" id="league-battle" aria-label="League battle">
+                <div class="ac-card-head">
+                  <h3>League battle</h3>
+                </div>
+                <div class="bt-visual" id="bt-visual" aria-hidden="true" hidden>
+                  <div class="bt-legend">
+                    <span><i class="bt-key-you"></i>You</span>
+                    <span id="bt-rival-legend"><i class="bt-key-ghost"></i><b id="bt-rival-key">Ghost rival</b></span>
+                  </div>
+                  <svg class="bt-overlap" id="bt-graphic" viewBox="0 0 480 165">
+                    <path class="bt-trackline" d="M12 131H468"/>
+                    <g class="bt-car bt-car-ghost" id="bt-ghost-car" transform="translate(248 0) scale(1.23 1) translate(-7 0)">
+                      <circle class="bt-tire" cx="42" cy="103" r="20"/>
+                      <circle class="bt-tire-inner" cx="42" cy="103" r="11"/>
+                      <circle class="bt-tire" cx="145" cy="103" r="18"/>
+                      <circle class="bt-tire-inner" cx="145" cy="103" r="10"/>
+                      <path class="bt-outline" d="M7 84l20-4 12-10h22l17 15h25l14-8h20l11 8 18 2 17 7-10 5-18-1-12 6h-13l-15-6h-19l-15 7H65l-13-6H35l-12-4-16-3z"/>
+                      <path class="bt-outline" d="M7 80V57l14 3 2 19M164 95l17 1 5 5-25 2"/>
+                      <path class="bt-detail" d="M47 84l14 13m0 0-19 6m88-20-10 11m10 5-11-3m-28-12h14"/>
+                      <ellipse class="bt-cockpit" cx="108" cy="79" rx="8" ry="5"/>
+                      <path class="bt-detail" d="M100 78h17l5 8"/>
+                    </g>
+                    <g class="bt-car bt-car-you" id="bt-you-car" transform="translate(12 0) scale(1.23 1) translate(-7 0)">
+                      <circle class="bt-tire" cx="42" cy="103" r="20"/>
+                      <circle class="bt-tire-inner" cx="42" cy="103" r="11"/>
+                      <circle class="bt-tire" cx="145" cy="103" r="18"/>
+                      <circle class="bt-tire-inner" cx="145" cy="103" r="10"/>
+                      <path class="bt-outline" d="M7 84l20-4 12-10h22l17 15h25l14-8h20l11 8 18 2 17 7-10 5-18-1-12 6h-13l-15-6h-19l-15 7H65l-13-6H35l-12-4-16-3z"/>
+                      <path class="bt-outline" d="M7 80V57l14 3 2 19M164 95l17 1 5 5-25 2"/>
+                      <path class="bt-detail" d="M47 84l14 13m0 0-19 6m88-20-10 11m10 5-11-3m-28-12h14"/>
+                      <ellipse class="bt-cockpit" cx="108" cy="79" rx="8" ry="5"/>
+                      <path class="bt-detail" d="M100 78h17l5 8"/>
+                    </g>
+                    <g class="bt-gap-marker" id="bt-gap-marker">
+                      <path class="bt-gap-track" d="M122.1 151H357.9"/>
+                      <path class="bt-gap-fill" id="bt-gap-fill" d="M240 151H240"/>
+                      <path class="bt-gap-ends" d="M122.1 146v10M357.9 146v10"/>
+                      <circle class="bt-gap-start" id="bt-gap-start" cx="240" cy="151" r="3"/>
+                      <circle class="bt-gap-dot" id="bt-gap-dot" cx="240" cy="151" r="3"/>
+                    </g>
+                  </svg>
+                </div>
+                <div class="bt-summary">
+                  <p class="bt-gap" id="bt-gap" role="status">League points appear after the first scored session.</p>
+                  <p class="bt-context" id="bt-context" hidden></p>
+                  <div class="bt-scores" id="bt-scores" role="group" aria-label="Current league points" hidden>
+                    <div class="bt-score bt-score-you">
+                      <span>You</span>
+                      <strong id="bt-you-points">0 pts</strong>
+                    </div>
+                    <div class="bt-score bt-score-rival">
+                      <span id="bt-rival-score-name">Rival</span>
+                      <strong id="bt-rival-points">0 pts</strong>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
               <section class="recent" aria-label="Recent XP">
                 <h3>Recent XP</h3>
                 <ul id="recent-list"></ul>
