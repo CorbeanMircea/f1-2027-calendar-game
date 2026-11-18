@@ -423,6 +423,7 @@ body.ac-page .ac-settings .app-panel { border-top: 2px solid var(--yellow); }
 }
 
 @media (max-width: 999px) {
+  body.ac-page .ac-rail-list { overflow-x: auto; overflow-y: hidden; }
   body.ac-page .ac-overview .ac-battle { grid-column: 1; grid-row: auto; }
 }
 
