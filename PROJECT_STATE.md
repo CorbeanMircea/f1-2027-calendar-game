@@ -2,22 +2,42 @@
 
 Plain HTML, CSS and JavaScript on GitHub Pages. Backend: Supabase (Postgres, Auth, Realtime, Edge Functions, pg_cron).
 Live site: https://corbeanmircea.github.io/f1-2027-calendar-game/
-Last reviewed against the code: 6 Nov 2026 (files and schema read; items under "Unverified" were not confirmed).
+Last reviewed against the code: 19 Nov 2026, commit dae9122 (files, migrations and edge functions read; nothing was run).
+Owner-verified: the owner reports checking all features manually on 19 Nov 2026. There are no automated tests for
+migrations 018 to 022 and 030 to 037. Live database definitions were not re-read for this review.
 
 ## Working rules
 - The owner runs every command and every SQL script. Nothing is deployed or changed remotely by the assistant.
 - Do not change authentication, prediction saving, deadlines, locking, scoring or the importer without an agreed plan.
 - Every milestone leaves the site working, and ends by updating this file.
 - Design: dark charcoal and white, restrained red, yellow for primary actions, team colours only for racing data. No gradients, glows or glassmorphism.
+- Deliver complete files with exact paths; small milestones; wait for confirmation after each.
 
-## Database (public schema)
-Tables: drivers, events, sessions, groups, group_members, profiles (includes avatar), predictions (picks jsonb),
+## Phase names used in commits (they overlap, read the date)
+- Milestones 1 to 18: the original build (site, Supabase, predictions, scoring, importer, admin, design).
+- A1, A2, A3.x (6 Nov): player statistics and achievements.
+- B1, B2.1 to B2.5 (6 to 10 Nov): season-long predictions and Title Caller.
+- M1 to M6 (11 to 15 Nov): driver lineup, substitutions, prediction form, grid penalties, notices, prediction corrections.
+- R1 (16 Nov): predictions page shell, event theming, access gate.
+- "Redesign phase A1 / A3" (18 Nov): Account page layout. Not the same as the statistics A1 and A3 above.
+- H1 onwards (19 Nov): housekeeping.
+
+## Database (public schema), migrations 001 to 037 in supabase/
+Core tables: drivers, events, sessions, groups, group_members, profiles (includes avatar), predictions (picks jsonb),
 results (versioned, status, data, source, api_snapshot, approved_by), scores (breakdown jsonb), import_log,
 push_subscriptions, push_log.
-Views: leaderboard (per season), player_xp (lifetime, all seasons), prediction_windows (lock times).
-Drivers are one row per driver per season (team_name is plain text), so team changes between seasons already work.
-There is no teams table and no season-long prediction table.
-Migrations are in supabase/001 to 022; tests exist for 005, 007, 009, 010, 016 and 017 only.
+Season tables (025, 026): season_predictions, season_prediction_log, season_results, season_scores.
+Change tables (030 to 037): driver_substitutions, driver_substitution_sessions, grid_penalties, prediction_corrections
+(all four append-only: a trigger blocks update and delete), player_notifications, push_notice_log.
+Views: leaderboard (per season, includes the season bonus), player_xp (lifetime, includes the bonus), prediction_windows,
+season_prediction_windows, player_session_stats, player_season_stats, player_event_progress, player_achievements,
+player_achievements_all.
+Drivers are one row per driver per season (team_name is plain text). There is no teams table.
+Tests exist in supabase/tests for 005, 007, 009, 010, 016, 017 and 023 to 029. None for 018 to 022 or 030 to 037.
+Rollback scripts for 030, 031, 033, 034, 035, 036 and 037 are in supabase/maintenance; they must be run in reverse order
+(037 first). maintenance/test_031_rollback_only.sql and test_037_rollback_only.sql are optional scenario checks that end
+with an intentional error so nothing is saved.
+Every function listed below for 030 to 037 is SECURITY DEFINER with an empty search_path; the admin functions check is_admin().
 
 ## Scoring (database function calc_points, mirrored in scorecard-engine.js)
 Qualifying and sprint qualifying: 1 point per driver in the right group (Q1 out, Q2 out, Q3), +3 for an exact Q3 slot,
@@ -29,144 +49,116 @@ Race maximum: 65 plus 8 per DNF driver picked (73 with one driver, 105 with five
 All predictions are optional. Results are scored only after an admin approves them.
 
 ## DNF rules
-- A prediction states whether anyone retires, how many (0 to 5 in the new format) and one driver per predicted DNF.
+- A prediction states whether anyone retires, how many (0 to 5) and one driver per predicted DNF.
 - Each picked DNF driver who really retired scores 4, or 8 if he started in the real top 8 (result field grid_top8).
-- A driver cannot be both in your top 8 and a DNF pick. Enforced by validation and by prediction_dnf_ok (migrations 010 and 020).
+- A driver cannot be both in your top 8 and a DNF pick (validation and prediction_dnf_ok, migrations 010 and 020).
 - Older predictions with the single dnf_driver field stay valid and score as before.
-- What counts as a DNF in the importer: status Retired or equivalent. Did not start, disqualified and lapped finishers do not count.
+- Importer: status Retired or equivalent counts. Did not start, disqualified and lapped finishers do not.
 
 ## Deadlines and reveal
 - Qualifying and sprint qualifying lock at their own start. Race predictions lock at qualifying start.
   Sprint predictions lock at sprint qualifying start. A session with no known start time stays closed.
-- Others' picks become visible only after the lock. Rules are in the predictions read policy (migration 005).
-  picks.js and picks-engine.js render the reveal. scorecard.js and scorecard-engine.js explain each score.
+- Others' picks become visible only after the lock (predictions read policy, migration 005). picks.js and picks-engine.js
+  render the reveal. scorecard.js and scorecard-engine.js explain each score.
 
 ## Results pipeline
 - Edge function import-results reads the Jolpica API (dry run, pending results, session-time sync). Sprint qualifying
-  is derived from the sprint grid and labelled "derived".
+  is derived from the sprint grid and labelled "derived". It accepts the secret in the x-import-secret header (and still
+  in a ?key= query parameter).
+- Lineup (030): qualifying and derived sprint qualifying are built from the session's effective lineup
+  (session_lineup_external) instead of all active drivers. A driver in the feed who is not in the lineup is logged as an error.
+- Grid penalties (034): if a penalty is registered for the Sprint, or the sprint grid shows a pit-lane start or a missing
+  slot, no derived Sprint Qualifying is created. It is logged as skipped and an admin enters it.
 - Admin panel (admin.html) approves, rejects, edits, corrects and enters results manually. Edited results keep an api_snapshot.
-- pg_cron jobs (all active): import-session-times-daily (06:15 UTC), import-results-every-30-min,
-  cleanup-cron-history (03:30 UTC), send-push-reminders-every-15-min.
-- A GitHub Actions workflow keeps the Supabase project awake.
+- pg_cron jobs as last documented: import-session-times-daily (06:15 UTC), import-results-every-30-min,
+  cleanup-cron-history (03:30 UTC), send-push-reminders-every-15-min. Change notices ride on the same send-reminders run.
+- A GitHub Actions workflow (.github/workflows/keepalive.yml) keeps the Supabase project awake.
 
-## Push reminders
-- push_subscriptions: one row per device (endpoint, keys, user, last_ok_at). push_log: one row per device, session and
-  kind, so the same reminder is not sent twice.
-- RPCs save_push_subscription and remove_push_subscription (authenticated). due_push_reminders is service_role only.
-- Edge function send-reminders (cron every 15 minutes, plus task=test for the Send a test button). sw.js shows the
-  notification. The public VAPID key is in config.js.
+## Driver changes, penalties, notices and corrections (M1 to M6)
+- Lineup (030, 031): session_lineup_state (service role), session_lineup (signed-in), session_lineup_external (service role),
+  check_pick_drivers, validate_session_data with optional lineup parameters. With no substitution and no inactive driver
+  row, behaviour is the original. If a season has an inactive driver row, result validation counts the active lineup.
+- Substitutions (031, 032): admin_preview_substitution, admin_register_substitution, admin_revert_substitution. A new
+  replacement driver row is created inactive. A session with an unknown start time is included only if the admin confirms it.
+  A revert is appended as new rows, only for sessions that have not taken place, never while a later substitution applies.
+- Prediction form (033, 034): prediction_form_lineup(session) returns the effective lineup, stand-ins for withdrawn drivers
+  the player already saved, the changes for the "Weekend changes" strip, and (034) the grid penalties in force.
+  predict-tiles.js shows a withdrawn driver as a flagged tile. A saved withdrawn pick stays valid and re-saveable; new picks use the lineup.
+- Grid penalties (034): admin_preview_grid_penalty, admin_register_grid_penalty, admin_revoke_grid_penalty (a revoke can carry a
+  corrected replacement), session_has_grid_penalty (service role). Informational: results and scores are not touched.
+- Notices (031, 035, 036): one in-app notice per player with a saved prediction for an affected session
+  (player_notifications, mark_notifications_read). Push delivery through send-reminders using due_push_notices
+  (notices created in the last 3 hours, once per device via push_notice_log). An admin can trigger delivery with ?task=notices.
+  Front end: notices.js and notices.css on the Predictions page, nav-badge.js for the unread badge.
+- Corrections (037): admin_preview_corrections, admin_correct_predictions (one or several players, all or nothing, mandatory
+  reason, validated like a player's save), admin_revert_correction (last in, first out), rescore_prediction (service role).
+  The player's created_at and updated_at are never written; the picks before and after are kept in prediction_corrections.
+  Only scores is written; season picks and the season bonus are untouched.
+- Admin screens in admin.html: Pending results, Missing results, Recently approved, Season results, Driver changes
+  (admin-changes.js), Grid penalties (admin-penalties.js), Prediction corrections (admin-corrections.js), Import log.
+
+## Season-long predictions (B1 plan agreed 6 Nov 2026, implemented in 025 to 029)
+- Picks: Drivers' champion and Constructors' champion, one pair per player per season.
+- Points (after an admin approves the official final standings): Drivers' 1st 60, 2nd 20, 3rd 10. Constructors' 1st 40, 2nd 15, 3rd 8.
+  +10 if both champion picks finish 1st. Maximum 110. A late joiner's points are halved, rounded down.
+- Opens when the season's drivers are loaded and every Round 1 session has a start time. Closes at the start of the earliest Round 1 session.
+- Late joiners (joined after that lock) may pick until the earliest Round 5 session, at half value.
+- Group-mates can read a player's picks only after that player's own window has closed (policy in 025).
+- Bonus lives in season_scores, never in scores. It is added to leaderboard.total_points and player_xp.xp (028; new columns
+  session_points, bonus_points, session_xp, bonus_xp). Session statistics, Season Points and the 13 original achievements stay session-only.
+- Admin: season results (versioned, approve only after all pick windows are closed, reject, edit), pick override with a written
+  reason (logged), points preview (026, 027; admin-season.js).
+- Front end: season-picks.js and season-picks.css (Season picks card on predict.html), standings.js (bonus in the final table only),
+  account-stats.js (bonus line in the Season section).
+- Title Caller (029): the 14th achievement, view player_achievements_all. A call = a Drivers' or Constructors' champion pick that
+  finished 1st in an approved season result; levels at 1, 2 and 4 calls.
+- NOT built: a page that shows everyone's season picks after the windows close (the database allows it; no page reads it).
+
+## Push reminders and app
+- push_subscriptions: one row per device. push_log: one row per device, session and kind (no duplicate reminders).
+- RPCs save_push_subscription and remove_push_subscription; due_push_reminders is service role only.
+- Edge function send-reminders (cron every 15 minutes, task=test for the Send a test button, task=notices for admins). sw.js shows
+  the notification. The public VAPID key is in config.js; the private key and IMPORT_SECRET are Supabase secrets, not in the repo.
 - Messages go about 3 hours and 1 hour before a deadline to players who have not predicted.
-- Account page (account-app.js) has the install button, the push switch and the calendar subscription links.
-  Signing out removes the device subscription first.
-- Calendar feed: edge function calendar-feed (webcal link on the Account page). It has no migration.
+- sw.js is network-first (cache lights-out-v1) and registered from site-nav.js. manifest.webmanifest makes the site installable.
+- Calendar feed: edge function calendar-feed (public, schedule only, no login, no migration).
 
 ## Profile, XP and levels
 - profiles.avatar (helmet code) is set only through set_avatar. XP is lifetime points over all seasons (player_xp).
 - Level n needs 40 x (n-1)^1.6 XP, cap 50. Seven ranks with badges (lo-profile.js). Level-up banner uses localStorage.
-- Account page driver card: avatar picker, XP bar, four numbers (total XP, sessions scored, best session, average),
-  rank ladder, last five XP gains. Home standings show avatar and rank badge.
-- Statistics views (migration 023, read-only): player_session_stats, player_season_stats, player_event_progress.
-  Accuracy is derived from scores.breakdown and the stored pick counts. The Account page does not use them yet (A2).
-- Account page Season section (account-stats.js, account-stats.css): points, position, accuracy, points progression
-  chart (inline SVG, you vs other players), points and accuracy by session type, highlights, round-by-round table.
-  It wraps AccountProfile.render/clear, so account.js and account-profile.js are unchanged.
-- Achievements (migration 024, read-only, computed not stored): view player_achievements (13 achievements per player:
-  progress, level, badge step, next target, and where the current level was earned). player_session_stats gained
-  session_players and won (a win needs rank 1, points above 0 and 2+ scoring players; ties share it) and
-  player_season_stats.session_wins follows it. Ever-present uses the full approved session sequence from results
-  (status approved), Sharp Shooter needs 8+ predicted slots and 85%+ placed accuracy, Leader and Comeback compare
-  positions within a season and accumulate across seasons, Sharp Eye counts exact positions, DNF Oracle uses only
-  the dnf_driver points.
-- Badge system (A3.2a): lo-achievements.js (13 emblems, steps I to IV, locked outline, plus display definitions),
-  achievements.css, and the unlinked design-review page badges.html with badge-sheet.js. No database use.
-  The thresholds in lo-achievements.js are for the sheet only; player_achievements is the source of truth.
-- Account page Achievements section (A3.2b): account-achievements.js reads player_achievements and draws one card per
-  achievement (badge, level, progress bar to the next level, round where the current level was earned) under the Season
-  section. A red NEW marker shows for levels gained since the last visit on this device (localStorage key lo-ach-<user id>;
-  the first visit on a device stores the current levels silently). It wraps AccountProfile.render like account-stats.js.
-- Title Caller (migration 029, the 14th achievement): view player_achievements_all = the 13 rows of player_achievements
-  plus title_caller (same columns). A call = the player's Drivers' or Constructors' champion pick finished 1st in an
-  approved season result; calls add up over seasons, half-value picks count; levels at 1/2/4 calls = badge steps II/III/IV;
-  earned at the season's last round, labelled "Season picks". account-achievements.js reads the new view and falls back to
-  player_achievements if it is missing. New laurel-around-1 emblem in lo-achievements.js.
-
-## Weekend recap
-- recap-engine.js (pure functions) and recap.js render a "Weekend recap" on the home page (index.html, recap.css):
-  winner, podium, climber, best score, notable calls, level-ups. Hidden when the last weekend has no points.
+- Statistics views (023): player_session_stats, player_season_stats, player_event_progress.
+- Achievements (024, 029): computed, not stored. 14 achievements in player_achievements_all. Emblems and display text in
+  lo-achievements.js (thresholds there are for the sheet only; the view is the source of truth). Design-review page badges.html (not linked).
 
 ## Front end
-Pages: index, account, predict (predict-tiles.js, predict-lights.js), leaderboard (standings.js), admin, picks/scorecard pages.
-Old files kept as fallbacks: predict.js, leaderboard.js, next-race.js/css, site-nav.css.
-Driver portraits and team logos: placeholders only, no asset pipeline yet.
+Pages: index, account, predict, leaderboard, picks, scorecard, admin, reset-password, badges (unlinked).
+- Shared: styles.css, site-chrome.css, lights-out.css, pages.css, profile.css, site-nav.js (navigation and service worker), theme.js
+  (data-driven event themes: circuit outline, hero photo, accents), admin-link.js, config.js.
+- Home: index.html, home.css, home.js, recap-engine.js, recap.js (weekend recap).
+- Predictions: predict.html, predict-tiles.js (driver tiles, lineup-aware), predict-lights.js (compact deadline lights),
+  predict-ui.js, predict-shell.js (R1 shell: rail, context bar), predict-layout.css, predict-changes.css, tiles.css, season-picks.js, notices.js.
+- Leaderboard: leaderboard.html, standings.js, standings.css.
+- Account (redesign 18 Nov): account-shell.js (section rail: Overview, Season stats, Achievements, Settings, links like account.html#stats),
+  account-layout.css, account-profile.js, account-stats.js (includes the league battle visual), account-achievements.js,
+  account-ach-preview.js (preview and All/Earned/Locked filter), account-app.js (install, push, calendar links), access-gate.css.
+- Not referenced by any page (to be removed in H2): predict.js, leaderboard.js, next-race.js, next-race.css, site-nav.css.
+- Assets: assets/circuits (24 SVG), assets/hero (24 JPG, Unsplash), see assets/ATTRIBUTIONS.md. Tools: tools/optimize-hero.mjs,
+  tools/generate-vapid.mjs. Driver portraits and team logos: placeholders only, no asset pipeline yet.
 
-## Data in the database now
-2026 season rehearsal data: 22 real 2026 drivers and events united-states-2026 (18), mexico-city-2026 (19),
-brazil-2026 (20), las-vegas-2026 (21), qatar-2026 (22), abu-dhabi-2026 (23), each with a qualifying and a race session.
-Only qualifying and race sessions exist for these events. Las Vegas, Qatar and Abu Dhabi session times are null until
-the daily time sync fills them. Event status is still 'scheduled' for every one, including finished weekends.
-Remove all rehearsal data with supabase/maintenance/remove_rehearsal_weekend.sql (check that it covers the four new
-events) before the 2027 season. 2027: 24 events and 68 sessions, times null until published. No 2027 drivers yet.
-
-## Unverified (owner to confirm or correct)
-- Recap shows correctly on the home page after a real weekend.
-- Push reminders arrive on a phone, including iOS installed-app mode.
-- Reveal after lock works for every session type in the live site.
-- Whether tests exist for migrations 018 to 022 (none found).
-- Whether node_modules is ignored by git.
-
-## Season-long predictions (agreed plan, 6 Nov 2026)
-- Picks: Drivers' champion and Constructors' champion, one pair per player per season.
-- Points (added only after an admin approves the official final standings):
-  Drivers' champion: pick finishes 1st 60, 2nd 20, 3rd 10. Constructors' champion: 1st 40, 2nd 15, 3rd 8.
-  +10 if both champion picks finish 1st. Maximum 110. A late joiner's points are halved, rounded down.
-- Opens when the season's drivers are loaded and every Round 1 session has a start time.
-  Closes at the start of the earliest Round 1 session (same UTC rule as session locks).
-- Late joiners: a player who joined the group after that lock may pick until the earliest Round 5 session, at half value.
-- Group-mates see a player's picks only after that player's own window has closed.
-- Season bonus lives in its own tables (never in scores), is added to the leaderboard total and to XP, and does not
-  change session statistics, Season Points or the other achievements.
-- Admin: can set a player's pick with a written reason (logged), and enters/approves the official season result.
-- Milestones: B2.1 tables, save function, window view, RLS, tests (migration 025). B2.2 Season picks card on the
-  Predictions page. B2.3 admin entry and approval of the season result, scoring and rescoring. B2.4 leaderboard, XP
-  and Season section integration. B2.5 optional Title Caller achievement and picks reveal.
-- B2.1 done: migration 025 (season_prediction_windows view, season_predictions and season_prediction_log tables,
-  submit_season_prediction and admin_set_season_prediction); behaviour test supabase/tests/025_season_predictions_test.sql
-  (ends with an intentional error that rolls back; report ALL OK). Season picks give no points yet.
-- B2.2 done: season-picks.js and season-picks.css add a Season picks card to predict.html (waiting, open, late-entry and
-  locked states). It reuses the chip styles of predict-ui.css and duplicates the TEAM_COLORS list of predict-tiles.js.
-  The form shows only when 2027 drivers and every Round 1 session time exist, so test it with the temporary-data recipe.
-- B2.3a done: migration 026 adds season_results (versioned top 3 drivers and top 3 constructors, one approved per season,
-  players see only the approved row), season_scores, calc_season_points (60/20/10, 40/15/8, +10 double, half value for
-  late entries rounded down), recalculate_season_scores, and admin functions: admin_save_season_result (every save is a
-  new pending version), admin_approve_season_result (only once the main and the late pick windows are closed; rescores),
-  admin_reject_season_result, admin_season_overview. admin_set_season_prediction now rescores when a result is approved.
-  Test: supabase/tests/026_season_results_scoring_test.sql (intentional error, report ALL OK). Season points are NOT in
-  the leaderboard, XP or any total yet (B2.4). The admin screen is B2.3b.
-  - B2.3b done: admin screen "Season results" in admin.html (admin-season.js, admin-season.css; admin.js untouched).
-  Per season with picks or a result: lock status, approved and pending result, points preview, Approve (only once all
-  pick windows are closed), Edit, Reject, Enter final standings, players' picks with points, pick override with a
-  required reason, and the log of admin pick changes. Migration 027 makes admin_season_overview list players without
-  picks as {user_id, name}. Test: supabase/tests/027_admin_season_overview_missing_test.sql.
-- Season bonus is still not in the leaderboard, XP or Season section: that is B2.4.
-- B2.3b verified (027 test ALL OK). B2.4a done: migration 028 re-creates leaderboard (total_points = session_points +
-  bonus_points; new trailing columns session_points, bonus_points) and player_xp (xp = session_xp + bonus_xp, lifetime
-  across seasons; new trailing columns session_xp, bonus_xp). A player needs one scored session in a season to be on
-  that season's leaderboard. Session stats, achievements and Season Points stay session-only. recap.js now reads
-  session_xp (level-ups are about the weekend); the Account "Average" uses session_xp. The 023 test compares season
-  stats with leaderboard.session_points. home.js reads the leaderboard view, so the home top 5 includes the bonus.
-- Still to do in B2.4b: standings.js (the leaderboard page adds up scores itself, so it does not show the bonus yet)
-  and the Season section on the Account page (league total and position, with the bonus as its own line).
-- B2.4b done: standings.js (leaderboard page) reads season_scores for the season and adds the bonus to the final table
-  only (never to an earlier weekend, so Move after approval shows the bonus effect); the player breakdown gets a
-  "Season picks" line (half value shows "Before halving"); a missing table silently means session points only.
-  account-stats.js (Season section) takes points and position from the leaderboard view (incl. bonus), shows
-  "incl. N from season picks" and a final "Season picks" row in the rounds table; the chart and statistics stay
-  session-only; if the leaderboard bonus columns are missing it falls back to session numbers.
-  The leaderboard page does not subscribe to season_scores in realtime: it updates on reload or when you return to the tab.
+## Data in the database
+As last documented (6 Nov 2026), not re-read: 2026 rehearsal data (22 real 2026 drivers; events united-states-2026, mexico-city-2026,
+brazil-2026, las-vegas-2026, qatar-2026, abu-dhabi-2026); 2027 calendar of 24 events and 68 sessions with times null until published;
+no 2027 drivers yet. The owner reports the database looks correct (19 Nov). The full reset before the 2027 season is deferred, and
+its script must be rebuilt first: supabase/maintenance/remove_rehearsal_weekend.sql covers only united-states-2026 and the 2026
+drivers, and rows in the append-only change tables (substitutions, penalties, corrections) would block deleting their events,
+sessions or drivers.
 
 ## Outstanding
-1. B2.5: Title Caller achievement and a reveal of everyone's season picks once the windows close.
-2. Driver photo and team logo asset pipeline (owner supplies the images).
-3. Real 2027 drivers and session times when published; check the Gulf races and any calendar change.
-4. Remove the 2026 rehearsal data with remove_rehearsal_weekend.sql before the 2027 season (check it covers all six events).
-5. Tests for migrations 018 to 022. Update this file after each milestone.
+1. Housekeeping: H2 repo hygiene (ignore the handoff folder, remove the unreferenced files, retire the old cleanup scripts),
+   H3 small code cleanup (dead FORM_AWARE flag in admin-changes.js, importer secret header only).
+2. Features: season picks reveal page, how-to-play page, driver photo and team logo asset pipeline (owner supplies images).
+3. Credit line for portugal.svg (CC BY 3.0) visible on the site.
+4. Before the 2027 season: rebuild and run the reset (rehearsal data, test season data), load 2027 drivers, check session times
+   (Gulf races, calendar changes), re-check live database definitions.
+5. Tests for migrations 018 to 022 and 030 to 037; re-run the 005 to 029 tests after any change to the functions they call.
+6. Unknown: status of the printed A3 wall calendar (print files are git-ignored and not in the repo).

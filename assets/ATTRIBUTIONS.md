@@ -1,12 +1,14 @@
 # Asset attributions
 
-Last updated: 27 October 2026
+Last updated: 19 November 2026
 
 Asset files are named after the event stem the website uses: the event id without the year
 (for example `monaco-2027` and `monaco-2026` both use `monaco`). The 2027 Mexico event
 (`mexico-2027`) shares the `mexico-city` files through an alias in `theme.js`.
 
 ## Circuit outlines (`assets/circuits/`)
+
+### CC0 collection (21 files)
 
 Source: MasterPlay007, "F1-Track-Layouts-SVG"
 https://github.com/MasterPlay007/F1-Track-Layouts-SVG
@@ -39,30 +41,29 @@ The path coordinates are unchanged. Each file was normalised to a single `<path>
 | qatar.svg | losail.svg |
 | abu-dhabi.svg | yas_marina.svg |
 
-### Circuits still to add
+### Wikimedia Commons (3 files)
 
-These are not in the CC0 collection and come from Wikimedia Commons. Check the licence on
-the file page when downloading.
-
-| File to create | Source | Licence | Obligation |
+| File | Source | Licence | Credit and obligation |
 |---|---|---|---|
-| portugal.svg | https://commons.wikimedia.org/wiki/File:Aut%C3%B3dromo_de_Algarve.svg | CC BY 3.0 | Credit the author (Sentoan), link the licence, state any modification. Add the credit here when the file is added. |
-| turkey.svg | https://commons.wikimedia.org/wiki/File:Circuit_Istanbul.svg | Public domain (author Rumbin) | None; record the source here. |
-| spain.svg | https://commons.wikimedia.org/wiki/File:Madring_Formula_1_Circuit.svg | CC0 1.0 (author Dave F63) | None; record the source here. |
+| portugal.svg | https://commons.wikimedia.org/wiki/File:Aut%C3%B3dromo_de_Algarve.svg | CC BY 3.0 (https://creativecommons.org/licenses/by/3.0/) | Author: Sentoan. Credit required, with a link to the licence and a statement of any modification. |
+| turkey.svg | https://commons.wikimedia.org/wiki/File:Circuit_Istanbul.svg | Public domain (author Rumbin) | None. Source recorded here. |
+| spain.svg | https://commons.wikimedia.org/wiki/File:Madring_Formula_1_Circuit.svg | CC0 1.0 (author Dave F63) | None. Source recorded here. |
 
-Each must contain exactly one circuit `<path>` and a `viewBox`. Until then the homepage
-draws a generated decorative racing line for these three races.
+Credit text for portugal.svg: "Autódromo de Algarve by Sentoan, licensed under CC BY 3.0
+(https://creativecommons.org/licenses/by/3.0/). Modified: reduced to a single path, viewBox 0 0 500 500,
+no fill, currentColor stroke."
+TO DO: confirm that the modification statement matches what was done to the file, and show this credit
+somewhere on the site (for example a small line in the footer).
 
 ## Hero photographs (`assets/hero/`)
 
-No photographs have been added yet. Use only photos that the Unsplash page marks
-"Free to use under the Unsplash License". Do not use Unsplash+ photos.
+24 photographs, one per circuit stem (the same stems as the circuit files).
+Source: Unsplash, downloaded by the owner under "Free to use under the Unsplash License".
 Licence: https://unsplash.com/license
-
-Record every photo below when it is added.
+The photographers and photo page URLs were not recorded when the files were added. The Unsplash licence does not
+require credit, but recording them is good practice: fill in the table below when convenient.
+Optimised from originals in `assets/hero-originals/` (not committed, git-ignored) with `node tools/optimize-hero.mjs`.
 
 | File | Photographer | Photo page URL | Downloaded |
 |---|---|---|---|
-| (none yet) | | | |
-
-Optimise originals with `node tools/optimize-hero.mjs` before committing them.
+| (to be filled in, one row per file) | | | |
