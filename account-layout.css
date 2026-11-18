@@ -1,0 +1,182 @@
+/* Lights Out: Account page layout (redesign phase A1).
+   Everything is scoped to body.ac-page, so no other page changes (profile.css is also used by the home page and is untouched).
+   Load AFTER every other stylesheet.
+   Signed in: a profile strip, then a section rail (desktop) or chips (phone) and one of four sections:
+   Overview, Season stats, Achievements, Settings. Signed out: one centered sign-in card. */
+
+body.ac-page { --maxw: 1440px; }
+
+body.ac-page .hero-inner { max-width: var(--maxw); padding-left: var(--gutter); padding-right: var(--gutter); }
+body.ac-page .hero h1 { font-size: clamp(2.1rem, 6vw, 3.2rem); }
+
+body.ac-page main.ac-wrap { max-width: var(--maxw); margin: 0 auto; padding: 20px var(--gutter) 56px; }
+
+body.ac-page #signed-out-view { max-width: 480px; margin: 24px auto; }
+/* The signed-in layout stays hidden until the shell is ready. If the shell never starts (4 s), the old stacked page is shown instead. */
+.ac:not(.shell-ready):not(.shell-failed) { display: none; }
+.ac.shell-ready[data-auth="out"] { display: none; }
+
+/* ----- profile strip (the driver card) ----- */
+body.ac-page .ac .driver {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin: 0 0 16px;
+}
+
+body.ac-page .ac .driver > .levelup { grid-row: 1; }
+body.ac-page .ac .driver > .driver-top { grid-row: 2; padding: 18px 22px; align-items: center; }
+body.ac-page .ac .driver > .driver-stats { grid-row: 3; }
+body.ac-page .ac .driver > .picker { grid-row: 4; }
+
+@media (min-width: 1000px) {
+  body.ac-page .ac .driver { grid-template-columns: minmax(0, 1fr) auto; }
+  body.ac-page .ac .driver > .levelup,
+  body.ac-page .ac .driver > .picker { grid-column: 1 / -1; }
+  body.ac-page .ac .driver > .driver-top { grid-column: 1; grid-row: 2; }
+  body.ac-page .ac .driver > .driver-stats {
+    grid-column: 2;
+    grid-row: 2;
+    min-width: 440px;
+    align-self: stretch;
+    border-top: 0;
+    border-left: 1px solid var(--hair);
+  }
+  body.ac-page .ac .driver > .picker { grid-row: 3; }
+  body.ac-page .ac .driver-stats div { display: flex; flex-direction: column; justify-content: center; }
+}
+
+/* ----- rail / chips and the sections ----- */
+.ac-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; align-items: start; }
+.ac-panes { min-width: 0; }
+
+.ac:not(.shell-ready) .ac-rail { display: none; }
+.ac.shell-ready .ac-pane { display: none; }
+.ac.shell-ready[data-view="overview"] #pane-overview,
+.ac.shell-ready[data-view="stats"] #pane-stats,
+.ac.shell-ready[data-view="achievements"] #pane-achievements,
+.ac.shell-ready[data-view="settings"] #pane-settings { display: block; }
+
+.ac:not(.shell-ready) .ac-pane { margin-bottom: 16px; }
+
+@media (min-width: 1000px) {
+  .ac-body { grid-template-columns: 240px minmax(0, 1fr); gap: 24px; }
+  .ac-rail { position: sticky; top: calc(var(--header-h) + 16px); }
+}
+
+.ac-rail-list { margin: 0; padding: 0; list-style: none; border: 1px solid var(--hair-strong); background: var(--panel); }
+
+.ac-tab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 0;
+  border-bottom: 1px solid var(--hair);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: inset 3px 0 0 transparent;
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.2s, background-color 0.2s, box-shadow 0.25s var(--ease-out);
+}
+
+.ac-rail-list li:last-child .ac-tab { border-bottom: 0; }
+.ac-tab:hover { color: var(--text); }
+.ac-tab[aria-current="true"] { background: #181b20; box-shadow: inset 3px 0 0 var(--yellow); color: var(--text); }
+.ac-tab:focus-visible { outline: 2px solid var(--yellow); outline-offset: -2px; }
+
+.ac-badge {
+  padding: 1px 7px;
+  border: 1px solid var(--yellow);
+  color: var(--yellow);
+  font-family: var(--font-text);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ----- cards ----- */
+.ac-card { margin: 0; padding: 18px 22px; border: 1px solid var(--hair-strong); background: var(--panel); }
+.ac-card h3 {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-family: var(--font-text);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.ac-card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.ac-card-head h3 { margin-bottom: 10px; }
+
+/* Overview */
+.ac-overview { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.ac-setup { grid-column: 1 / -1; border-color: var(--yellow); }
+.ac-todo { margin: 0; padding: 0; list-style: none; }
+.ac-todo-item { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 16px; padding: 8px 0; border-top: 1px solid var(--hair); }
+.ac-todo-item:first-child { border-top: 0; }
+
+.ac-nums { display: grid; grid-template-columns: repeat(3, 1fr); margin: 0; }
+.ac-nums div { padding: 4px 8px; text-align: center; }
+.ac-nums div + div { border-left: 1px solid var(--hair); }
+.ac-nums dt { color: var(--muted); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
+.ac-nums dd { margin: 4px 0 0; font-family: var(--font-display); font-size: 2rem; font-variant-numeric: tabular-nums; font-weight: 900; line-height: 1; }
+
+.ac-overview .recent,
+.ac-overview .ladder { border: 1px solid var(--hair-strong); background: var(--panel); }
+.ac-overview .ladder { grid-column: 1 / -1; }
+
+/* Season stats and Achievements fill the width of the section */
+.ac-pane > .stats,
+.ac-pane > .ach { margin: 0; }
+
+body.ac-page .ac .ach-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; padding: 16px 22px 22px; border-top: 0; }
+body.ac-page .ac .ach-card,
+body.ac-page .ac .ach-card:nth-child(3n + 1),
+body.ac-page .ac .ach-card:nth-child(2n + 1) { border: 1px solid var(--hair); }
+
+/* Settings */
+.ac-settings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.ac-col { display: grid; gap: 16px; min-width: 0; }
+body.ac-page .ac .panel { max-width: none; margin: 0; }
+body.ac-page .ac .app-panel { margin: 0; }
+
+/* ----- phone and tablet: chips instead of the rail ----- */
+@media (max-width: 600px) {
+  body.ac-page .ac .ach-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 12px; }
+}
+
+@media (max-width: 999px) {
+  .ac-rail-list { display: flex; overflow-x: auto; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
+  .ac-rail-list li { flex: 0 0 auto; scroll-snap-align: start; }
+  .ac-tab {
+    padding: 10px 14px;
+    border-bottom: 0;
+    border-right: 1px solid var(--hair);
+    box-shadow: inset 0 3px 0 transparent;
+    font-size: 1.1rem;
+    white-space: nowrap;
+  }
+  .ac-tab[aria-current="true"] { box-shadow: inset 0 3px 0 var(--yellow); }
+
+  body.ac-page .ac .driver > .driver-top { padding: 16px; }
+  .ac-overview,
+  .ac-settings { grid-template-columns: minmax(0, 1fr); }
+  .ac-card { padding: 16px; }
+  .ac-nums dd { font-size: 1.7rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ac-tab { transition: none; }
+}

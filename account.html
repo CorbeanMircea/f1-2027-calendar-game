@@ -13,8 +13,9 @@
   <link rel="stylesheet" href="account-stats.css">
   <link rel="stylesheet" href="achievements.css"> <!-- NEW (A3.2b) -->
   <link rel="stylesheet" href="account-app.css">
+  <link rel="stylesheet" href="account-layout.css"> <!-- NEW (R-A1): layout, load last -->
 </head>
-<body>
+<body class="ac-page">
   <script src="site-nav.js"></script>
   <header class="hero">
     <div class="checker" aria-hidden="true"></div>
@@ -24,7 +25,7 @@
     </div>
   </header>
 
-  <main class="account-wrap profile-page">
+  <main class="account-wrap profile-page ac-wrap">
     <section class="panel" id="signed-out-view">
       <h2>Sign in or create an account</h2>
       <form id="auth-form" novalidate>
@@ -49,214 +50,258 @@
       </form>
     </section>
 
-    <section class="driver" id="driver-card" aria-label="Driver profile" hidden>
-      <div class="levelup" id="levelup" role="status" hidden>
-        <strong>Level up</strong>
-        <span id="levelup-text"></span>
-        <button type="button" id="levelup-close" aria-label="Dismiss">Close</button>
-      </div>
-
-      <div class="driver-top">
-        <div class="driver-av">
-          <div class="av-tile" id="driver-avatar"></div>
-          <div id="driver-badge"></div>
+    <!-- NEW (R-A1): profile strip, section rail and the four sections. Every id the page scripts use is unchanged. -->
+    <div class="ac" id="ac" data-auth="out" data-view="overview">
+      <section class="driver" id="driver-card" aria-label="Driver profile" hidden>
+        <div class="levelup" id="levelup" role="status" hidden>
+          <strong>Level up</strong>
+          <span id="levelup-text"></span>
+          <button type="button" id="levelup-close" aria-label="Dismiss">Close</button>
         </div>
-        <div>
-          <h2 class="driver-name" id="driver-name"></h2>
-          <p class="driver-rank" id="driver-rank"></p>
-          <div class="xp">
-            <div class="xp-bar" id="xp-bar" role="progressbar" aria-label="Progress to the next level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-              <span class="xp-fill" id="xp-fill"></span>
-            </div>
-            <p class="xp-meta"><span id="xp-left"></span><span id="xp-right"></span></p>
-          </div>
-          <div class="driver-actions">
-            <button type="button" class="btn" id="edit-avatar" aria-expanded="false" aria-controls="avatar-picker">Edit avatar</button>
-          </div>
-        </div>
-      </div>
 
-      <section class="picker" id="avatar-picker" aria-label="Choose your avatar" hidden>
-        <div class="picker-grid">
-          <div class="picker-preview"><div class="av-tile" id="picker-preview"></div></div>
+        <div class="driver-top">
+          <div class="driver-av">
+            <div class="av-tile" id="driver-avatar"></div>
+            <div id="driver-badge"></div>
+          </div>
           <div>
-            <h3>Helmet pattern</h3>
-            <div class="pk-patterns" id="pk-patterns"></div>
-            <h3>Shell colour</h3>
-            <div class="pk-colours" id="pk-bases"></div>
-            <h3>Pattern colour</h3>
-            <div class="pk-colours" id="pk-colours"></div>
-            <h3>Visor</h3>
-            <div class="pk-opts" id="pk-visors"></div>
-            <h3>Number plate</h3>
-            <div class="pk-opts" id="pk-styles"></div>
-            <div class="pk-number">
-              <label for="pk-number">Racing number (1 to 99)</label>
-              <input id="pk-number" type="number" min="1" max="99" inputmode="numeric">
+            <h2 class="driver-name" id="driver-name"></h2>
+            <p class="driver-rank" id="driver-rank"></p>
+            <div class="xp">
+              <div class="xp-bar" id="xp-bar" role="progressbar" aria-label="Progress to the next level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <span class="xp-fill" id="xp-fill"></span>
+              </div>
+              <p class="xp-meta"><span id="xp-left"></span><span id="xp-right"></span></p>
             </div>
-            <div class="actions">
-              <button type="button" class="btn btn-primary" id="picker-save">Save avatar</button>
-              <button type="button" class="btn" id="picker-random">Randomise</button>
-              <button type="button" class="btn" id="picker-cancel">Cancel</button>
+            <div class="driver-actions">
+              <button type="button" class="btn" id="edit-avatar" aria-expanded="false" aria-controls="avatar-picker">Edit avatar</button>
             </div>
-            <p class="message" id="picker-msg" role="status" aria-live="polite"></p>
           </div>
         </div>
-      </section>
 
-      <dl class="driver-stats">
-        <div><dt>Total XP</dt><dd id="stat-xp">0</dd></div>
-        <div><dt>Sessions scored</dt><dd id="stat-sessions">0</dd></div>
-        <div><dt>Best session</dt><dd id="stat-best">0</dd></div>
-        <div><dt>Average</dt><dd id="stat-avg">0</dd></div>
-      </dl>
+        <section class="picker" id="avatar-picker" aria-label="Choose your avatar" hidden>
+          <div class="picker-grid">
+            <div class="picker-preview"><div class="av-tile" id="picker-preview"></div></div>
+            <div>
+              <h3>Helmet pattern</h3>
+              <div class="pk-patterns" id="pk-patterns"></div>
+              <h3>Shell colour</h3>
+              <div class="pk-colours" id="pk-bases"></div>
+              <h3>Pattern colour</h3>
+              <div class="pk-colours" id="pk-colours"></div>
+              <h3>Visor</h3>
+              <div class="pk-opts" id="pk-visors"></div>
+              <h3>Number plate</h3>
+              <div class="pk-opts" id="pk-styles"></div>
+              <div class="pk-number">
+                <label for="pk-number">Racing number (1 to 99)</label>
+                <input id="pk-number" type="number" min="1" max="99" inputmode="numeric">
+              </div>
+              <div class="actions">
+                <button type="button" class="btn btn-primary" id="picker-save">Save avatar</button>
+                <button type="button" class="btn" id="picker-random">Randomise</button>
+                <button type="button" class="btn" id="picker-cancel">Cancel</button>
+              </div>
+              <p class="message" id="picker-msg" role="status" aria-live="polite"></p>
+            </div>
+          </div>
+        </section>
 
-      <section class="ladder" aria-label="Rank ladder">
-        <h3>Rank ladder</h3>
-        <ol id="ladder"></ol>
-      </section>
-
-      <section class="recent" aria-label="Recent XP">
-        <h3>Recent XP</h3>
-        <ul id="recent-list"></ul>
-      </section>
-    </section>
-
-    <section class="stats" id="stats-card" aria-label="Season statistics" hidden>
-      <div class="stats-head">
-        <h2>Season</h2>
-        <label class="stats-season" id="stats-season-wrap" hidden>
-          <span class="sr-only">Season</span>
-          <select id="stats-season"></select>
-        </label>
-      </div>
-      <p class="stats-state" id="stats-state" role="status"></p>
-      <div id="stats-body" hidden>
-        <dl class="stats-hero">
-          <div><dt>Points</dt><dd id="st-points">0</dd><small id="st-points-sub"></small></div>
-          <div><dt>Position</dt><dd id="st-rank">&ndash;</dd><small id="st-rank-sub"></small></div>
-          <div><dt>Accuracy</dt><dd id="st-acc">&ndash;</dd><small id="st-acc-sub"></small></div>
+        <dl class="driver-stats">
+          <div><dt>Total XP</dt><dd id="stat-xp">0</dd></div>
+          <div><dt>Sessions scored</dt><dd id="stat-sessions">0</dd></div>
+          <div><dt>Best session</dt><dd id="stat-best">0</dd></div>
+          <div><dt>Average</dt><dd id="stat-avg">0</dd></div>
         </dl>
-        <section class="stats-sec" aria-label="Points progression">
-          <h3>Points progression</h3>
-          <div class="stats-chart" id="stats-chart"></div>
-          <p class="stats-legend" id="stats-legend"></p>
-        </section>
-        <section class="stats-sec" aria-label="Performance by session type">
-          <h3>By session type</h3>
-          <ul class="stats-types" id="stats-types"></ul>
-        </section>
-        <section class="stats-sec" aria-label="Season highlights">
-          <h3>Highlights</h3>
-          <dl class="stats-grid" id="stats-grid"></dl>
-        </section>
-        <section class="stats-sec" aria-label="Round by round">
-          <details class="stats-rounds">
-            <summary>Round by round</summary>
-            <div class="stats-table-wrap">
-              <table class="stats-table">
-                <thead><tr><th>Round</th><th>Grand Prix</th><th>Points</th><th>Total</th><th>Pos</th></tr></thead>
-                <tbody id="stats-rounds"></tbody>
-              </table>
+      </section>
+
+      <div class="ac-body">
+        <nav class="ac-rail" id="ac-rail" aria-label="Account sections"></nav>
+
+        <div class="ac-panes">
+          <div class="ac-pane" id="pane-overview" data-pane="overview">
+            <div class="ac-overview">
+              <section class="ac-card ac-setup" id="ac-setup" aria-label="Set up" hidden>
+                <h3>Set up</h3>
+                <ul class="ac-todo" id="ac-todo"></ul>
+              </section>
+
+              <section class="ac-card ac-season" id="ov-season" aria-label="This season" hidden>
+                <div class="ac-card-head">
+                  <h3>This season</h3>
+                  <button type="button" class="link-btn" data-go="stats">Season stats</button>
+                </div>
+                <dl class="ac-nums">
+                  <div><dt>Points</dt><dd id="ov-points">0</dd></div>
+                  <div><dt>Position</dt><dd id="ov-rank">&ndash;</dd></div>
+                  <div><dt>Accuracy</dt><dd id="ov-acc">&ndash;</dd></div>
+                </dl>
+              </section>
+
+              <section class="recent" aria-label="Recent XP">
+                <h3>Recent XP</h3>
+                <ul id="recent-list"></ul>
+              </section>
+
+              <section class="ladder" aria-label="Rank ladder">
+                <h3>Rank ladder</h3>
+                <ol id="ladder"></ol>
+              </section>
             </div>
-          </details>
-          <p class="stats-note">Accuracy counts every driver you predicted in the right place or group: the top 8 for race and sprint, the knockout group or Q3 place for qualifying. Exact positions counts only the exactly right slot.</p>
-        </section>
-      </div>
-    </section>
-
-    <!-- NEW (A3.2b): achievements -->
-    <section class="ach" id="ach-card" aria-label="Achievements" hidden>
-      <div class="ach-head">
-        <h2>Achievements</h2>
-        <p class="ach-count" id="ach-count"></p>
-      </div>
-      <p class="ach-state" id="ach-state" role="status"></p>
-      <ul class="ach-grid" id="ach-grid"></ul>
-    </section>
-    <!-- END NEW (A3.2b) -->
-
-    <section class="panel" id="signed-in-view" hidden>
-      <h2>You are signed in</h2>
-      <p class="signed-in-email" id="signed-in-email"></p>
-
-      <p class="placeholder" id="membership-status" role="status"></p>
-
-      <div id="join-section" hidden>
-        <h3>Join the friends group</h3>
-        <p class="placeholder">Enter a display name and the invite code you were given.</p>
-        <form id="join-form" novalidate>
-          <div class="field">
-            <label for="join-name">Display name (2 to 30 characters)</label>
-            <input id="join-name" name="join-name" type="text" maxlength="30" autocomplete="nickname" required>
           </div>
-          <div class="field">
-            <label for="join-code">Invite code</label>
-            <input id="join-code" name="join-code" type="text" autocomplete="off" autocapitalize="characters" required>
+
+          <div class="ac-pane" id="pane-stats" data-pane="stats">
+            <section class="stats" id="stats-card" aria-label="Season statistics" hidden>
+              <div class="stats-head">
+                <h2>Season</h2>
+                <label class="stats-season" id="stats-season-wrap" hidden>
+                  <span class="sr-only">Season</span>
+                  <select id="stats-season"></select>
+                </label>
+              </div>
+              <p class="stats-state" id="stats-state" role="status"></p>
+              <div id="stats-body" hidden>
+                <dl class="stats-hero">
+                  <div><dt>Points</dt><dd id="st-points">0</dd><small id="st-points-sub"></small></div>
+                  <div><dt>Position</dt><dd id="st-rank">&ndash;</dd><small id="st-rank-sub"></small></div>
+                  <div><dt>Accuracy</dt><dd id="st-acc">&ndash;</dd><small id="st-acc-sub"></small></div>
+                </dl>
+                <section class="stats-sec" aria-label="Points progression">
+                  <h3>Points progression</h3>
+                  <div class="stats-chart" id="stats-chart"></div>
+                  <p class="stats-legend" id="stats-legend"></p>
+                </section>
+                <section class="stats-sec" aria-label="Performance by session type">
+                  <h3>By session type</h3>
+                  <ul class="stats-types" id="stats-types"></ul>
+                </section>
+                <section class="stats-sec" aria-label="Season highlights">
+                  <h3>Highlights</h3>
+                  <dl class="stats-grid" id="stats-grid"></dl>
+                </section>
+                <section class="stats-sec" aria-label="Round by round">
+                  <details class="stats-rounds">
+                    <summary>Round by round</summary>
+                    <div class="stats-table-wrap">
+                      <table class="stats-table">
+                        <thead><tr><th>Round</th><th>Grand Prix</th><th>Points</th><th>Total</th><th>Pos</th></tr></thead>
+                        <tbody id="stats-rounds"></tbody>
+                      </table>
+                    </div>
+                  </details>
+                  <p class="stats-note">Accuracy counts every driver you predicted in the right place or group: the top 8 for race and sprint, the knockout group or Q3 place for qualifying. Exact positions counts only the exactly right slot.</p>
+                </section>
+              </div>
+            </section>
           </div>
-          <div class="actions">
-            <button type="submit" class="btn btn-primary" id="join-button">Join group</button>
+
+          <div class="ac-pane" id="pane-achievements" data-pane="achievements">
+            <!-- NEW (A3.2b): achievements -->
+            <section class="ach" id="ach-card" aria-label="Achievements" hidden>
+              <div class="ach-head">
+                <h2>Achievements</h2>
+                <p class="ach-count" id="ach-count"></p>
+              </div>
+              <p class="ach-state" id="ach-state" role="status"></p>
+              <ul class="ach-grid" id="ach-grid"></ul>
+            </section>
+            <!-- END NEW (A3.2b) -->
           </div>
-        </form>
-      </div>
 
-      <div id="member-section" hidden>
-        <p>Group: <strong id="member-group"></strong></p>
-        <p>Display name: <strong id="member-name"></strong></p>
-        <p>Role: <strong id="member-role"></strong></p>
-      </div>
+          <div class="ac-pane" id="pane-settings" data-pane="settings">
+            <div class="ac-settings">
+              <div class="ac-col" id="signed-in-view" hidden>
+                <section class="panel ac-card" aria-label="League">
+                  <h2>League</h2>
+                  <p class="placeholder" id="membership-status" role="status"></p>
 
-      <details class="security" id="security-details">
-        <summary>Change password</summary>
-        <form id="change-form" novalidate>
-          <div class="field">
-            <label for="change-password">New password (at least 8 characters)</label>
-            <input id="change-password" type="password" autocomplete="new-password" minlength="8">
+                  <div id="join-section" hidden>
+                    <h3>Join the friends group</h3>
+                    <p class="placeholder">Enter a display name and the invite code you were given.</p>
+                    <form id="join-form" novalidate>
+                      <div class="field">
+                        <label for="join-name">Display name (2 to 30 characters)</label>
+                        <input id="join-name" name="join-name" type="text" maxlength="30" autocomplete="nickname" required>
+                      </div>
+                      <div class="field">
+                        <label for="join-code">Invite code</label>
+                        <input id="join-code" name="join-code" type="text" autocomplete="off" autocapitalize="characters" required>
+                      </div>
+                      <div class="actions">
+                        <button type="submit" class="btn btn-primary" id="join-button">Join group</button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div id="member-section" hidden>
+                    <p>Group: <strong id="member-group"></strong></p>
+                    <p>Display name: <strong id="member-name"></strong></p>
+                    <p>Role: <strong id="member-role"></strong></p>
+                  </div>
+                </section>
+
+                <section class="panel ac-card" aria-label="Sign-in and security">
+                  <h2>Sign-in</h2>
+                  <p class="signed-in-email" id="signed-in-email"></p>
+
+                  <details class="security" id="security-details">
+                    <summary>Change password</summary>
+                    <form id="change-form" novalidate>
+                      <div class="field">
+                        <label for="change-password">New password (at least 8 characters)</label>
+                        <input id="change-password" type="password" autocomplete="new-password" minlength="8">
+                      </div>
+                      <div class="field">
+                        <label for="change-password-2">Repeat the new password</label>
+                        <input id="change-password-2" type="password" autocomplete="new-password" minlength="8">
+                      </div>
+                      <div class="actions">
+                        <button type="submit" class="btn" id="change-save-button">Save new password</button>
+                      </div>
+                    </form>
+                  </details>
+
+                  <div class="actions">
+                    <button type="button" class="btn" id="sign-out-button">Sign out</button>
+                  </div>
+                </section>
+              </div>
+
+              <section class="panel app-panel" id="app-panel" aria-labelledby="app-title">
+                <h2 id="app-title">Get the app and reminders</h2>
+
+                <h3>Install on your phone</h3>
+                <p class="app-note" id="install-note"></p>
+                <div class="actions">
+                  <button type="button" class="btn btn-primary" id="install-button" hidden>Install Lights Out</button>
+                </div>
+
+                <div id="push-block" hidden>
+                  <h3>Reminders on this device</h3>
+                  <p class="app-note" id="push-note"></p>
+                  <div class="actions">
+                    <button type="button" class="btn btn-primary" id="push-on" hidden>Turn on reminders</button>
+                    <button type="button" class="btn" id="push-test" hidden>Send a test</button>
+                    <button type="button" class="btn" id="push-off" hidden>Turn off reminders</button>
+                  </div>
+                </div>
+
+                <h3>Deadline reminders in your calendar</h3>
+                <p class="app-note">Subscribe once and every prediction deadline appears in your calendar with an alert one day and one hour before. It updates by itself when session times change.</p>
+                <div class="actions">
+                  <a class="btn" id="cal-apple" href="#" rel="noopener">Apple / Outlook</a>
+                  <a class="btn" id="cal-google" href="#" target="_blank" rel="noopener">Google Calendar</a>
+                  <button type="button" class="btn" id="cal-copy">Copy link</button>
+                </div>
+                <input class="feed-url" id="cal-url" type="text" readonly aria-label="Calendar link">
+                <p class="app-note">In Google Calendar the alerts come from your calendar settings: open Settings, choose this calendar and add notifications under "Event notifications".</p>
+              </section>
+            </div>
           </div>
-          <div class="field">
-            <label for="change-password-2">Repeat the new password</label>
-            <input id="change-password-2" type="password" autocomplete="new-password" minlength="8">
-          </div>
-          <div class="actions">
-            <button type="submit" class="btn" id="change-save-button">Save new password</button>
-          </div>
-        </form>
-      </details>
-
-      <div class="actions">
-        <button type="button" class="btn" id="sign-out-button">Sign out</button>
-      </div>
-    </section>
-
-    <section class="panel app-panel" id="app-panel" aria-labelledby="app-title">
-      <h2 id="app-title">Get the app and reminders</h2>
-
-      <h3>Install on your phone</h3>
-      <p class="app-note" id="install-note"></p>
-      <div class="actions">
-        <button type="button" class="btn btn-primary" id="install-button" hidden>Install Lights Out</button>
-      </div>
-
-      <div id="push-block" hidden>
-        <h3>Reminders on this device</h3>
-        <p class="app-note" id="push-note"></p>
-        <div class="actions">
-          <button type="button" class="btn btn-primary" id="push-on" hidden>Turn on reminders</button>
-          <button type="button" class="btn" id="push-test" hidden>Send a test</button>
-          <button type="button" class="btn" id="push-off" hidden>Turn off reminders</button>
         </div>
       </div>
-
-      <h3>Deadline reminders in your calendar</h3>
-      <p class="app-note">Subscribe once and every prediction deadline appears in your calendar with an alert one day and one hour before. It updates by itself when session times change.</p>
-      <div class="actions">
-        <a class="btn" id="cal-apple" href="#" rel="noopener">Apple / Outlook</a>
-        <a class="btn" id="cal-google" href="#" target="_blank" rel="noopener">Google Calendar</a>
-        <button type="button" class="btn" id="cal-copy">Copy link</button>
-      </div>
-      <input class="feed-url" id="cal-url" type="text" readonly aria-label="Calendar link">
-      <p class="app-note">In Google Calendar the alerts come from your calendar settings: open Settings, choose this calendar and add notifications under "Event notifications".</p>
-    </section>
+    </div>
+    <!-- END NEW (R-A1) -->
 
     <p class="message" id="auth-message" role="status" aria-live="polite"></p>
   </main>
@@ -270,6 +315,8 @@
   <script src="account-achievements.js"></script> <!-- NEW (A3.2b) -->
   <script src="account-app.js"></script>
   <script src="account.js"></script>
+  <script src="account-shell.js"></script> <!-- NEW (R-A1) -->
+  <script>window.setTimeout(function () { var a = document.getElementById("ac"); if (a && !a.classList.contains("shell-ready")) { a.classList.add("shell-failed"); } }, 4000);</script>
   <script src="admin-link.js"></script>
 </body>
 </html>
