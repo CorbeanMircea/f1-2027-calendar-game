@@ -141,7 +141,7 @@ Pages: index, account, predict, leaderboard, picks, scorecard, admin, reset-pass
 - Account (redesign 18 Nov): account-shell.js (section rail: Overview, Season stats, Achievements, Settings, links like account.html#stats),
   account-layout.css, account-profile.js, account-stats.js (includes the league battle visual), account-achievements.js,
   account-ach-preview.js (preview and All/Earned/Locked filter), account-app.js (install, push, calendar links), access-gate.css.
-- Not referenced by any page (to be removed in H2): predict.js, leaderboard.js, next-race.js, next-race.css, site-nav.css.
+- Removed in H2 (19 Nov 2026, still in git history): predict.js, leaderboard.js, next-race.js, next-race.css, site-nav.css.
 - Assets: assets/circuits (24 SVG), assets/hero (24 JPG, Unsplash), see assets/ATTRIBUTIONS.md. Tools: tools/optimize-hero.mjs,
   tools/generate-vapid.mjs. Driver portraits and team logos: placeholders only, no asset pipeline yet.
 
@@ -154,8 +154,7 @@ drivers, and rows in the append-only change tables (substitutions, penalties, co
 sessions or drivers.
 
 ## Outstanding
-1. Housekeeping: H2 repo hygiene (ignore the handoff folder, remove the unreferenced files, retire the old cleanup scripts),
-   H3 small code cleanup (dead FORM_AWARE flag in admin-changes.js, importer secret header only).
+1. Housekeeping: H3 small code cleanup (dead FORM_AWARE flag in admin-changes.js, importer secret header only).
 2. Features: season picks reveal page, how-to-play page, driver photo and team logo asset pipeline (owner supplies images).
 3. Credit line for portugal.svg (CC BY 3.0) visible on the site.
 4. Before the 2027 season: rebuild and run the reset (rehearsal data, test season data), load 2027 drivers, check session times
