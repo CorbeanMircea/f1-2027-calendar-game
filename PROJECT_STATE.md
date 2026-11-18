@@ -154,7 +154,7 @@ drivers, and rows in the append-only change tables (substitutions, penalties, co
 sessions or drivers.
 
 ## Outstanding
-1. Housekeeping: H3 small code cleanup (dead FORM_AWARE flag in admin-changes.js, importer secret header only).
+1. Housekeeping: done (H1, H2). H3 dropped: FORM_AWARE in admin-changes.js is a deliberate rollback switch (now permanently true), and the importer keeps accepting ?key= for manual browser dry runs while the scheduled jobs use the x-import-secret header.
 2. Features: season picks reveal page, how-to-play page, driver photo and team logo asset pipeline (owner supplies images).
 3. Credit line for portugal.svg (CC BY 3.0) visible on the site.
 4. Before the 2027 season: rebuild and run the reset (rehearsal data, test season data), load 2027 drivers, check session times
