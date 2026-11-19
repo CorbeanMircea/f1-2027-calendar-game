@@ -1,0 +1,82 @@
+/* Lights Out: Championship tab on the Leaderboard page. */
+
+/* While the Championship tab is open the league panel stays out of the way (standings.js is not touched). */
+body.champ-active #board-panel { display: none !important; }
+
+.lb-tabs { display: flex; margin: 0 0 14px; border: 1px solid var(--hair-strong); background: var(--panel); }
+.lb-tabs[hidden] { display: none; }
+.lb-tab {
+  flex: 1 1 0;
+  padding: 11px 16px;
+  border: 0;
+  border-right: 1px solid var(--hair);
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.lb-tab:last-child { border-right: 0; }
+.lb-tab[aria-selected="true"] { background: #181b20; box-shadow: inset 0 3px 0 var(--yellow); color: var(--text); }
+.lb-tab:focus-visible { outline: 2px solid var(--yellow); outline-offset: -2px; }
+
+#champ-panel[hidden] { display: none; }
+#champ-panel { padding: 0; border: 0; background: transparent; }
+
+.ch-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; margin: 0 0 12px; }
+.ch-head p { margin: 0; }
+.ch-season { color: var(--muted); font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.ch-season select {
+  margin-left: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--hair-strong);
+  border-radius: 0;
+  background: #0a0b0d;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+}
+.ch-status { color: var(--muted); font-size: 0.85rem; }
+.ch-empty { margin: 0; padding: 16px 14px; border: 1px solid var(--hair-strong); background: var(--panel); color: var(--muted); }
+.ch-error { color: var(--text); }
+
+.ch-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+@media (min-width: 980px) { .ch-grid { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; } }
+
+.ch-card { border: 1px solid var(--hair-strong); background: var(--panel); }
+.ch-card h3 { margin: 0; padding: 12px 14px; border-bottom: 1px solid var(--hair); font-size: 1.3rem; font-weight: 800; text-transform: uppercase; }
+.ch-scroll { overflow-x: auto; }
+
+.ch-table { width: 100%; border-collapse: collapse; }
+.ch-table th, .ch-table td { padding: 8px 10px; border-bottom: 1px solid var(--hair); text-align: left; font-weight: 400; vertical-align: middle; }
+.ch-table tbody tr:last-child > * { border-bottom: 0; }
+.ch-table thead th { color: var(--muted); font-size: 0.64rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
+
+.ch-pos { width: 2.6rem; padding-left: 14px !important; font-family: var(--font-display); font-size: 1.15rem; font-weight: 800; color: var(--muted); }
+.ch-pos.lead { color: var(--yellow); }
+.ch-who b { display: inline-block; margin-right: 8px; font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; }
+.ch-who .ch-teamname { font-size: 1.15rem; }
+.ch-name { margin-right: 8px; }
+.ch-team { color: var(--muted); font-size: 0.8rem; }
+.ch-num { width: 3.6rem; font-family: var(--font-display); font-size: 1.15rem; font-weight: 800; text-align: right !important; white-space: nowrap; }
+.ch-wins { color: var(--muted); }
+.ch-picked { width: 9.5rem; }
+
+.ch-chips { display: inline-flex; align-items: center; gap: 3px; }
+.ch-chip { display: inline-block; width: 22px; height: 22px; overflow: hidden; border: 1px solid var(--hair-strong); line-height: 0; }
+.ch-chip svg { width: 100%; height: 100%; }
+.ch-more { margin-left: 3px; color: var(--muted); font-size: 0.75rem; }
+
+.ch-note { margin: 12px 0 0; color: var(--muted); font-size: 0.8rem; }
+
+@media (max-width: 560px) {
+  .ch-wins { display: none; }
+  .ch-picked { width: 6.5rem; }
+  .ch-team, .ch-name { display: block; margin-right: 0; }
+  .ch-table th, .ch-table td { padding: 8px 6px; }
+}

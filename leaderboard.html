@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="pages.css">
   <link rel="stylesheet" href="profile.css">
   <link rel="stylesheet" href="access-gate.css">
+  <link rel="stylesheet" href="championship.css">
 </head>
 <body>
   <script src="site-nav.js"></script>
@@ -34,6 +35,11 @@
         <a class="btn btn-primary" href="account.html">Go to Account</a>
       </div>
     </section>
+
+    <nav class="lb-tabs" id="lb-tabs" aria-label="Leaderboard views" hidden>
+      <button type="button" class="lb-tab" id="lb-tab-league" aria-selected="true">League</button>
+      <button type="button" class="lb-tab" id="lb-tab-champ" aria-selected="false">Championship</button>
+    </nav>
 
     <section class="panel" id="board-panel" hidden>
       <div class="board-top">
@@ -65,12 +71,14 @@
     </section>
 
     <p class="message" id="board-message" role="status" aria-live="polite"></p>
+    <section class="panel" id="champ-panel" hidden></section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1/dist/umd/supabase.js"></script>
   <script src="config.js"></script>
   <script src="lo-profile.js"></script>
   <script src="standings.js"></script>
+  <script src="championship.js"></script>
   <script src="admin-link.js"></script>
 </body>
 </html>
