@@ -40,9 +40,12 @@
       "+8 for a perfect top 8 (max 32)."
   };
 
-  // Portrait images. Add entries like "2026-rus": "assets/portraits/rus.webp" once verified images exist.
-  // Every portrait gets the same dark, desaturated treatment from tiles.css.
-  var PORTRAITS = {};
+  // Portrait photos come from portraits.js (written by tools/optimize-portraits.mjs), keyed by the lower-case driver code.
+  // Every portrait gets the same dark, desaturated treatment from tiles.css. A driver without a photo gets the silhouette.
+  function portraitFor(d) {
+    var all = window.LO_PORTRAITS || {};
+    return all[String(d.code || "").toLowerCase()] || null;
+  }
 
   // Approximate team colours (to be checked). Matched against the team name.
   var TEAM_COLORS = [
@@ -283,15 +286,21 @@
     tile.style.setProperty("--team", teamColor(d.team_name));
 
     var portrait = el("span", "tile-portrait");
-    if (PORTRAITS[d.id]) {
-      var img = document.createElement("img");
-      img.src = PORTRAITS[d.id];
-      img.alt = "";
-      img.loading = "lazy";
-      portrait.appendChild(img);
-    } else {
+    var photo = portraitFor(d);
+    function placeholder() {
+      portrait.textContent = "";
       portrait.innerHTML = SILHOUETTE;
       portrait.title = "Placeholder portrait";
+    }
+    if (photo) {
+      var img = document.createElement("img");
+      img.src = photo.src;
+      img.alt = "";
+      img.loading = "lazy";
+      img.onerror = placeholder;
+      portrait.appendChild(img);
+    } else {
+      placeholder();
     }
     tile.appendChild(portrait);
 
@@ -998,8 +1007,9 @@
   function buildForm(type, existing) {
     fieldsEl.textContent = "";
     fieldsEl.appendChild(el("p", "points-note", NOTES[type]));
-    fieldsEl.appendChild(el("p", "portrait-note",
-      "Portraits are placeholders until verified images are added."));
+    if (drivers.some(function (d) { return !portraitFor(d); })) {
+      fieldsEl.appendChild(el("p", "portrait-note", "Some portraits are placeholders until photos are added."));
+    }
     if (type === "qualifying" || type === "sprint_qualifying") {
       return buildQualifying(fieldsEl, existing, type === "qualifying" ? "Q" : "SQ");
     }

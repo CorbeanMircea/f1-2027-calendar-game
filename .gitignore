@@ -14,3 +14,11 @@ node_modules/
 Thumbs.db
 
 assets/hero-originals/
+
+# Handoff snapshots made for review (copies of the source and history)
+lights-out-full-handoff-*/
+
+# Driver photo originals are not committed; only their credits list is
+assets/portraits-originals/*
+!assets/portraits-originals/credits.csv
+!assets/portraits-originals/focus.csv
