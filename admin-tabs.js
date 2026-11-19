@@ -119,7 +119,30 @@
 
   show(window.location.hash.replace("#", "") || "results", false);
 
-  // 4. A count on the Results tab while results are waiting for approval (read from the list admin.js fills in).
+  // 4. Long histories: show the latest few entries, with a button for the rest.
+  //    (The lists are newest first. They are redrawn by their own scripts, so this re-applies after every redraw.)
+  var LATEST = 5;
+  ["changes-list", "penalties-list", "corrections-list"].forEach(function (id) {
+    var list = document.getElementById(id);
+    if (!list || !list.parentNode) { return; }
+    var expanded = false;
+    var more = el("button", "btn btn-small at-more");
+    more.type = "button";
+    list.parentNode.insertBefore(more, list.nextSibling);
+
+    var apply = function () {
+      var cards = Array.prototype.slice.call(list.children);
+      cards.forEach(function (card, i) { card.classList.toggle("at-extra", !expanded && i >= LATEST); });
+      more.hidden = cards.length <= LATEST;
+      more.textContent = expanded ? "Show only the latest " + LATEST : "Show all " + cards.length + " entries";
+      more.setAttribute("aria-expanded", expanded ? "true" : "false");
+    };
+    more.addEventListener("click", function () { expanded = !expanded; apply(); });
+    new MutationObserver(apply).observe(list, { childList: true });
+    apply();
+  });
+
+  // 5. A count on the Results tab while results are waiting for approval (read from the list admin.js fills in).
   var pending = document.getElementById("pending-list");
   if (pending && buttons.results) {
     var badge = el("span", "at-badge");
