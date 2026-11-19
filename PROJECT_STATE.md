@@ -138,6 +138,7 @@ Pages: index, account, predict, leaderboard, picks, scorecard, admin, reset-pass
 - Predictions: predict.html, predict-tiles.js (driver tiles, lineup-aware), predict-lights.js (compact deadline lights),
   predict-ui.js, predict-shell.js (R1 shell: rail, context bar), predict-layout.css, predict-changes.css, tiles.css, season-picks.js, notices.js.
 - Leaderboard: leaderboard.html, standings.js, standings.css.
+- How to play (P3, 19 Nov 2026): how-to-play.html and how-to-play.css, static, no scripts. Linked as "Rules" in the desktop top bar (site-nav.js, topOnly) and from the home page footer. The rules text is hand-written: update it whenever scoring, deadlines or season picks change.
 - Account (redesign 18 Nov): account-shell.js (section rail: Overview, Season stats, Achievements, Settings, links like account.html#stats),
   account-layout.css, account-profile.js, account-stats.js (includes the league battle visual), account-achievements.js,
   account-ach-preview.js (preview and All/Earned/Locked filter), account-app.js (install, push, calendar links), access-gate.css.
@@ -155,7 +156,7 @@ sessions or drivers.
 
 ## Outstanding
 1. Housekeeping: done (H1, H2). H3 dropped: FORM_AWARE in admin-changes.js is a deliberate rollback switch (now permanently true), and the importer keeps accepting ?key= for manual browser dry runs while the scheduled jobs use the x-import-secret header.
-2. Features: season picks reveal page, how-to-play page, driver photo and team logo asset pipeline (owner supplies images).
+2. Features: driver photo and team logo asset pipeline (owner supplies images).
 3. Credit line for portugal.svg (CC BY 3.0) visible on the site.
 4. Before the 2027 season: rebuild and run the reset (rehearsal data, test season data), load 2027 drivers, check session times
    (Gulf races, calendar changes), re-check live database definitions.
