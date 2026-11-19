@@ -25,8 +25,8 @@ import sharp from "sharp";
 const SRC = "assets/portraits-originals";
 const OUT = "assets/portraits";
 const WIDTH = 480;
-const HEIGHT = 360;
-const MAX_BYTES = 45 * 1024;
+const HEIGHT = 480;
+const MAX_BYTES = 60 * 1024;
 const IMAGE_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".tif", ".tiff"]);
 
 // Minimal CSV reader: quoted fields, commas and line breaks inside quotes.

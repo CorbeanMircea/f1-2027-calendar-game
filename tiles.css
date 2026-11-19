@@ -152,7 +152,7 @@ body .account-wrap {
 .tile-portrait {
   position: relative;
   display: block;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
   border-bottom: 3px solid var(--team, var(--line));
   background: #101216;
