@@ -1,0 +1,22 @@
+/* Lights Out: credits page (static, plus a table filled from portraits.js). */
+
+.cr-page .pg-head-in { padding: 18px var(--gutter) 16px; }
+.cr-page .pg-title { font-size: clamp(2rem, 6vw, 3.2rem); }
+.cr-page .pg-sub { margin-top: 8px; font-size: 0.9rem; }
+
+.cr-wrap { max-width: 860px; margin: 0 auto; padding: 8px var(--gutter) 56px; }
+.cr-sec { padding: 22px 0 6px; }
+.cr-sec + .cr-sec { border-top: 1px solid var(--hair); }
+.cr-sec h2 { margin: 0 0 12px; font-size: 1.7rem; font-weight: 800; text-transform: uppercase; }
+.cr-sec p { margin: 0 0 12px; }
+.cr-sec a { text-decoration: underline; text-underline-offset: 4px; }
+.cr-list { margin: 0 0 12px; padding-left: 20px; }
+.cr-list li { margin: 0 0 8px; }
+.cr-note { color: var(--muted); }
+
+.cr-scroll { overflow-x: auto; border: 1px solid var(--hair-strong); background: var(--panel); }
+.cr-table { width: 100%; min-width: 520px; border-collapse: collapse; }
+.cr-table th, .cr-table td { padding: 9px 14px; border-bottom: 1px solid var(--hair); text-align: left; font-weight: 400; vertical-align: baseline; }
+.cr-table tbody tr:last-child > * { border-bottom: 0; }
+.cr-table thead th { color: var(--muted); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
+.cr-table tbody th { font-family: var(--font-display); font-size: 1.15rem; font-weight: 800; }

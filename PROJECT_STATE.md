@@ -144,7 +144,7 @@ Pages: index, account, predict, leaderboard, picks, scorecard, admin, reset-pass
   account-ach-preview.js (preview and All/Earned/Locked filter), account-app.js (install, push, calendar links), access-gate.css.
 - Removed in H2 (19 Nov 2026, still in git history): predict.js, leaderboard.js, next-race.js, next-race.css, site-nav.css.
 - Assets: assets/circuits (24 SVG), assets/hero (24 JPG, Unsplash), see assets/ATTRIBUTIONS.md. Tools: tools/optimize-hero.mjs,
-  tools/generate-vapid.mjs. Driver portraits and team logos: placeholders only, no asset pipeline yet.
+  tools/generate-vapid.mjs. Driver portraits (P4, 19 Nov 2026): originals from Wikimedia Commons go in assets/portraits-originals/ (git-ignored, named by lower-case driver code) with a credits row in credits.csv (committed); tools/optimize-portraits.mjs (crops around the face position in assets/portraits-originals/focus.csv, set with tools/portrait-focus.html) writes assets/portraits/<code>.webp and portraits.js (window.LO_PORTRAITS); photos show in colour; predict-tiles.js shows the photo by driver code, otherwise the silhouette; credits.html lists the credits. Team logos: none, by decision (team name and colour bar only).
 
 ## Data in the database
 As last documented (6 Nov 2026), not re-read: 2026 rehearsal data (22 real 2026 drivers; events united-states-2026, mexico-city-2026,
@@ -156,8 +156,8 @@ sessions or drivers.
 
 ## Outstanding
 1. Housekeeping: done (H1, H2). H3 dropped: FORM_AWARE in admin-changes.js is a deliberate rollback switch (now permanently true), and the importer keeps accepting ?key= for manual browser dry runs while the scheduled jobs use the x-import-secret header.
-2. Features: driver photo and team logo asset pipeline (owner supplies images).
-3. Credit line for portugal.svg (CC BY 3.0) visible on the site.
+2. Features: add driver photos for the 2027 grid once the drivers are known.
+3. Confirm the "Adapted for this site" wording for portugal.svg on credits.html.
 4. Before the 2027 season: rebuild and run the reset (rehearsal data, test season data), load 2027 drivers, check session times
    (Gulf races, calendar changes), re-check live database definitions.
 5. Tests for migrations 018 to 022 and 030 to 037; re-run the 005 to 029 tests after any change to the functions they call.
