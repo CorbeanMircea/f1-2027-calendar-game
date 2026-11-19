@@ -43,6 +43,7 @@
   var client = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_PUBLISHABLE_KEY);
   var data = { me: null, drivers: {}, names: {}, avatars: {}, events: [], byEvent: {}, sessions: {}, approved: {}, windows: [] };
   var sel = { view: "session", eventId: null, sessionId: null, season: null };
+  var live = { actual: null, points: null };
   var requestId = 0;
   var scrollCheck = null;
 
@@ -107,8 +108,9 @@
     return parts.length > 1 ? parts.slice(1).join(" ") : parts[0];
   }
 
-  function pick(id, only) {
-    var c = el("span", "cp" + (only ? " only" : ""), driverCode(id));
+  // state: "hit", "near", "miss" or "" (no result yet)
+  function pick(id, only, state) {
+    var c = el("span", "cp" + (only ? " only" : "") + (state ? " " + state : ""), driverCode(id));
     c.title = driverName(id) + (only ? " (nobody else made this pick)" : "");
     return c;
   }
@@ -122,18 +124,48 @@
     return s;
   }
 
-  function sortPlayers(ids) {
+  // Scored session: best score first. Otherwise you first, then by name.
+  function sortPlayers(ids, points) {
     return ids.slice().sort(function (a, b) {
-      if (a === data.me) { return -1; }
-      if (b === data.me) { return 1; }
+      if (points) {
+        var d = (points[b] === undefined ? -1 : points[b]) - (points[a] === undefined ? -1 : points[a]);
+        if (d !== 0) { return d; }
+      } else {
+        if (a === data.me) { return -1; }
+        if (b === data.me) { return 1; }
+      }
       return String(data.names[a]).localeCompare(String(data.names[b]));
     });
+  }
+
+  function actualChip(id) {
+    var c = el("span", "cp act", driverCode(id));
+    c.title = driverName(id);
+    return c;
+  }
+
+  function actualList(ids) {
+    if (!ids || ids.length === 0) { return dash(); }
+    var list = el("span", "cp-list");
+    ids.forEach(function (id) { list.appendChild(actualChip(id)); });
+    return list;
+  }
+
+  function stateAt(id, i, actual) {
+    if (!actual) { return ""; }
+    var j = actual.indexOf(id);
+    return j === i ? "hit" : (j !== -1 ? "near" : "miss");
+  }
+
+  function stateIn(id, actual) {
+    if (!actual) { return ""; }
+    return actual.indexOf(id) !== -1 ? "hit" : "miss";
   }
 
   // ---------- the comparison table ----------
   // players: user ids (already sorted). sections: [{title?, rows: [{label, room: [node], cell: function (uid) -> node}]}]
 
-  function columnHead(uid, half) {
+  function columnHead(uid, half, points) {
     var th = el("th", "pl" + (uid === data.me ? " me" : ""));
     th.scope = "col";
     var box = el("div", "pl-in");
@@ -146,12 +178,14 @@
     box.appendChild(el("span", "pl-name", data.names[uid] || "Player"));
     if (uid === data.me) { box.appendChild(el("span", "pl-note", "you")); }
     if (half && half(uid)) { box.appendChild(el("span", "pl-note", "half value")); }
+    if (points && points[uid] !== undefined) { box.appendChild(el("span", "pl-pts", points[uid] + " pts")); }
     th.appendChild(box);
     return th;
   }
 
   function buildTable(players, sections, total, opts) {
-    var table = el("table", "pk-matrix" + (opts && opts.season ? " is-season" : ""));
+    var withResult = !!(opts && opts.result);
+    var table = el("table", "pk-matrix" + (opts && opts.season ? " is-season" : "") + (withResult ? " has-result" : ""));
     table.style.setProperty("--n", String(players.length));
 
     var thead = document.createElement("thead");
@@ -160,12 +194,18 @@
     corner.scope = "col";
     corner.appendChild(el("span", "sr", "Pick"));
     hr.appendChild(corner);
+    if (withResult) {
+      var resHead = el("th", "res-col");
+      resHead.scope = "col";
+      resHead.appendChild(el("span", "", "Result"));
+      hr.appendChild(resHead);
+    }
     var roomHead = el("th", "rm-col");
     roomHead.scope = "col";
     roomHead.appendChild(el("span", "", "Room"));
     roomHead.appendChild(el("small", "", "of " + total));
     hr.appendChild(roomHead);
-    players.forEach(function (u) { hr.appendChild(columnHead(u, opts && opts.half)); });
+    players.forEach(function (u) { hr.appendChild(columnHead(u, opts && opts.half, opts && opts.points)); });
     thead.appendChild(hr);
     table.appendChild(thead);
 
@@ -174,7 +214,7 @@
       if (sec.title) {
         var st = el("tr", "sec");
         var sh = document.createElement("th");
-        sh.colSpan = players.length + 2;
+        sh.colSpan = players.length + (withResult ? 3 : 2);
         sh.appendChild(el("span", "", sec.title));
         st.appendChild(sh);
         tbody.appendChild(st);
@@ -184,6 +224,11 @@
         var label = el("th", "pos", r.label);
         label.scope = "row";
         tr.appendChild(label);
+        if (withResult) {
+          var res = el("td", "res-col");
+          res.appendChild(r.result ? r.result() : dash());
+          tr.appendChild(res);
+        }
         var room = el("td", "rm-col");
         r.room.forEach(function (n) { room.appendChild(n); });
         if (r.room.length === 0) { room.appendChild(dash()); }
@@ -200,7 +245,7 @@
     return table;
   }
 
-  function showBoard(table, legendText) {
+  function showBoard(table, legendText, withResult) {
     boardEl.textContent = "";
     var hint = el("p", "pk-hint", "Swipe sideways to see every player.");
     hint.hidden = true;
@@ -213,6 +258,16 @@
     legend.appendChild(el("span", "cp only", "VER"));
     legend.appendChild(document.createTextNode(" " + legendText));
     boardEl.appendChild(legend);
+    if (withResult) {
+      var key = el("p", "pk-legend");
+      key.appendChild(el("span", "cp hit", "VER"));
+      key.appendChild(document.createTextNode(" exact "));
+      key.appendChild(el("span", "cp near", "VER"));
+      key.appendChild(document.createTextNode(" right driver or group, wrong place "));
+      key.appendChild(el("span", "cp miss", "VER"));
+      key.appendChild(document.createTextNode(" missed. Players are ordered by points scored."));
+      boardEl.appendChild(key);
+    }
     boardEl.hidden = false;
 
     scrollCheck = function () { hint.hidden = !(wrap.scrollWidth > wrap.clientWidth + 2); };
@@ -223,7 +278,7 @@
 
   // ---------- one session ----------
 
-  function sessionSections(type, byUser, summary, players) {
+  function sessionSections(type, byUser, summary, players, actual) {
     var total = summary.total;
     var out = [];
 
@@ -231,6 +286,7 @@
 
     function orderedSection(title, key, secKey) {
       var listOf = function (p) { return E.list(p, key); };
+      var act = actual ? E.list(actual, key) : null;
       var flags = {};
       players.forEach(function (u) { flags[u] = E.onlyPicks(u, key, "slot", byUser, listOf); });
       return {
@@ -239,16 +295,17 @@
           return {
             label: "P" + r.pos,
             room: r.top ? [roomItem(driverCode(r.top.id), r.top.count, total)] : [],
+            result: act ? function () { return act[i] ? actualChip(act[i]) : dash(); } : null,
             cell: function (u) {
               var id = listOf(byUser[u])[i];
-              return id ? pick(id, flags[u][i]) : dash();
+              return id ? pick(id, flags[u][i], stateAt(id, i, act)) : dash();
             }
           };
         })
       };
     }
 
-    function groupRow(label, secKey, flagKey, listOf, maxRoom) {
+    function groupRow(label, secKey, flagKey, listOf, maxRoom, act) {
       var s = sec(secKey);
       var flags = {};
       var size = 0;
@@ -260,11 +317,12 @@
       return {
         label: label,
         room: s ? s.rows.slice(0, shown).map(function (r) { return roomItem(driverCode(r.id), r.count, total); }) : [],
+        result: act ? function () { return actualList(act); } : null,
         cell: function (u) {
           var ids = listOf(byUser[u]);
           if (ids.length === 0) { return dash(); }
           var list = el("span", "cp-list");
-          ids.forEach(function (id, i) { list.appendChild(pick(id, flags[u][i])); });
+          ids.forEach(function (id, i) { list.appendChild(pick(id, flags[u][i], stateIn(id, act))); });
           return list;
         }
       };
@@ -274,8 +332,8 @@
       var q1 = function (p) { return E.list(p, "q1_out"); };
       var q2 = function (p) { return E.list(p, "q2_out"); };
       out.push({ title: "Knocked out", rows: [
-        groupRow("Q1", "q1", "q1_out", q1, 6),
-        groupRow("Q2", "q2", "q2_out", q2, 6)
+        groupRow("Q1", "q1", "q1_out", q1, 6, actual ? E.list(actual, "q1_out") : null),
+        groupRow("Q2", "q2", "q2_out", q2, 6, actual ? E.list(actual, "q2_out") : null)
       ] });
       out.push(orderedSection("Q3 order", "q3_order", "q3"));
       return out;
@@ -285,21 +343,26 @@
     if (type === "race") {
       var flOf = function (p) { return p.fastest_lap ? [p.fastest_lap] : []; };
       var dnOf = function (p) { return E.dnfList(p); };
+      var actDnf = actual ? E.dnfList(actual) : null;
+      var actFl = actual && actual.fastest_lap ? [actual.fastest_lap] : (actual ? [] : null);
       var countSec = sec("dnfcount");
       var countRoom = countSec ? countSec.rows.slice().sort(function (a, b) { return b.count - a.count; }).slice(0, 2)
         .map(function (r) { return roomItem(r.label, r.count, total); }) : [];
       out.push({ title: "Extras", rows: [
-        groupRow("FL", "fl", "fl", flOf, 3),
+        groupRow("FL", "fl", "fl", flOf, 3, actFl),
         {
           label: "DNFs",
           room: countRoom,
+          result: actDnf ? function () { return el("span", "cp-num", actDnf.length === 0 ? "None" : String(actDnf.length)); } : null,
           cell: function (u) {
             var p = byUser[u];
             var n = p.any_dnf ? Number(p.dnf_count) || 0 : 0;
-            return el("span", "cp-num", n === 0 ? "None" : String(n));
+            var diff = actDnf ? Math.abs(n - actDnf.length) : -1;
+            var c = el("span", "cp-num" + (diff === 0 ? " hit" : (diff === 1 ? " near" : (diff > 1 ? " miss" : ""))), n === 0 ? "None" : String(n));
+            return c;
           }
         },
-        groupRow("DNF by", "dnf", "dnf", dnOf, 6)
+        groupRow("DNF by", "dnf", "dnf", dnOf, 6, actDnf)
       ] });
     }
     return out;
@@ -345,10 +408,15 @@
       return;
     }
 
-    var players = sortPlayers(predictedIds);
+    var actual = live.actual;
+    var points = actual && live.points && Object.keys(live.points).length > 0 ? live.points : null;
+    var players = sortPlayers(predictedIds, points);
     var summary = E.summarize(session.session_type, byUser);
-    var table = buildTable(players, sessionSections(session.session_type, byUser, summary, players), summary.total);
-    showBoard(table, "A star marks a pick nobody else made. Room: the most popular picks and how many players chose them; yellow means more than half.");
+    var table = buildTable(players, sessionSections(session.session_type, byUser, summary, players, actual), summary.total, {
+      result: !!actual,
+      points: points
+    });
+    showBoard(table, "A star marks a pick nobody else made. Room: the most popular picks and how many players chose them; yellow means more than half.", !!actual);
   }
 
   function loadSession() {
@@ -357,9 +425,21 @@
     summaryEl.hidden = true;
     boardEl.hidden = true;
     setMsg("", "Loading...");
-    return client.from("predictions").select("user_id, picks").eq("session_id", sid).then(function (res) {
+    var extra = data.approved[sid] ? Promise.all([
+      client.from("results").select("data").eq("session_id", sid).eq("status", "approved").limit(1),
+      client.from("scores").select("user_id, points").eq("session_id", sid)
+    ]).then(function (r) {
+      var points = {};
+      if (!r[1].error) { (r[1].data || []).forEach(function (x) { points[x.user_id] = Number(x.points) || 0; }); }
+      var row = !r[0].error && r[0].data && r[0].data[0] ? r[0].data[0] : null;
+      return { actual: row && row.data ? row.data : null, points: points };
+    }, function () { return { actual: null, points: null }; }) : Promise.resolve({ actual: null, points: null });
+
+    return Promise.all([client.from("predictions").select("user_id, picks").eq("session_id", sid), extra]).then(function (both) {
+      var res = both[0];
       if (my !== requestId) { return; }
       if (res.error) { throw res.error; }
+      live = both[1];
       var byUser = {};
       (res.data || []).forEach(function (r) { byUser[r.user_id] = r.picks || {}; });
       setMsg("", "");

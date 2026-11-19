@@ -100,13 +100,15 @@ body.pk-page .board-wrap { padding-top: 16px; padding-bottom: 40px; }
   --pos-w: 52px;
   --room-w: 132px;
   --col-w: 92px;
+  --res-w: 0px;
   width: 100%;
-  min-width: calc(var(--pos-w) + var(--room-w) + var(--n, 3) * var(--col-w));
+  min-width: calc(var(--pos-w) + var(--res-w) + var(--room-w) + var(--n, 3) * var(--col-w));
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
 }
 .pk-matrix.is-season { --pos-w: 128px; --col-w: 124px; }
+.pk-matrix.has-result { --res-w: 92px; }
 
 .pk-matrix th, .pk-matrix td {
   padding: 6px 8px;
@@ -139,6 +141,9 @@ body.pk-page .board-wrap { padding-top: 16px; padding-bottom: 40px; }
 .pk-matrix thead th.rm-col { color: var(--muted); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
 .pk-matrix thead th.rm-col small { margin-left: 6px; letter-spacing: 0.08em; }
 
+.pk-matrix .res-col { width: var(--res-w); border-right: 1px solid var(--hair); background: #101216; }
+.pk-matrix thead th.res-col { color: var(--text); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
+
 .pk-matrix td.me, .pk-matrix th.me { background: rgba(255, 212, 0, 0.06); }
 .pk-matrix thead th.me { box-shadow: inset 0 -2px 0 var(--yellow); }
 
@@ -168,6 +173,7 @@ body.pk-page .board-wrap { padding-top: 16px; padding-bottom: 40px; }
   font-weight: 800;
   text-transform: uppercase;
 }
+.pl-pts { color: var(--yellow); font-family: var(--font-display); font-size: 1rem; font-weight: 800; line-height: 1; }
 .pl-note { color: var(--muted); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
 
 /* room items */
@@ -190,6 +196,15 @@ body.pk-page .board-wrap { padding-top: 16px; padding-bottom: 40px; }
 }
 .cp.only, .cp-team.only { border-color: var(--yellow); }
 .cp.only::after, .cp-team.only::after { content: "\2605"; color: var(--yellow); font-size: 0.65rem; }
+/* result states: exact = solid yellow, right driver or group but wrong place = soft yellow, missed = muted */
+.cp.act { border-color: var(--text); background: transparent; }
+.cp.hit { border-color: var(--yellow); background: var(--yellow); color: #0d0e10; }
+.cp.near { border-color: rgba(255, 212, 0, 0.55); background: rgba(255, 212, 0, 0.18); }
+.cp.miss { color: var(--muted); }
+.cp.hit.only::after { color: #0d0e10; }
+.cp-num.hit { padding: 0 8px; background: var(--yellow); color: #0d0e10; }
+.cp-num.near { padding: 0 8px; background: rgba(255, 212, 0, 0.18); }
+.cp-num.miss { color: var(--muted); }
 .cp-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
 .cp-none { color: var(--muted); }
 .cp-num { font-family: var(--font-display); font-size: 1.25rem; font-weight: 800; }
@@ -220,6 +235,7 @@ body.pk-page .board-wrap { padding-top: 16px; padding-bottom: 40px; }
   .pk-strip .grow { margin-left: 0; width: 100%; }
   .pk-matrix { --pos-w: 44px; --room-w: 104px; --col-w: 84px; }
   .pk-matrix.is-season { --pos-w: 96px; --col-w: 108px; }
+  .pk-matrix.has-result { --res-w: 80px; }
   .pk-matrix th, .pk-matrix td { padding: 5px 5px; }
   .cp { padding: 1px 6px; font-size: 1rem; }
   .rm { margin-right: 6px; font-size: 0.98rem; }
