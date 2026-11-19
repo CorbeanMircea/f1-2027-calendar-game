@@ -1,0 +1,97 @@
+/* Lights Out: How to play (static page, no scripts of its own). */
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+.htp-page .pg-head-in { padding: 18px var(--gutter) 16px; }
+.htp-page .pg-title { font-size: clamp(2rem, 6vw, 3.2rem); }
+.htp-page .pg-sub { margin-top: 8px; font-size: 0.9rem; }
+
+/* section links: left rail on desktop, scrolling chips on phones */
+.htp-rail {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--hair);
+  background: var(--bg);
+  position: sticky;
+  top: var(--header-h);
+  z-index: 5;
+}
+.htp-rail::-webkit-scrollbar { display: none; }
+.htp-rail a {
+  flex: none;
+  padding: 11px 14px;
+  border-right: 1px solid var(--hair);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.htp-rail a:hover { color: var(--text); }
+.htp-rail a:focus-visible { outline: 2px solid var(--yellow); outline-offset: -2px; }
+
+.htp-wrap { max-width: 860px; margin: 0 auto; padding: 16px var(--gutter) 56px; }
+
+@media (min-width: 1100px) {
+  .htp-rail {
+    position: fixed;
+    top: calc(var(--header-h) + 150px);
+    left: max(var(--gutter), calc((100vw - var(--maxw)) / 2 + var(--gutter)));
+    z-index: 1;
+    flex-direction: column;
+    width: 180px;
+    overflow: visible;
+    border: 0;
+    border-left: 1px solid var(--hair-strong);
+    background: transparent;
+  }
+  .htp-rail a { padding: 8px 14px; border-right: 0; }
+  .htp-wrap { margin-left: max(230px, calc((100vw - var(--maxw)) / 2 + 230px)); margin-right: auto; }
+}
+
+/* sections */
+.htp-sec { padding: 22px 0 6px; scroll-margin-top: calc(var(--header-h) + 52px); }
+.htp-sec + .htp-sec { margin-top: 10px; border-top: 1px solid var(--hair); }
+.htp-sec h2 { margin: 0 0 12px; font-size: 1.7rem; font-weight: 800; text-transform: uppercase; }
+.htp-sec p { margin: 0 0 12px; }
+.htp-sec sup { font-size: 0.7em; }
+
+.htp-steps { margin: 0; padding: 0; list-style: none; counter-reset: s; }
+.htp-steps li { position: relative; margin: 0 0 10px; padding: 12px 14px 12px 52px; border: 1px solid var(--hair-strong); background: var(--panel); counter-increment: s; }
+.htp-steps li::before {
+  content: counter(s);
+  position: absolute;
+  left: 14px;
+  top: 8px;
+  color: var(--yellow);
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 900;
+  line-height: 1;
+}
+.htp-steps b { font-weight: 700; }
+
+.htp-list { margin: 0 0 12px; padding-left: 20px; }
+.htp-list li { margin: 0 0 8px; }
+.htp-note { color: var(--muted); font-size: 0.88rem; }
+
+.htp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin: 0 0 14px; }
+.htp-card { border: 1px solid var(--hair-strong); background: var(--panel); }
+.htp-card h3 { margin: 0; padding: 12px 14px; border-bottom: 1px solid var(--hair); font-size: 1.3rem; font-weight: 800; text-transform: uppercase; }
+.htp-card h3 small { display: block; color: var(--muted); font-family: var(--font-text); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.14em; }
+.htp-card .htp-table { border: 0; }
+.htp-max { margin: 0; padding: 10px 14px; border-top: 1px solid var(--hair); color: var(--yellow); font-family: var(--font-display); font-size: 1.05rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
+
+.htp-table { width: 100%; border-collapse: collapse; border: 1px solid var(--hair-strong); background: var(--panel); }
+.htp-table th, .htp-table td { padding: 9px 14px; border-bottom: 1px solid var(--hair); text-align: left; font-weight: 400; vertical-align: baseline; }
+.htp-table tbody tr:last-child > * { border-bottom: 0; }
+.htp-table thead th { color: var(--muted); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
+.htp-table td { width: 4.5rem; font-family: var(--font-display); font-size: 1.3rem; font-weight: 800; text-align: right; white-space: nowrap; }
+.htp-table td:first-child { text-align: left; }
+.htp-ranks { max-width: 420px; margin-bottom: 12px; }
+.htp-ranks td { width: 6rem; }

@@ -654,6 +654,8 @@
 
 .site-footer { padding: 8px 0 40px; color: var(--muted); font-size: 0.85rem; }
 .site-footer p { margin: 0; }
+.site-footer p + p { margin-top: 8px; }
+.site-footer a { color: var(--text); text-decoration: underline; text-underline-offset: 4px; }
 
 /* Give the schedule and league snapshot a shared card frame below the hero. */
 .home-grid > section {

@@ -16,7 +16,9 @@
     { file: "scorecard.html", label: "Score check", short: "Scores",
       icon: "M5 3h14v18H5zM9 8h6M9 12h6M9 16h4" },
     { file: "account.html", label: "Account", short: "Account",
-      icon: "M5 21v-3a4 4 0 014-4h6a4 4 0 014 4v3M9 8a3 3 0 106 0 3 3 0 00-6 0" }
+      icon: "M5 21v-3a4 4 0 014-4h6a4 4 0 014 4v3M9 8a3 3 0 106 0 3 3 0 00-6 0" },
+    // Top bar only: the phone bottom bar keeps five tabs. Phones reach it from the footer of the home page.
+    { file: "how-to-play.html", label: "Rules", short: "Rules", topOnly: true, icon: "" }
   ];
 
   // A password-reset link that lands on any other page is sent on to the reset page.
@@ -39,6 +41,7 @@
   var bottom = "";
   PAGES.forEach(function (p) {
     top += '<a href="' + p.file + '"' + aria(p.file) + ">" + p.label + "</a>";
+    if (p.topOnly) { return; }
     bottom += '<a href="' + p.file + '"' + aria(p.file) + '>' +
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + p.icon + '"/></svg>' +
       "<span>" + p.short + "</span></a>";

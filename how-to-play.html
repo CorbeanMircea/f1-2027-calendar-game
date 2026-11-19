@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0e10">
+  <title>How to play | Lights Out</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="site-chrome.css">
+  <link rel="stylesheet" href="lights-out.css">
+  <link rel="stylesheet" href="pages.css">
+  <link rel="stylesheet" href="how-to-play.css">
+</head>
+<body class="htp-page">
+  <script src="site-nav.js"></script>
+
+  <header class="pg-head">
+    <div class="pg-head-in">
+      <p class="lo-eyebrow">The rules</p>
+      <h1 class="pg-title">How to <span>play</span></h1>
+      <p class="pg-sub">Predict each session before it starts, earn points when the official result is approved, climb the leaderboard.</p>
+    </div>
+  </header>
+
+  <nav class="htp-rail" aria-label="On this page">
+    <a href="#weekend">The weekend</a>
+    <a href="#deadlines">Deadlines</a>
+    <a href="#scoring">Scoring</a>
+    <a href="#dnf">DNF rules</a>
+    <a href="#season">Season picks</a>
+    <a href="#changes">When things change</a>
+    <a href="#levels">XP and levels</a>
+  </nav>
+
+  <main class="htp-wrap">
+    <section class="htp-sec" id="weekend">
+      <h2>The weekend</h2>
+      <ol class="htp-steps">
+        <li><b>Predict.</b> Before the deadline, open Predictions and fill in the sessions you want: Qualifying and Race, plus Sprint Qualifying and Sprint on sprint weekends. Every prediction is optional, so skip whatever you like.</li>
+        <li><b>Lock.</b> At the deadline your picks lock. From that moment everyone's picks become visible on Picks reveal.</li>
+        <li><b>Score.</b> When an admin approves the official result, points are added. Score check shows how every point was earned, and the leaderboard updates.</li>
+        <li><b>Recap.</b> The home page shows a weekend recap: the winner, the podium, the biggest climber and the notable calls.</li>
+      </ol>
+    </section>
+
+    <section class="htp-sec" id="deadlines">
+      <h2>Deadlines</h2>
+      <table class="htp-table">
+        <thead><tr><th scope="col">Prediction</th><th scope="col">Locks at the start of</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Qualifying</th><td>Qualifying</td></tr>
+          <tr><th scope="row">Race</th><td>Qualifying</td></tr>
+          <tr><th scope="row">Sprint Qualifying</th><td>Sprint Qualifying</td></tr>
+          <tr><th scope="row">Sprint</th><td>Sprint Qualifying</td></tr>
+        </tbody>
+      </table>
+      <p class="htp-note">Times are shown in your local time. A session with no confirmed start time stays closed. If you have not predicted yet, a reminder goes out about 3 hours and 1 hour before the deadline: install the app and switch reminders on from the Account page.</p>
+    </section>
+
+    <section class="htp-sec" id="scoring">
+      <h2>Scoring</h2>
+      <div class="htp-cards">
+        <article class="htp-card">
+          <h3>Qualifying <small>and Sprint Qualifying</small></h3>
+          <table class="htp-table">
+            <tbody>
+              <tr><th scope="row">Driver you said goes out in Q1 and does</th><td>1</td></tr>
+              <tr><th scope="row">Driver you said goes out in Q2 and does</th><td>1</td></tr>
+              <tr><th scope="row">Driver you put in the Q3 order who reaches Q3</th><td>1</td></tr>
+              <tr><th scope="row">Exact Q3 position (on top of that point)</th><td>+3</td></tr>
+              <tr><th scope="row">All ten Q3 positions exact</th><td>+10</td></tr>
+            </tbody>
+          </table>
+          <p class="htp-max">Maximum 62</p>
+        </article>
+
+        <article class="htp-card">
+          <h3>Sprint</h3>
+          <table class="htp-table">
+            <tbody>
+              <tr><th scope="row">Exact position in your top 8</th><td>3</td></tr>
+              <tr><th scope="row">Right driver, finished in the top 8 in another place</th><td>1</td></tr>
+              <tr><th scope="row">All eight positions exact</th><td>+8</td></tr>
+            </tbody>
+          </table>
+          <p class="htp-max">Maximum 32</p>
+        </article>
+
+        <article class="htp-card">
+          <h3>Race</h3>
+          <table class="htp-table">
+            <tbody>
+              <tr><th scope="row">Exact position in your top 8</th><td>5</td></tr>
+              <tr><th scope="row">Right driver, finished in the top 8 in another place</th><td>2</td></tr>
+              <tr><th scope="row">All eight positions exact</th><td>+15</td></tr>
+              <tr><th scope="row">Fastest lap</th><td>3</td></tr>
+              <tr><th scope="row">Right on whether anyone retires</th><td>2</td></tr>
+              <tr><th scope="row">Number of DNFs exact</th><td>5</td></tr>
+              <tr><th scope="row">Number of DNFs off by one</th><td>2</td></tr>
+              <tr><th scope="row">Each DNF driver who retires (see DNF rules)</th><td>4 or 8</td></tr>
+            </tbody>
+          </table>
+          <p class="htp-max">Maximum 65, plus 8 for each DNF driver you picked</p>
+        </article>
+      </div>
+      <p class="htp-note">Points are added only after an admin approves the official result. Score check explains every point of every session.</p>
+    </section>
+
+    <section class="htp-sec" id="dnf">
+      <h2>DNF rules</h2>
+      <ul class="htp-list">
+        <li>For the Race you say whether anyone retires, how many (0 to 5), and name one driver for each predicted DNF.</li>
+        <li>A driver you picked who really retires scores 4 points, or 8 if he started in the real top 8.</li>
+        <li>A driver cannot be in your top 8 and also be one of your DNF picks.</li>
+        <li>A DNF means the driver is classified as retired. Did not start, disqualified and lapped finishers do not count.</li>
+      </ul>
+    </section>
+
+    <section class="htp-sec" id="season">
+      <h2>Season picks</h2>
+      <p>Once a season, pick the Drivers' champion and the Constructors' champion. The picks open when the season's drivers are loaded and every Round 1 session has a start time, and they lock at the start of the first Round 1 session. Everyone's season picks become visible on Picks reveal, under Season picks, once your window has closed.</p>
+      <div class="htp-cards">
+        <article class="htp-card">
+          <h3>Drivers' champion</h3>
+          <table class="htp-table">
+            <tbody>
+              <tr><th scope="row">Your pick finishes 1st</th><td>60</td></tr>
+              <tr><th scope="row">Finishes 2nd</th><td>20</td></tr>
+              <tr><th scope="row">Finishes 3rd</th><td>10</td></tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="htp-card">
+          <h3>Constructors' champion</h3>
+          <table class="htp-table">
+            <tbody>
+              <tr><th scope="row">Your pick finishes 1st</th><td>40</td></tr>
+              <tr><th scope="row">Finishes 2nd</th><td>15</td></tr>
+              <tr><th scope="row">Finishes 3rd</th><td>8</td></tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+      <ul class="htp-list">
+        <li>Both picks finish 1st: +10. Maximum 110.</li>
+        <li>Season points are added after an admin approves the official final standings. They count towards the leaderboard total and your XP, not towards any weekend's score.</li>
+        <li>Joined the league after the lock? You can still pick until the first Round 5 session, at half value (rounded down).</li>
+      </ul>
+    </section>
+
+    <section class="htp-sec" id="changes">
+      <h2>When things change</h2>
+      <ul class="htp-list">
+        <li><b>Driver changes.</b> If a driver is replaced for a weekend, the prediction form uses the new lineup. If you had already saved a prediction that is affected, you get a notice (and a push message if you enabled reminders). Your saved pick stays valid, and you can change it until the deadline.</li>
+        <li><b>Grid penalties.</b> You get a notice, for information. Penalties do not change results or scoring.</li>
+        <li><b>Corrections.</b> An admin can correct a locked prediction only with a written reason. The change is logged, and the original picks are kept.</li>
+      </ul>
+    </section>
+
+    <section class="htp-sec" id="levels">
+      <h2>XP and levels</h2>
+      <p>Every point you score is XP, across all seasons (including season picks). Level n needs 40 &times; (n &minus; 1)<sup>1.6</sup> XP, up to level 50. Your rank follows your level.</p>
+      <table class="htp-table htp-ranks">
+        <thead><tr><th scope="col">Rank</th><th scope="col">From level</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Rookie</th><td>1</td></tr>
+          <tr><th scope="row">Midfielder</th><td>4</td></tr>
+          <tr><th scope="row">Points Finisher</th><td>8</td></tr>
+          <tr><th scope="row">Podium Regular</th><td>12</td></tr>
+          <tr><th scope="row">Race Winner</th><td>18</td></tr>
+          <tr><th scope="row">Champion</th><td>25</td></tr>
+          <tr><th scope="row">Legend</th><td>35</td></tr>
+        </tbody>
+      </table>
+      <p class="htp-note">Achievements, your helmet and your statistics are on the Account page.</p>
+    </section>
+  </main>
+</body>
+</html>
