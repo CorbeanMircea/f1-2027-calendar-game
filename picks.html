@@ -11,10 +11,9 @@
   <link rel="stylesheet" href="lights-out.css">
   <link rel="stylesheet" href="pages.css">
   <link rel="stylesheet" href="profile.css">
-  <link rel="stylesheet" href="scorecard.css">
   <link rel="stylesheet" href="picks.css">
 </head>
-<body>
+<body class="pk-page">
   <script src="site-nav.js"></script>
 
   <header class="pg-head">
@@ -25,22 +24,19 @@
     </div>
   </header>
 
-  <main class="board-wrap">
+  <main class="board-wrap pk-wrap">
     <p class="message" id="pk-msg" role="status" aria-live="polite"></p>
 
-    <section class="panel" id="pk-controls" hidden>
-      <div class="sc-selects">
-        <div class="field">
-          <label for="pk-event">Weekend</label>
-          <select id="pk-event"></select>
-        </div>
+    <section class="pk-bar" id="pk-controls" hidden>
+      <div class="field pk-weekend" id="pk-weekend">
+        <label for="pk-event">Weekend</label>
+        <select id="pk-event"></select>
       </div>
-      <div class="sc-tabs" id="pk-tabs" role="tablist" aria-label="Session"></div>
+      <div class="pk-tabs" id="pk-tabs" role="tablist" aria-label="What to reveal"></div>
     </section>
 
     <section id="pk-summary" hidden></section>
-    <section id="pk-room" hidden></section>
-    <section id="pk-players" hidden></section>
+    <section id="pk-board" hidden></section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1/dist/umd/supabase.js"></script>
