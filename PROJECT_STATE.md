@@ -137,7 +137,7 @@ Pages: index, account, predict, leaderboard, picks, scorecard, admin, reset-pass
 - Home: index.html, home.css, home.js, recap-engine.js, recap.js (weekend recap).
 - Predictions: predict.html, predict-tiles.js (driver tiles, lineup-aware), predict-lights.js (compact deadline lights),
   predict-ui.js, predict-shell.js (R1 shell: rail, context bar), predict-layout.css, predict-changes.css, tiles.css, season-picks.js, notices.js.
-- Leaderboard: leaderboard.html, standings.js, standings.css.
+- Leaderboard: leaderboard.html, standings.js, standings.css. Championship tab (P7, 19 Nov 2026): championship.js, championship.css and the edge function championship-standings (deployed with JWT verification off; reads Jolpica standings for the season, 10-minute in-memory cache, needs a signed-in caller). Shows the real Drivers' and Constructors' tables plus the league players who picked each leader (season_predictions, only what the policy returns).
 - How to play (P3, 19 Nov 2026): how-to-play.html and how-to-play.css, static, no scripts. Linked as "Rules" in the desktop top bar (site-nav.js, topOnly) and from the home page footer. The rules text is hand-written: update it whenever scoring, deadlines or season picks change.
 - Account (redesign 18 Nov): account-shell.js (section rail: Overview, Season stats, Achievements, Settings, links like account.html#stats),
   account-layout.css, account-profile.js, account-stats.js (includes the league battle visual), account-achievements.js,
