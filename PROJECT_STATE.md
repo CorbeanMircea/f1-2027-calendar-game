@@ -94,6 +94,8 @@ All predictions are optional. Results are scored only after an admin approves th
   reason, validated like a player's save), admin_revert_correction (last in, first out), rescore_prediction (service role).
   The player's created_at and updated_at are never written; the picks before and after are kept in prediction_corrections.
   Only scores is written; season picks and the season bonus are untouched.
+- Admin page tabs (P8, 19 Nov 2026): admin-tabs.js and admin-tabs.css regroup the sections below into six tabs at load time (Results with a pending count, Driver changes, Grid penalties, Corrections, Season results, Import log; deep links #results, #changes, #penalties, #corrections, #season, #log); the admin scripts are unchanged.
+- Admin page tabs (P8, 19 Nov 2026): admin-tabs.js and admin-tabs.css regroup the sections below into six tabs at load time (Results with a pending count, Driver changes, Grid penalties, Corrections, Season results, Import log; deep links #results, #changes, #penalties, #corrections, #season, #log). The three history lists (substitutions, penalties, corrections) show the latest five entries with a "Show all" button. The admin scripts are unchanged.
 - Admin screens in admin.html: Pending results, Missing results, Recently approved, Season results, Driver changes
   (admin-changes.js), Grid penalties (admin-penalties.js), Prediction corrections (admin-corrections.js), Import log.
 
