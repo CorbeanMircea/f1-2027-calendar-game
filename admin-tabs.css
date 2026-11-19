@@ -1,0 +1,55 @@
+/* Lights Out: tabs for the Admin page (see admin-tabs.js). */
+
+.at-tabs {
+  display: flex;
+  overflow-x: auto;
+  margin: 0 0 18px;
+  border: 1px solid var(--hair-strong);
+  background: var(--panel);
+  scrollbar-width: none;
+}
+.at-tabs::-webkit-scrollbar { display: none; }
+
+.at-tab {
+  display: inline-flex;
+  flex: 1 0 auto;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 18px;
+  border: 0;
+  border-right: 1px solid var(--hair);
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.at-tab:last-child { border-right: 0; }
+.at-tab:hover { color: var(--text); }
+.at-tab[aria-selected="true"] { background: #181b20; box-shadow: inset 0 3px 0 var(--yellow); color: var(--text); }
+.at-tab:focus-visible { outline: 2px solid var(--yellow); outline-offset: -2px; }
+
+.at-badge {
+  min-width: 1.3em;
+  padding: 1px 6px;
+  background: var(--red);
+  color: #fff;
+  font-family: var(--font-text);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: center;
+}
+.at-badge[hidden] { display: none; }
+
+.at-pane[hidden] { display: none; }
+/* the first heading of a tab sits directly under the tab bar */
+.at-pane > .admin-section-title:first-child { margin-top: 0; }
+
+@media (max-width: 700px) {
+  .at-tab { padding: 10px 14px; font-size: 1rem; }
+}
