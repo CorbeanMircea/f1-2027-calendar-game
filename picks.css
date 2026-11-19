@@ -221,6 +221,32 @@ body.pk-page .board-wrap { padding-top: 16px; padding-bottom: 40px; }
   line-height: 1.15;
 }
 
+.pk-guide {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 5px 14px;
+  align-items: start;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--hair-strong);
+  border-left: 3px solid var(--yellow);
+  background: var(--panel);
+}
+.pk-guide-title {
+  grid-row: span 2;
+  padding-top: 2px;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.pk-guide .pk-legend,
+.pk-guide-you { margin: 0; color: var(--muted); font-size: 0.8rem; line-height: 1.5; }
+.pk-guide .cp { padding: 0 6px; font-size: 0.9rem; }
+.pk-guide-you { grid-column: 2; }
+.pk-result-key { grid-column: 2; }
 .pk-legend { margin: 10px 0 0; color: var(--muted); font-size: 0.8rem; }
 .pk-legend .cp { padding: 0 6px; font-size: 0.9rem; }
 
@@ -233,6 +259,10 @@ body.pk-page .board-wrap { padding-top: 16px; padding-bottom: 40px; }
   .pk-weekend { border-right: 0; border-bottom: 1px solid var(--hair); }
   .pk-tab { min-width: 104px; padding: 9px 12px; font-size: 1.05rem; }
   .pk-strip .grow { margin-left: 0; width: 100%; }
+  .pk-guide { grid-template-columns: 1fr; gap: 4px; padding: 10px 12px; }
+  .pk-guide-title,
+  .pk-guide-you,
+  .pk-result-key { grid-column: 1; grid-row: auto; }
   .pk-matrix { --pos-w: 44px; --room-w: 104px; --col-w: 84px; }
   .pk-matrix.is-season { --pos-w: 96px; --col-w: 108px; }
   .pk-matrix.has-result { --res-w: 80px; }

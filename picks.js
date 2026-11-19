@@ -202,8 +202,8 @@
     }
     var roomHead = el("th", "rm-col");
     roomHead.scope = "col";
-    roomHead.appendChild(el("span", "", "Room"));
-    roomHead.appendChild(el("small", "", "of " + total));
+    roomHead.appendChild(el("span", "", "Most picked"));
+    roomHead.appendChild(el("small", "", "players"));
     hr.appendChild(roomHead);
     players.forEach(function (u) { hr.appendChild(columnHead(u, opts && opts.half, opts && opts.points)); });
     thead.appendChild(hr);
@@ -247,27 +247,31 @@
 
   function showBoard(table, legendText, withResult) {
     boardEl.textContent = "";
-    var hint = el("p", "pk-hint", "Swipe sideways to see every player.");
-    hint.hidden = true;
-    var wrap = el("div", "pk-scroll");
-    wrap.appendChild(table);
-    boardEl.appendChild(hint);
-    boardEl.appendChild(wrap);
-
+    var guide = el("div", "pk-guide");
+    guide.appendChild(el("strong", "pk-guide-title", "How to read this"));
     var legend = el("p", "pk-legend");
     legend.appendChild(el("span", "cp only", "VER"));
     legend.appendChild(document.createTextNode(" " + legendText));
-    boardEl.appendChild(legend);
+    guide.appendChild(legend);
+    guide.appendChild(el("p", "pk-guide-you", "The highlighted column is your picks."));
     if (withResult) {
-      var key = el("p", "pk-legend");
+      var key = el("p", "pk-legend pk-result-key");
       key.appendChild(el("span", "cp hit", "VER"));
       key.appendChild(document.createTextNode(" exact "));
       key.appendChild(el("span", "cp near", "VER"));
       key.appendChild(document.createTextNode(" right driver or group, wrong place "));
       key.appendChild(el("span", "cp miss", "VER"));
-      key.appendChild(document.createTextNode(" missed. Players are ordered by points scored."));
-      boardEl.appendChild(key);
+      key.appendChild(document.createTextNode(" missed."));
+      guide.appendChild(key);
     }
+
+    var hint = el("p", "pk-hint", "Swipe to compare every player's picks \u2192");
+    hint.hidden = true;
+    var wrap = el("div", "pk-scroll");
+    wrap.appendChild(table);
+    boardEl.appendChild(guide);
+    boardEl.appendChild(hint);
+    boardEl.appendChild(wrap);
     boardEl.hidden = false;
 
     scrollCheck = function () { hint.hidden = !(wrap.scrollWidth > wrap.clientWidth + 2); };
@@ -416,7 +420,7 @@
       result: !!actual,
       points: points
     });
-    showBoard(table, "A star marks a pick nobody else made. Room: the most popular picks and how many players chose them; yellow means more than half.", !!actual);
+    showBoard(table, "A star marks a pick nobody else made. Most picked shows the most common choice and how many players chose it; yellow means a majority.", !!actual);
   }
 
   function loadSession() {
@@ -538,7 +542,7 @@
       season: true,
       half: function (u) { return !!byUser[u].half_value; }
     });
-    showBoard(table, "A star marks a pick nobody else made. Room: the most popular picks and how many players chose them; yellow means more than half.");
+    showBoard(table, "A star marks a pick nobody else made. Most picked shows the most common choice and how many players chose it; yellow means a majority.");
   }
 
   function loadSeason() {
