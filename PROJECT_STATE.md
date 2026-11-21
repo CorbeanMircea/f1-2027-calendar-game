@@ -62,6 +62,7 @@ All predictions are optional. Results are scored only after an admin approves th
   render the reveal. scorecard.js and scorecard-engine.js explain each score.
 
 ## Results pipeline
+- Race matching (P11, 21 Nov 2026): the API gives race dates in UTC while events use local dates, so a race belongs to an event when its date is within one day of the event's dates (Las Vegas starts Saturday 20:00 local = Sunday 04:00 UTC). Events are at least 5 days apart, so this still matches exactly one race.
 - Edge function import-results reads the Jolpica API (dry run, pending results, session-time sync). Sprint qualifying
   is derived from the sprint grid and labelled "derived". It accepts the secret in the x-import-secret header (and still
   in a ?key= query parameter).
