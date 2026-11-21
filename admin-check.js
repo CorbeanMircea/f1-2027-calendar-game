@@ -193,9 +193,42 @@
   head.appendChild(again);
   section.appendChild(head);
   var summary = el("p", "ck-summary");
+  var stepper = el("div", "ck-stepper");
+  var stepperLabel = el("span", "ck-step-label");
+  var progress = el("div", "ck-progress");
+  progress.setAttribute("role", "progressbar");
+  progress.setAttribute("aria-label", "Weekend check progress");
+  progress.setAttribute("aria-valuemin", "1");
+  progress.setAttribute("aria-valuemax", "1");
+  progress.setAttribute("aria-valuenow", "1");
+  var progressFill = el("span", "ck-progress-fill");
+  progress.appendChild(progressFill);
+  stepper.appendChild(stepperLabel);
+  stepper.appendChild(progress);
+  stepper.hidden = true;
   var body = el("div", "ck-body");
+  var stepActions = el("div", "ck-step-actions");
+  stepActions.hidden = true;
+  var previous = el("button", "btn ck-step-previous", "Previous");
+  previous.type = "button";
+  var next = el("button", "btn btn-primary ck-step-next", "Next step");
+  next.type = "button";
+  stepActions.appendChild(previous);
+  stepActions.appendChild(next);
+  var activeStep = 0;
+  var activeStepCount = 0;
+  previous.addEventListener("click", function () {
+    if (activeStep > 0 && current) { activeStep--; render(current); }
+  });
+  next.addEventListener("click", function () {
+    if (!current || activeStepCount === 0) { return; }
+    activeStep = activeStep === activeStepCount - 1 ? 0 : activeStep + 1;
+    render(current);
+  });
   section.appendChild(summary);
+  section.appendChild(stepper);
   section.appendChild(body);
+  section.appendChild(stepActions);
   section.appendChild(el("p", "ck-note", "Run this before every race weekend, and again after Qualifying and after Sprint Qualifying. A warning needs a look; a problem needs fixing before the weekend."));
   panel.appendChild(section);
 
@@ -231,6 +264,7 @@
   function render(data) {
     var manual = readManual(data.event.id);
     var result = evaluate(data, Date.now(), manual);
+    activeStep = Math.min(activeStep, Math.max(0, result.groups.length - 1));
     body.textContent = "";
 
     var parts = [];
@@ -241,22 +275,39 @@
     summary.textContent = data.event.name + " (round " + data.event.round + ", " + data.event.season + "): " +
       (parts.length ? parts.join(", ") : "everything is in place") + ". Checked " + new Date(data.generated_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) + ".";
 
-    result.groups.forEach(function (g) {
+    var steps = result.groups;
+    activeStepCount = steps.length;
+    stepper.hidden = steps.length === 0;
+    stepActions.hidden = steps.length === 0;
+    if (steps.length) {
+      var group = steps[activeStep];
+      stepperLabel.textContent = "Step " + (activeStep + 1) + " of " + steps.length;
+      progress.setAttribute("aria-valuemax", String(steps.length));
+      progress.setAttribute("aria-valuenow", String(activeStep + 1));
+      progress.setAttribute("aria-valuetext", "Step " + (activeStep + 1) + " of " + steps.length + ": " + group.title);
+      progressFill.style.width = ((activeStep + 1) / steps.length * 100) + "%";
+      previous.disabled = activeStep === 0;
+      next.disabled = false;
+      next.textContent = activeStep === steps.length - 1 ? "Review from start" : "Next step";
+
       var box = el("section", "ck-group");
-      box.appendChild(el("h3", "", g.title));
+      box.appendChild(el("h3", "", group.title));
       var ul = el("ul", "ck-rows");
-      g.rows.forEach(function (r) {
+      group.rows.forEach(function (r) {
         var li = el("li", "ck-row " + r.status);
         if (r.manual) {
           var label = el("label", "ck-manual");
           var box2 = document.createElement("input");
           box2.type = "checkbox";
+          box2.id = "ck-manual-" + r.manual;
           box2.checked = !!manual[r.manual];
           box2.addEventListener("change", function () {
             var m = readManual(data.event.id);
             m[r.manual] = box2.checked;
             saveManual(data.event.id, m);
             render(data);
+            var updated = document.getElementById(box2.id);
+            if (updated) { updated.focus(); }
           });
           label.appendChild(box2);
           var text = el("span", "ck-text");
@@ -279,7 +330,7 @@
       });
       box.appendChild(ul);
       body.appendChild(box);
-    });
+    }
     setBadge(result.counts);
   }
 
@@ -319,7 +370,7 @@
       });
   }
 
-  select.addEventListener("change", function () { load(select.value); });
+  select.addEventListener("change", function () { activeStep = 0; load(select.value); });
   again.addEventListener("click", function () { load(select.value || null); });
 
   // First load: the function picks the current or next weekend, then the list is filled around it.

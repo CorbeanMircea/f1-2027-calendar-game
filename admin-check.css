@@ -20,14 +20,16 @@
 .ck-summary.warn { border-left-color: var(--yellow); }
 .ck-summary.bad { border-left-color: var(--red); }
 
-.ck-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
-@media (min-width: 1000px) { .ck-body { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } }
+.ck-stepper { display: flex; align-items: center; gap: 14px; margin: 0 0 12px; padding: 11px 14px; border: 1px solid var(--hair-strong); background: var(--panel); }
+.ck-step-label { flex: none; color: var(--muted); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+.ck-progress { flex: 1 1 auto; height: 5px; overflow: hidden; background: var(--hair); }
+.ck-progress-fill { display: block; width: 0; height: 100%; background: var(--yellow); transition: width 0.2s ease; }
 
 .ck-group { border: 1px solid var(--hair-strong); background: var(--panel); }
 .ck-group h3 { margin: 0; padding: 10px 14px; border-bottom: 1px solid var(--hair); font-size: 1.2rem; font-weight: 800; text-transform: uppercase; }
 .ck-rows { margin: 0; padding: 0; list-style: none; }
 
-.ck-row { display: flex; align-items: flex-start; gap: 12px; padding: 9px 14px; border-bottom: 1px solid var(--hair); }
+.ck-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--hair); }
 .ck-row:last-child { border-bottom: 0; }
 .ck-mark {
   flex: none;
@@ -57,4 +59,17 @@
 .ck-manual input { flex: none; width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--yellow); }
 .ck-row.todo .ck-text b::after { content: " \b7 to confirm"; color: var(--yellow); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
 
+.ck-step-actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 12px; }
+.ck-step-actions [disabled] { cursor: not-allowed; opacity: 0.45; }
 .ck-note { margin: 14px 0 0; color: var(--muted); font-size: 0.85rem; }
+
+@media (max-width: 600px) {
+  .ck-stepper { gap: 10px; padding: 10px 12px; }
+  .ck-step-label { font-size: 0.68rem; }
+  .ck-row { padding: 12px; }
+  .ck-step-actions button { min-height: 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ck-progress-fill { transition: none; }
+}
