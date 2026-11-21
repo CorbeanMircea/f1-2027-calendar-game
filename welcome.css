@@ -1,0 +1,101 @@
+/* Lights Out: welcome flow (Getting started card on Home, invite note on Account). */
+
+.wl-invite {
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border: 1px solid var(--hair-strong);
+  border-left: 3px solid var(--yellow);
+  background: var(--panel);
+  font-size: 0.92rem;
+}
+
+.wl {
+  max-width: var(--maxw);
+  margin: 18px auto 0;
+  padding: 0 var(--gutter);
+}
+.wl > * { max-width: 100%; }
+
+.wl {
+  display: block;
+}
+.wl-head, .wl-steps {
+  border: 1px solid var(--hair-strong);
+  background: var(--panel);
+}
+.wl-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 14px;
+  border-bottom: 0;
+}
+.wl-head > div:first-child { flex: 1 1 auto; min-width: 0; }
+.wl-eyebrow { margin: 0; color: var(--muted); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; }
+.wl-title { margin: 2px 0 0; font-size: 1.5rem; font-weight: 800; text-transform: uppercase; }
+
+/* start lights: one comes on for every finished step */
+.wl-lights { display: flex; gap: 6px; }
+.wl-light { width: 14px; height: 14px; border: 1px solid var(--hair-strong); border-radius: 50%; background: #0a0b0d; }
+.wl-light.on { border-color: var(--red); background: var(--red); }
+
+.wl-hide {
+  padding: 4px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+.wl-hide:hover { color: var(--text); }
+.wl-hide:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+
+.wl-steps { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--hair); }
+.wl-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--hair);
+}
+.wl-step:last-child { border-bottom: 0; }
+.wl-mark {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--hair-strong);
+  color: #0d0e10;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+.wl-step.done .wl-mark { border-color: var(--yellow); background: var(--yellow); }
+.wl-text { flex: 1 1 auto; min-width: 0; }
+.wl-text b { display: block; font-weight: 700; }
+.wl-hint { display: block; color: var(--muted); font-size: 0.85rem; }
+.wl-step.done .wl-text b { color: var(--muted); font-weight: 400; text-decoration: line-through; text-decoration-color: var(--hair-strong); }
+
+.wl-go {
+  flex: none;
+  padding: 7px 14px;
+  border: 1px solid var(--hair-strong);
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.wl-go.primary { border-color: var(--yellow); background: var(--yellow); color: #0d0e10; }
+.wl-go:hover { filter: brightness(1.1); }
+.wl-go:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+
+@media (max-width: 560px) {
+  .wl-lights { display: none; }
+  .wl-step { align-items: flex-start; }
+  .wl-go { padding: 6px 10px; }
+}
