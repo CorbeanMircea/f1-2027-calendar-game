@@ -2,17 +2,23 @@
 
 .at-tabs {
   display: flex;
+  min-width: 0;
+  max-width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
   margin: 0 0 18px;
   border: 1px solid var(--hair-strong);
   background: var(--panel);
-  scrollbar-width: none;
+  scrollbar-width: thin;
 }
-.at-tabs::-webkit-scrollbar { display: none; }
+.at-tabs::-webkit-scrollbar { height: 6px; }
+.at-tabs::-webkit-scrollbar-thumb { background: var(--hair-strong); }
 
 .at-tab {
   display: inline-flex;
-  flex: 1 0 auto;
+  flex: 0 0 auto;
   align-items: center;
   gap: 8px;
   padding: 11px 18px;
