@@ -11,13 +11,14 @@
 
   var TABS = [
     { key: "results", label: "Results" },
+    { key: "check", label: "Weekend check" },
     { key: "changes", label: "Driver changes" },
     { key: "penalties", label: "Grid penalties" },
     { key: "corrections", label: "Corrections" },
     { key: "season", label: "Season results" },
     { key: "log", label: "Import log" }
   ];
-  var SECTION_IDS = { "season-admin": "season", "changes-admin": "changes", "penalties-admin": "penalties", "corrections-admin": "corrections" };
+  var SECTION_IDS = { "check-admin": "check", "season-admin": "season", "changes-admin": "changes", "penalties-admin": "penalties", "corrections-admin": "corrections" };
 
   function el(tag, cls, text) {
     var n = document.createElement(tag);

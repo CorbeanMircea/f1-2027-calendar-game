@@ -45,6 +45,7 @@
   text-align: center;
 }
 .at-badge[hidden] { display: none; }
+.at-badge.warn { background: var(--yellow); color: #0d0e10; }
 
 .at-pane[hidden] { display: none; }
 /* the first heading of a tab sits directly under the tab bar */
