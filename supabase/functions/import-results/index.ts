@@ -61,6 +61,20 @@ function driverId(row: Row): string {
   return String(row.Driver.driverId);
 }
 
+// The API gives each race's date in UTC, while our event dates are the local dates of the weekend. A race that starts late
+// on the last local day (Las Vegas: Saturday 20:00 local = Sunday 04:00 UTC) therefore falls on the next UTC day, so a race
+// belongs to an event when its date is within one day of the event's dates. Events are at least a week apart, so this still
+// matches exactly one race.
+function dayShift(date: string, days: number): string {
+  const d = new Date(date + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+function belongsToEvent(r: Row, ev: { start_date: string; end_date: string }): boolean {
+  return r.date >= dayShift(ev.start_date, -1) && r.date <= dayShift(ev.end_date, 1);
+}
+
 function num(value: unknown): number {
   return Number(value);
 }
@@ -233,7 +247,7 @@ async function processEvent(db: Row, ev: Row, apply: boolean, cache: Map<string,
 
   // Find the API race that belongs to this event by DATE (not by round number).
   const races = await loadSchedule(ev.season, cache);
-  const matches = races.filter((r) => r.date >= ev.start_date && r.date <= ev.end_date);
+  const matches = races.filter((r) => belongsToEvent(r, ev));
   if (matches.length !== 1) {
     await log(
       "all",
@@ -396,7 +410,7 @@ async function syncEventTimes(
     return report;
   }
 
-  const matches = races.filter((r) => r.date >= ev.start_date && r.date <= ev.end_date);
+  const matches = races.filter((r) => belongsToEvent(r, ev));
   if (matches.length !== 1) {
     await log(
       "all",
