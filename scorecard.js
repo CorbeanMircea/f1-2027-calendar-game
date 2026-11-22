@@ -176,6 +176,7 @@
     table.appendChild(head);
 
     var allSame = true;
+    var recFull = recorded ? (recorded.breakdown && recorded.breakdown.late ? Number(recorded.breakdown.raw_total) : recorded.points) : null;
     Object.keys(calc.components).forEach(function (k) {
       var tr = document.createElement("tr");
       tr.appendChild(el("td", "", E.LABELS[k] || k));
@@ -192,11 +193,23 @@
     tot.className = "total";
     tot.appendChild(el("td", "", "Total"));
     tot.appendChild(el("td", "", String(calc.total)));
-    tot.appendChild(el("td", "", recorded ? String(recorded.points) : "\u2014"));
-    var totalSame = !!recorded && recorded.points === calc.total;
+    tot.appendChild(el("td", "", recorded ? String(recFull) : "\u2014"));
+    var totalSame = !!recorded && recFull === calc.total;
     if (!totalSame) { allSame = false; }
     tot.appendChild(el("td", totalSame ? "good" : "bad", totalSame ? "\u2713" : "differs"));
     table.appendChild(tot);
+    if (recorded && recorded.breakdown && recorded.breakdown.late) {
+      var lateRow = document.createElement("tr");
+      var factor = Number(recorded.breakdown.late_factor);
+      var lateCalc = Math.floor(calc.total * factor);
+      lateRow.appendChild(el("td", "", "Late entry: saved after Qualifying started, counts at " + Math.round(factor * 100) + "% (rounded down)"));
+      lateRow.appendChild(el("td", "", String(lateCalc)));
+      lateRow.appendChild(el("td", "", String(recorded.points)));
+      var lateSame = lateCalc === recorded.points;
+      if (!lateSame) { allSame = false; }
+      lateRow.appendChild(el("td", lateSame ? "good" : "bad", lateSame ? "\u2713" : "differs"));
+      table.appendChild(lateRow);
+    }
     wrap.appendChild(table);
     return { node: wrap, same: allSame };
   }
@@ -249,7 +262,7 @@
     if (!recorded) {
       resultEl.appendChild(el("p", "sc-check bad", "Calculated total: " + calc.total + " points, but no score is recorded yet for this player."));
     } else if (cmp.same) {
-      resultEl.appendChild(el("p", "sc-check ok", "The score calculated here (" + calc.total + ") matches the score recorded by the site."));
+      resultEl.appendChild(el("p", "sc-check ok", "The score calculated here (" + calc.total + ") matches the score recorded by the site." + (recorded.breakdown && recorded.breakdown.late ? " This was a late entry, so it counts at " + Math.round(Number(recorded.breakdown.late_factor) * 100) + "%: " + recorded.points + " points." : "")));
     } else {
       resultEl.appendChild(el("p", "sc-check bad", "The score calculated here (" + calc.total + ") does not match the recorded score (" + recorded.points + "). Tell the admin."));
     }
@@ -288,7 +301,7 @@
       var pred = ctx.predictions[id];
       var rec = ctx.scores[id];
       var calc = pred ? E.explain(type, pred, actual).total : 0;
-      var recPts = rec ? rec.points : 0;
+      var recPts = rec ? (rec.breakdown && rec.breakdown.late ? Number(rec.breakdown.raw_total) : rec.points) : 0;
       var same = calc === recPts;
       if (!same) { mismatches++; }
       var tr = document.createElement("tr");

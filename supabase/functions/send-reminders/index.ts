@@ -67,8 +67,9 @@ export function reminderPayload(row: DueRow, now: Date = new Date()) {
     : `in about ${Math.round(minutes / 60)} hours`;
   const what = joinList(row.missing.map((t) => TYPE_LABEL[t] ?? t));
   return {
-    title: `Predictions lock ${when}`,
-    body: `${row.event_name}: you have not picked ${what} yet.`,
+    title: `Full-value predictions close ${when}`,
+    body: `${row.event_name}: you have not picked ${what} yet.` +
+      (row.missing.some((t) => t === "race" || t === "sprint") ? " Race and Sprint predictions stay open afterwards at 70%." : ""),
     url: "predict.html",
     tag: `lock-${row.lock_id}`,
   };

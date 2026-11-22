@@ -38,7 +38,7 @@
       <h2>The weekend</h2>
       <ol class="htp-steps">
         <li><b>Predict.</b> Before the deadline, open Predictions and fill in the sessions you want: Qualifying and Race, plus Sprint Qualifying and Sprint on sprint weekends. Every prediction is optional, so skip whatever you like.</li>
-        <li><b>Lock.</b> At the deadline your picks lock. From that moment everyone's picks become visible on Picks reveal.</li>
+        <li><b>Lock.</b> Each session locks when it starts, and from that moment everyone's picks for it become visible on Picks reveal.</li>
         <li><b>Score.</b> When an admin approves the official result, points are added. Score check shows how every point was earned, and the leaderboard updates.</li>
         <li><b>Recap.</b> The home page shows a weekend recap: the winner, the podium, the biggest climber and the notable calls.</li>
       </ol>
@@ -46,16 +46,13 @@
 
     <section class="htp-sec" id="deadlines">
       <h2>Deadlines</h2>
-      <table class="htp-table">
-        <thead><tr><th scope="col">Prediction</th><th scope="col">Locks at the start of</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">Qualifying</th><td>Qualifying</td></tr>
-          <tr><th scope="row">Race</th><td>Qualifying</td></tr>
-          <tr><th scope="row">Sprint Qualifying</th><td>Sprint Qualifying</td></tr>
-          <tr><th scope="row">Sprint</th><td>Sprint Qualifying</td></tr>
-        </tbody>
-      </table>
-      <p class="htp-note">Times are shown in your local time. A session with no confirmed start time stays closed. If you have not predicted yet, a reminder goes out about 3 hours and 1 hour before the deadline: install the app and switch reminders on from the Account page.</p>
+      <ul class="htp-list">
+        <li><b>Qualifying</b> and <b>Sprint Qualifying</b> predictions close when that session starts.</li>
+        <li><b>Race</b> and <b>Sprint</b> predictions stay open until they start. They have full value until Qualifying (for the Race) or Sprint Qualifying (for the Sprint) begins.</li>
+        <li><b>Late entries.</b> A Race or Sprint prediction that you save or change after that moment counts at 70% of its points, rounded down. A prediction you made earlier and leave alone keeps full value, and saving the same picks again is not a change. It is there for news that comes after Qualifying, such as a grid penalty.</li>
+        <li>Everyone's picks for a session become visible when that session starts.</li>
+      </ul>
+      <p class="htp-note">Times are shown in your local time. A session with no confirmed start time stays closed. If you have not predicted yet, a reminder goes out about 3 hours and 1 hour before the full-value deadline: install the app and switch reminders on from the Account page.</p>
     </section>
 
     <section class="htp-sec" id="scoring">
@@ -104,7 +101,7 @@
           <p class="htp-max">Maximum 65, plus 8 for each DNF driver you picked</p>
         </article>
       </div>
-      <p class="htp-note">Points are added only after an admin approves the official result. Score check explains every point of every session.</p>
+      <p class="htp-note">Points are added only after an admin approves the official result. Score check explains every point of every session, including the 70% line of a late entry.</p>
     </section>
 
     <section class="htp-sec" id="dnf">

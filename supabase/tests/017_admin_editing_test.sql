@@ -38,10 +38,13 @@ begin
     'q3_order', (select jsonb_agg('zz-' || lpad(g::text, 2, '0') order by g) from generate_series(1, 10) as g));
 
   -- Bahrain sprint predictions are locked; the admin predicted the top 8 exactly.
+  -- Predictions close at the session's own start (migration 039): Sprint Qualifying and the Sprint both started an hour ago.
   update public.sessions set start_utc = now() - interval '1 hour'
-    where id = 'bahrain-2027-sprint_qualifying';
-  insert into public.predictions (user_id, session_id, picks)
-  values (v_admin, 'bahrain-2027-sprint', jsonb_build_object('top8', v_top8));
+    where id in ('bahrain-2027-sprint_qualifying', 'bahrain-2027-sprint');
+  -- The admin predicted EARLY (two hours ago, before Sprint Qualifying started): a prediction saved after that moment would be a
+  -- late entry and score at 70% (migration 039).
+  insert into public.predictions (user_id, session_id, picks, created_at, updated_at)
+  values (v_admin, 'bahrain-2027-sprint', jsonb_build_object('top8', v_top8), now() - interval '2 hours', now() - interval '2 hours');
 
   v_r1 := public.enter_result('bahrain-2027-sprint', jsonb_build_object('top8', v_top8), 'jolpica');
 

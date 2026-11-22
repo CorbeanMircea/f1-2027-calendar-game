@@ -27,8 +27,9 @@ begin
 
   -- Bahrain sprint predictions are locked (sprint qualifying "started an hour ago").
   -- The Australia sprint has no time set, so its predictions count as still open.
+  -- Predictions close at the session's own start (migration 039): Sprint Qualifying and the Sprint both started an hour ago.
   update public.sessions set start_utc = now() - interval '1 hour'
-    where id = 'bahrain-2027-sprint_qualifying';
+    where id in ('bahrain-2027-sprint_qualifying', 'bahrain-2027-sprint');
 
   v_r1 := public.enter_result('bahrain-2027-sprint', jsonb_build_object('top8', v_top8));
   v_r2 := public.enter_result('bahrain-2027-sprint', jsonb_build_object('top8', v_top8));

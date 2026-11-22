@@ -66,12 +66,14 @@
     if (remaining <= 0) {
       return { kind: "locked", text: "Locking now", time: "Checking with the server", lit: 0 };
     }
-    var hours = remaining / 3600000;
+    var late = !!win.fullMs && now >= win.fullMs;
+    var fullRemaining = win.fullMs && !late ? win.fullMs - now : null;
+    var hours = (fullRemaining !== null ? fullRemaining : remaining) / 3600000;
     var lit = hours <= 1 ? 5 : hours <= 6 ? 4 : hours <= 24 ? 3 : hours <= 72 ? 2 : 1;
     return {
-      kind: remaining < 86400000 ? "soon" : "open",
-      text: remaining < 86400000 ? "Predictions lock soon" : "Predictions open",
-      time: "Locks in " + untilText(remaining),
+      kind: late ? "late" : ((fullRemaining !== null ? fullRemaining : remaining) < 86400000 ? "soon" : "open"),
+      text: late ? "Late entry: counts at 70%" : (fullRemaining !== null ? (fullRemaining < 86400000 ? "Full value ends soon" : "Predictions open") : (remaining < 86400000 ? "Predictions lock soon" : "Predictions open")),
+      time: late ? "Closes in " + untilText(remaining) : (fullRemaining !== null ? "Full value for " + untilText(fullRemaining) + " \u00b7 closes " + whenText(win.lockMs) : "Locks in " + untilText(remaining)),
       lit: lit
     };
   }
@@ -102,7 +104,7 @@
       return;
     }
     var mine = ++token;
-    client.from("prediction_windows").select("lock_at, is_open").eq("session_id", id).limit(1)
+    client.from("prediction_windows").select("lock_at, is_open, full_value_until, is_late").eq("session_id", id).limit(1)
       .then(function (result) {
         if (mine !== token) { return; }
         if (result.error || !result.data || result.data.length === 0) {
@@ -113,7 +115,8 @@
         var row = result.data[0];
         win = {
           lockMs: row.lock_at ? Date.parse(row.lock_at) : null,
-          isOpen: row.is_open === true
+          isOpen: row.is_open === true,
+          fullMs: row.full_value_until ? Date.parse(row.full_value_until) : null
         };
         loadedFor = id;
         render(animate);

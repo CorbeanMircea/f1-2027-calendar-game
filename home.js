@@ -167,8 +167,21 @@
       .sort(function (a, b) { return msOf(a) - msOf(b); });
   }
 
+  var EARLY_TYPE = { race: "qualifying", sprint: "sprint_qualifying" };
+
+  // Until when a Race or Sprint prediction has full value: the start of Qualifying / Sprint Qualifying (null for the others).
+  function fullValueFor(session) {
+    var early = EARLY_TYPE[session.session_type];
+    if (!early) { return null; }
+    for (var i = 0; i < current.sessions.length; i++) {
+      var s = current.sessions[i];
+      if (s.session_type === early && s.start_utc) { return msOf(s); }
+    }
+    return null;
+  }
+
   function lockTimeFor(session) {
-    var lockType = LOCK_TYPE[session.session_type];
+    var lockType = session.session_type; // every session now locks at its own start (migration 039)
     for (var i = 0; i < current.sessions.length; i++) {
       var s = current.sessions[i];
       if (s.session_type === lockType && s.start_utc) { return msOf(s); }
@@ -227,7 +240,7 @@
     if (state.kind === "open" || state.kind === "soon") {
       return target + " of 5 lights on. More come on as the deadline nears, and all five show when predictions lock.";
     }
-    if (state.kind === "locked") { return "All five lights on: predictions are locked."; }
+    if (state.kind === "locked") { return "All five lights on: the full-value deadline has passed."; }
     if (state.kind === "done") { return "Results are published. Lights out."; }
     return "Lights out until the session times are confirmed.";
   }
@@ -471,7 +484,7 @@
       body.appendChild(el("p", "rc-detail", "Points appear on the leaderboard after an admin approves each result."));
     } else {
       body.appendChild(el("p", "rc-label",
-        state.kind === "locked" ? TYPE_LABEL[state.session.session_type] + " starts in" : "Predictions lock in"));
+        state.kind === "locked" ? TYPE_LABEL[state.session.session_type] + " starts in" : "Full-value deadline in"));
       body.appendChild(buildClock());
       updateClock(state.remaining);
       addRow(rows, state.kind === "locked" ? "Next session" : "Deadline",
@@ -549,9 +562,10 @@
       } else if (lockMs !== null && lockMs <= now) {
         state = "locked"; tag = "Locked"; note = "Predictions locked";
       } else {
-        state = lockMs !== null && lockMs - now < 86400000 ? "soon" : "open";
-        tag = state === "soon" ? "Closes soon" : "Open";
-        note = LOCK_TYPE[s.session_type] === s.session_type
+        var fullMs = fullValueFor(s);
+        state = fullMs !== null && fullMs <= now ? "soon" : (lockMs !== null && lockMs - now < 86400000 ? "soon" : "open");
+        tag = fullMs !== null && fullMs <= now ? "Late entry" : (state === "soon" ? "Closes soon" : "Open");
+        note = fullMs !== null && fullMs <= now ? "Counts at 70% if saved or changed now" : fullMs !== null ? "Full value until " + TYPE_LABEL[EARLY_TYPE[s.session_type]] + " starts, then 70% until this session starts" : LOCK_TYPE[s.session_type] === s.session_type
           ? "Predictions lock when this session starts"
           : "Predictions lock when " + TYPE_LABEL[LOCK_TYPE[s.session_type]] + " starts";
       }

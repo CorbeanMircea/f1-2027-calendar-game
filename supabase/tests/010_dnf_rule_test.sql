@@ -17,8 +17,9 @@ begin
   select jsonb_agg('zz-' || lpad(g::text, 2, '0') order by g) into v_top8
   from generate_series(1, 8) as g;
 
+  -- Predictions close at the session's own start (migration 039): give the Race, as well as Qualifying, a time in the future.
   update public.sessions set start_utc = now() + interval '1 day'
-    where id = 'bahrain-2027-qualifying';
+    where id in ('bahrain-2027-qualifying', 'bahrain-2027-race');
 
   perform set_config('request.jwt.claims',
                      json_build_object('sub', v_user, 'role', 'authenticated')::text, true);

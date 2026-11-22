@@ -20,7 +20,7 @@
 
   var TYPE_LABEL = { sprint_qualifying: "Sprint Qualifying", sprint: "Sprint", qualifying: "Qualifying", race: "Race" };
   var TYPE_ORDER = { sprint_qualifying: 1, sprint: 2, qualifying: 3, race: 4 };
-  var LOCK_TYPE = { qualifying: "qualifying", race: "qualifying", sprint_qualifying: "sprint_qualifying", sprint: "sprint_qualifying" };
+  var LOCK_TYPE = { qualifying: "qualifying", race: "race", sprint_qualifying: "sprint_qualifying", sprint: "sprint" };
 
   function el(tag, cls, text) {
     var n = document.createElement(tag);

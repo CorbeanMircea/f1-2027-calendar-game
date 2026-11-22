@@ -1,0 +1,2 @@
+/* Lights Out: the amber "late entry" state of the deadline lights (Race and Sprint after Qualifying / Sprint Qualifying). */
+.deadline-lights[data-state="late"] { --flag-bg: #d9822b; --flag-ink: #101114; }
