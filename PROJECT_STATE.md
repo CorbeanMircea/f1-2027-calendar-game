@@ -56,7 +56,8 @@ All predictions are optional. Results are scored only after an admin approves th
 - Importer: status Retired or equivalent counts. Did not start, disqualified and lapped finishers do not.
 
 ## Deadlines and reveal
-- Qualifying and sprint qualifying lock at their own start. Race predictions lock at qualifying start.
+- Late entries (P13, 22 Nov 2026, migration 039): Qualifying and Sprint Qualifying lock at their own start. Race and Sprint predictions stay open until their own start; one saved or changed after Qualifying (Race) or Sprint Qualifying (Sprint) started counts at 70% (lo_late_factor(), rounded down; scores.breakdown gets late, late_factor, raw_total). Saving identical picks changes nothing (updated_at is what decides lateness; admin corrections keep it). prediction_windows: lock_at is the session's own start, plus full_value_until and is_late. Every session reveals its picks at its own start. tools/apply-late-entry-edits.mjs made the page edits. Previously:
+- (Old rule, before P13) Qualifying and sprint qualifying lock at their own start. Race predictions lock at qualifying start.
   Sprint predictions lock at sprint qualifying start. A session with no known start time stays closed.
 - Others' picks become visible only after the lock (predictions read policy, migration 005). picks.js and picks-engine.js
   render the reveal. scorecard.js and scorecard-engine.js explain each score.
