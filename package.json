@@ -14,9 +14,16 @@
     "test:list": "playwright test --list",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
-    "test:report": "playwright show-report"
+    "test:report": "playwright show-report",
+    "db:plan": "powershell -NoProfile -ExecutionPolicy Bypass -File tests/db/apply-migrations.ps1 -DryRun",
+    "db:start": "supabase start --workdir tests/db",
+    "db:status": "supabase status --workdir tests/db",
+    "db:replay": "powershell -NoProfile -ExecutionPolicy Bypass -File tests/db/apply-migrations.ps1",
+    "db:reset": "powershell -NoProfile -ExecutionPolicy Bypass -File tests/db/reset-local-db.ps1",
+    "db:stop": "supabase stop --workdir tests/db"
   },
   "devDependencies": {
-    "@playwright/test": "^1.65.1"
+    "@playwright/test": "^1.65.1",
+    "supabase": "3.2.0"
   }
 }

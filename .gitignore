@@ -29,3 +29,9 @@ playwright-report/
 blob-report/
 playwright/.cache/
 .auth/
+
+# Supabase CLI cache folders (created when the CLI runs; machine-specific)
+supabase/.temp/
+supabase/.branches/
+tests/db/supabase/.temp/
+tests/db/supabase/.branches/
