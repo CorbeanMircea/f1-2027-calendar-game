@@ -11,6 +11,7 @@
     "test": "playwright test",
     "test:unit": "playwright test --project=unit",
     "test:e2e": "playwright test --project=chromium-desktop",
+    "test:sql": "powershell -NoProfile -ExecutionPolicy Bypass -File tests/db/run-sql-tests.ps1",
     "test:list": "playwright test --list",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
@@ -19,6 +20,8 @@
     "db:start": "supabase start --workdir tests/db",
     "db:status": "supabase status --workdir tests/db",
     "db:replay": "powershell -NoProfile -ExecutionPolicy Bypass -File tests/db/apply-migrations.ps1",
+    "db:seed": "powershell -NoProfile -ExecutionPolicy Bypass -File tests/db/seed-local-db.ps1",
+    "db:fresh": "powershell -NoProfile -ExecutionPolicy Bypass -File tests/db/reset-local-db.ps1 -Seed",
     "db:reset": "powershell -NoProfile -ExecutionPolicy Bypass -File tests/db/reset-local-db.ps1",
     "db:stop": "supabase stop --workdir tests/db"
   },
