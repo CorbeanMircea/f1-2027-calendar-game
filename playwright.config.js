@@ -1,6 +1,9 @@
-// Lights Out: Playwright configuration (milestone T1).
-// The site is plain static files, so tests serve the repository folder with a tiny local server
-// (tests/tools/static-server.js) on 127.0.0.1. Nothing here talks to production.
+// Lights Out: Playwright configuration (milestones T1 and T2).
+// Two projects:
+//   unit              Node-only tests of the pure scoring code (tests/unit). No browser, no network.
+//   chromium-desktop  Browser tests (tests/e2e) against a local copy of the site. Nothing here talks to production.
+// The site is plain static files, so browser tests serve the repository folder with a tiny local server
+// (tests/tools/static-server.js) on 127.0.0.1.
 const { defineConfig, devices } = require("@playwright/test");
 
 const PORT = Number(process.env.LO_TEST_PORT || 4173);
@@ -8,7 +11,7 @@ const BASE_URL = "http://127.0.0.1:" + PORT;
 const IN_CI = !!process.env.CI;
 
 module.exports = defineConfig({
-  testDir: "./tests/e2e",
+  testDir: "./tests",
   outputDir: "./test-results",
 
   fullyParallel: true,
@@ -36,7 +39,8 @@ module.exports = defineConfig({
   },
 
   projects: [
-    { name: "chromium-desktop", use: { ...devices["Desktop Chrome"] } }
+    { name: "unit", testDir: "./tests/unit" },
+    { name: "chromium-desktop", testDir: "./tests/e2e", use: { ...devices["Desktop Chrome"] } }
   ],
 
   webServer: {

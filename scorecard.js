@@ -201,7 +201,8 @@
     if (recorded && recorded.breakdown && recorded.breakdown.late) {
       var lateRow = document.createElement("tr");
       var factor = Number(recorded.breakdown.late_factor);
-      var lateCalc = Math.floor(calc.total * factor);
+      // Round away floating-point error first (90 * 0.7 is 62.99999999999999) so the result matches the database, which rounds exactly.
+      var lateCalc = Math.floor(Math.round(calc.total * factor * 1e6) / 1e6);
       lateRow.appendChild(el("td", "", "Late entry: saved after Qualifying started, counts at " + Math.round(factor * 100) + "% (rounded down)"));
       lateRow.appendChild(el("td", "", String(lateCalc)));
       lateRow.appendChild(el("td", "", String(recorded.points)));

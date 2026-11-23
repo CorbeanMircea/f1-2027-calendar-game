@@ -27,13 +27,6 @@
     qualifying: "Qualifying",
     race: "Race"
   };
-  // Which qualifying session locks the predictions for each session type (unchanged rule).
-  var LOCK_TYPE = {
-    qualifying: "qualifying",
-    race: "qualifying",
-    sprint_qualifying: "sprint_qualifying",
-    sprint: "sprint_qualifying"
-  };
   var FLAG_TEXT = {
     tbc: "Times to be confirmed",
     open: "Predictions open",
@@ -565,9 +558,7 @@
         var fullMs = fullValueFor(s);
         state = fullMs !== null && fullMs <= now ? "soon" : (lockMs !== null && lockMs - now < 86400000 ? "soon" : "open");
         tag = fullMs !== null && fullMs <= now ? "Late entry" : (state === "soon" ? "Closes soon" : "Open");
-        note = fullMs !== null && fullMs <= now ? "Counts at 70% if saved or changed now" : fullMs !== null ? "Full value until " + TYPE_LABEL[EARLY_TYPE[s.session_type]] + " starts, then 70% until this session starts" : LOCK_TYPE[s.session_type] === s.session_type
-          ? "Predictions lock when this session starts"
-          : "Predictions lock when " + TYPE_LABEL[LOCK_TYPE[s.session_type]] + " starts";
+        note = fullMs !== null && fullMs <= now ? "Counts at 70% if saved or changed now" : fullMs !== null ? "Full value until " + TYPE_LABEL[EARLY_TYPE[s.session_type]] + " starts, then 70% until this session starts" : "Predictions lock when this session starts";
       }
 
       var item = el("li", "tl-item");
