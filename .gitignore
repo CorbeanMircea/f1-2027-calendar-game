@@ -22,3 +22,10 @@ lights-out-full-handoff-*/
 assets/portraits-originals/*
 !assets/portraits-originals/credits.csv
 !assets/portraits-originals/focus.csv
+
+# Playwright test output and saved sign-in state (milestone T1)
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+.auth/
