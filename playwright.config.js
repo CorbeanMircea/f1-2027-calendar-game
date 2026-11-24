@@ -1,7 +1,10 @@
-// Lights Out: Playwright configuration (milestones T1 and T2).
-// Two projects:
-//   unit              Node-only tests of the pure scoring code (tests/unit). No browser, no network.
-//   chromium-desktop  Browser tests (tests/e2e) against a local copy of the site. Nothing here talks to production.
+// Lights Out: Playwright configuration (milestones T1, T2 and T4).
+// Projects:
+//   unit              Node-only tests of the pure scoring code and the safety rules (tests/unit). No browser, no network.
+//   chromium-desktop  Browser smoke tests (tests/e2e) against a local copy of the site. No database needed.
+//   chromium-local    Browser tests (tests/e2e-local) against the site AND the local Supabase stack in Docker.
+//   local-setup       Checks the local stack is ready before chromium-local runs.
+// Nothing here talks to production.
 // The site is plain static files, so browser tests serve the repository folder with a tiny local server
 // (tests/tools/static-server.js) on 127.0.0.1.
 const { defineConfig, devices } = require("@playwright/test");
@@ -40,7 +43,18 @@ module.exports = defineConfig({
 
   projects: [
     { name: "unit", testDir: "./tests/unit" },
-    { name: "chromium-desktop", testDir: "./tests/e2e", use: { ...devices["Desktop Chrome"] } }
+    { name: "chromium-desktop", testDir: "./tests/e2e", use: { ...devices["Desktop Chrome"] } },
+
+    // Browser tests that need the LOCAL Supabase stack in Docker (npm run db:start, then npm run db:fresh).
+    // "local-setup" runs first and stops with a clear message if the stack is not ready.
+    { name: "local-setup", testDir: "./tests/e2e-local", testMatch: /local\.setup\.js$/ },
+    {
+      name: "chromium-local",
+      testDir: "./tests/e2e-local",
+      testMatch: /.*\.spec\.js$/,
+      dependencies: ["local-setup"],
+      use: { ...devices["Desktop Chrome"] }
+    }
   ],
 
   webServer: {

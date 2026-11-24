@@ -5,6 +5,7 @@
 #   db.seed             disabled (tests/db/*.ps1 and tests/db/seed.sql do the seeding, explicitly)
 #   storage, analytics  disabled (the site does not use them; saves memory)
 #   auth.site_url       the local test web server (http://127.0.0.1:4173)
+#   auth.rate_limit     sign-up/sign-in and token limits raised to 1000 per 5 minutes (browser tests create many test users)
 # Never run "supabase link" or any --remote command in tests/db.
 #:schema https://supabase.com/schemas/config/v1.json
 # For detailed configuration reference documentation, visit:
@@ -215,9 +216,9 @@ sms_sent = 30
 # Number of anonymous sign-ins that can be made per hour per IP address. Requires enable_anonymous_sign_ins = true.
 anonymous_users = 30
 # Number of sessions that can be refreshed in a 5 minute interval per IP address.
-token_refresh = 150
+token_refresh = 1000
 # Number of sign up and sign-in requests that can be made in a 5 minute interval per IP address (excludes anonymous users).
-sign_in_sign_ups = 30
+sign_in_sign_ups = 1000
 # Number of OTP / Magic link verifications that can be made in a 5 minute interval per IP address.
 token_verifications = 30
 # Number of Web3 logins that can be made in a 5 minute interval per IP address.

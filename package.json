@@ -8,9 +8,11 @@
   },
   "scripts": {
     "serve": "node tests/tools/static-server.js 4173",
-    "test": "playwright test",
+    "test": "playwright test --project=unit --project=chromium-desktop",
     "test:unit": "playwright test --project=unit",
     "test:e2e": "playwright test --project=chromium-desktop",
+    "test:local": "playwright test --project=chromium-local",
+    "test:local:headed": "playwright test --project=chromium-local --headed",
     "test:sql": "powershell -NoProfile -ExecutionPolicy Bypass -File tests/db/run-sql-tests.ps1",
     "test:list": "playwright test --list",
     "test:ui": "playwright test --ui",
