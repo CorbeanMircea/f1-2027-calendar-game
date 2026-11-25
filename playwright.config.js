@@ -3,7 +3,8 @@
 //   unit              Node-only tests of the pure scoring code and the safety rules (tests/unit). No browser, no network.
 //   chromium-desktop  Browser smoke tests (tests/e2e) against a local copy of the site. No database needed.
 //   chromium-local    Browser tests (tests/e2e-local) against the site AND the local Supabase stack in Docker.
-//   local-setup       Checks the local stack is ready before chromium-local runs.
+//   api-local         API and permission tests (tests/api-local) against the local stack, no browser.
+//   local-setup       Checks the local stack is ready before chromium-local and api-local run.
 // Nothing here talks to production.
 // The site is plain static files, so browser tests serve the repository folder with a tiny local server
 // (tests/tools/static-server.js) on 127.0.0.1.
@@ -54,7 +55,10 @@ module.exports = defineConfig({
       testMatch: /.*\.spec\.js$/,
       dependencies: ["local-setup"],
       use: { ...devices["Desktop Chrome"] }
-    }
+    },
+
+    // API and database-permission tests against the same local stack. No browser is started.
+    { name: "api-local", testDir: "./tests/api-local", testMatch: /.*\.spec\.js$/, dependencies: ["local-setup"] }
   ],
 
   webServer: {
