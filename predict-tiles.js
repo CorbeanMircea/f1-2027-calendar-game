@@ -1324,7 +1324,7 @@
         }
         setMessage("error", saveMsg);
         if (result.error.message.indexOf("closed") !== -1) {
-          loadWindows(null).catch(handleLoadError);
+          loadWindows(null).then(function () { setMessage("error", saveMsg); }).catch(handleLoadError);
         }
         return;
       }
