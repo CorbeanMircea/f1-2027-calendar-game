@@ -71,6 +71,7 @@ class Api {
     expect(res.body.access_token, "sign-up must return a session (is e-mail confirmation off locally?)").toBeTruthy();
     user.id = res.body.user.id;
     user.token = res.body.access_token;
+    user.session = res.body; // the whole session, so a browser can be signed in without typing anything
     return user;
   }
 
