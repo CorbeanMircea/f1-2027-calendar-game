@@ -18,6 +18,15 @@ function psql(sql) {
   ).trim();
 }
 
+// Runs a larger script that is sent through standard input (no command-line length limit).
+function psqlStdin(sql) {
+  return execFileSync(
+    "docker",
+    ["exec", "-i", CONTAINER, "psql", "-U", "postgres", "-d", "postgres", "-tA", "-v", "ON_ERROR_STOP=1", "-q", "-f", "-"],
+    { encoding: "utf8", input: sql, maxBuffer: 256 * 1024 * 1024 }
+  ).trim();
+}
+
 // For queries that return one JSON value (for example select json_agg(...)).
 function psqlJson(sql) {
   return JSON.parse(psql(sql));
@@ -28,4 +37,4 @@ function literal(value) {
   return "'" + String(value).replace(/'/g, "''") + "'";
 }
 
-module.exports = { CONTAINER, psql, psqlJson, literal };
+module.exports = { CONTAINER, psql, psqlStdin, psqlJson, literal };

@@ -36,6 +36,15 @@ title-caller tests have scored data. Browser tests create their own sign-in user
 left data behind. It exits with code 1 if anything is not passing.
 
 Three legacy tests are **retired** (listed in `run-sql-tests.ps1`, never deleted): `005`, `007` and `009` were written for a schema that later
-migrations replaced, so they cannot pass any more. Run them anyway with `-IncludeRetired`. Replacement tests are planned.
+migrations replaced, so they cannot pass any more. Run them anyway with `-IncludeRetired`.
+
+Their replacements test the CURRENT behaviour and are numbered from 101 so they can never be mistaken for the retired ones:
+
+| Test | Replaces / covers |
+|---|---|
+| `101_submit_prediction_test.sql` | saving predictions (was 005) |
+| `102_results_approval_test.sql` | results, approval, rejection, editing and re-scoring (was 007) |
+| `103_calc_points_test.sql` | the scoring rules and the multi-DNF rule of migration 020 (was 009); same numbers as the browser unit tests |
+| `104_join_group_test.sql` | joining the group (migration 003, which had no test) |
 
 Never run `supabase link`, `supabase db push` or any `--remote` command in this project.
